@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace DataReferenceFinder.ReferenceFinder
 {
@@ -142,6 +139,6 @@ namespace DataReferenceFinder.ReferenceFinder
 			return Results.Last();
 		}
 
-		public ObservableCollection<CFindReferenceOperationResults> Results { get; private set; } = new ObservableCollection<CFindReferenceOperationResults> ();
+		public ObservableCollection<CFindReferenceOperationResults> Results { get; private set; } = new ObservableCollection<CFindReferenceOperationResults>();
 	}
 }

@@ -1,6 +1,5 @@
 ﻿using DataReferenceFinder.ReferenceFinder;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DataReferenceFinder.Commands
 {
@@ -9,22 +8,18 @@ namespace DataReferenceFinder.Commands
 	{
 		protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
 		{
-			var outputWindow = await VS.Services.GetOutputWindowAsync();
-			
-			await DataReferenceFinderPackage.ExtensionOutput.ActivateAsync();
 			var textWriter = await DataReferenceFinderPackage.ExtensionOutput.CreateOutputPaneTextWriterAsync();
 
 			var documentView = await VS.Documents.GetActiveDocumentViewAsync();
 			var caretPosition = documentView.TextView?.Caret.Position;
 
-
 			//string searchPath = "E:\\KlaxEngineProject_MockData\\ProjectData_1";
 			string searchPath = "E:\\KlaxEngineProject_MockData";
-			Guid searchGuid = new Guid("6696a24d-7a9c-489d-b9ef-7b6e775a24df");
 			string searchText = await TextUtilFunctions.FindGuidUnderCaretAsync();
 
 			if (string.IsNullOrEmpty(searchText))
 			{
+				await DataReferenceFinderPackage.ExtensionOutput.ActivateAsync();
 				await textWriter.WriteLineAsync("No Guid selection found");
 				return;
 			}
@@ -35,31 +30,26 @@ namespace DataReferenceFinder.Commands
 				Task scanTask = Task.Run(scanner.ScanAsync);
 				Task progressUpdateTask = ShowScannerProgressAsync(scanner);
 
-				await textWriter.WriteLineAsync(string.Format("Searching references for: {0} in files: {1}", searchGuid.ToString(), searchPath));
-				await scanTask;
-				await textWriter.WriteLineAsync(string.Format("Searching for references done. Scan took: {0}ms", scanner.GetLastScanDurationMs()));
-
-				foreach (var fileEntry in scanner.FoundOccurences)
-				{
-					await textWriter.WriteLineAsync(string.Format("	Found {0} References in file: {1}", fileEntry.Value.Count, fileEntry.Key));
-					List<SFoundLineEntry> foundEntries = fileEntry.Value.ToList();
-					foundEntries.Sort((a, b) => { return a.lineNumber - b.lineNumber; });
-
-					foreach (var entry in foundEntries)
-					{
-						await textWriter.WriteLineAsync(string.Format("		Line {0}: {1}", entry.lineNumber, entry.lineText));
-					}
-				}
+				await ReferenceResultsWindow.ShowAsync();
 				await progressUpdateTask;
 			}
 			catch (Exception ex)
 			{
+				await DataReferenceFinderPackage.ExtensionOutput.ActivateAsync();
 				await textWriter.WriteLineAsync("Exeception occured:");
 				await textWriter.WriteLineAsync(ex.Message);
 				await textWriter.WriteLineAsync(ex.StackTrace);
 				await textWriter.WriteLineAsync(ex.ToString());
 			}
 		}
+
+		// Somehow this does not update correctly. Visual studio does not call this function reliabily when trying to execute a command or opening the menu in which it is located
+		// This is super frustrating for the user as it might not invoke the command when it could get invoked. Better leave it active all the time
+		//protected override void BeforeQueryStatus(EventArgs e)
+		//{			
+		//	string guidText = ThreadHelper.JoinableTaskFactory.Run(TextUtilFunctions.FindGuidUnderCaretAsync);
+		//	Command.Enabled = !string.IsNullOrEmpty(guidText);
+		//}
 
 		async Task ShowScannerProgressAsync(CFileReferenceScanner scanner)
 		{

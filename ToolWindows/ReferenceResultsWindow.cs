@@ -22,7 +22,7 @@ namespace DataReferenceFinder
 		internal class Pane : ToolkitToolWindowPane
 		{
 			public Pane()
-			{				
+			{
 				BitmapImageMoniker = KnownMonikers.ToolWindow;
 				ToolBar = new CommandID(PackageGuids.ReferenceResultsToolbarCommandSet_Guid, PackageIds.ReferenceResultsToolbar);
 			}

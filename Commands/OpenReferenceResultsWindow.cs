@@ -1,6 +1,4 @@
-﻿using System.Windows.Controls;
-
-namespace DataReferenceFinder.Commands
+﻿namespace DataReferenceFinder.Commands
 {
 	[Command(PackageGuids.DataReferenceFinderCommandSet_GuidString, PackageIds.OpenReferenceResults)]
 	internal sealed class OpenReferenceResultsWindow : BaseCommand<OpenReferenceResultsWindow>

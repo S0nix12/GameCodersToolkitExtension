@@ -1,16 +1,9 @@
 ﻿using DataReferenceFinder.ReferenceFinder;
-using Microsoft.VisualStudio.Threading;
-using stdole;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using static Microsoft.VisualStudio.Threading.AsyncReaderWriterLock;
 
 namespace DataReferenceFinder
 {

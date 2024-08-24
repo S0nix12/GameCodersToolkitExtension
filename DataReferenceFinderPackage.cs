@@ -28,5 +28,5 @@ namespace DataReferenceFinder
 		internal static CFindReferenceResultsStorage FindReferenceResultsStorage { get; private set; }
 	}
 
-	
+
 }
