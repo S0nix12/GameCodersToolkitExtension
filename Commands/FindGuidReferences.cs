@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using DataReferenceFinder.ReferenceFinder;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DataReferenceFinder.Commands
@@ -13,13 +14,23 @@ namespace DataReferenceFinder.Commands
 			await DataReferenceFinderPackage.ExtensionOutput.ActivateAsync();
 			var textWriter = await DataReferenceFinderPackage.ExtensionOutput.CreateOutputPaneTextWriterAsync();
 
+			var documentView = await VS.Documents.GetActiveDocumentViewAsync();
+			var caretPosition = documentView.TextView?.Caret.Position;
+
+
 			//string searchPath = "E:\\KlaxEngineProject_MockData\\ProjectData_1";
 			string searchPath = "E:\\KlaxEngineProject_MockData";
 			Guid searchGuid = new Guid("6696a24d-7a9c-489d-b9ef-7b6e775a24df");
+			string searchText = await TextUtilFunctions.FindGuidUnderCaretAsync();
 
+			if (string.IsNullOrEmpty(searchText))
+			{
+				await textWriter.WriteLineAsync("No Guid selection found");
+				return;
+			}
 			try
 			{
-				CFileReferenceScanner scanner = new CFileReferenceScanner(searchPath, searchGuid.ToString());
+				CFileReferenceScanner scanner = new CFileReferenceScanner(searchPath, searchText);
 				List<Task> taskList = new List<Task>();
 				Task scanTask = Task.Run(scanner.ScanAsync);
 				Task progressUpdateTask = ShowScannerProgressAsync(scanner);

@@ -54,6 +54,7 @@
     <Compile Include="Commands\FindGuidReferences.cs" />
     <Compile Include="DataReferenceFinderPackage.cs" />
     <Compile Include="ReferenceFinder\FindReferenceResultsStorage.cs" />
+    <Compile Include="ReferenceFinder\TextUtilFunctions.cs" />
     <Compile Include="source.extension.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
