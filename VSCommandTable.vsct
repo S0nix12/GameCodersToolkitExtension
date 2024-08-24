@@ -1,0 +1,122 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+  <Include href="KnownImageIds.vsct"/>
+  <Include href="VSGlobals.vsct"/>
+
+  <Commands package="DataReferenceFinderPackage_Guid">
+    <Groups>
+      <Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesToolsGroup" priority="0x0600">
+        <Parent guid="VSMainMenu" id="Tools"/>
+      </Group>
+      <Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesViewGroup" priority="0x0600">
+        <Parent guid="VSMainMenu" id="View"/>
+      </Group>
+      <Group guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup0" priority="0x0000">
+        <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar"/>
+      </Group>
+      <Group guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup1" priority="0x0001">
+        <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar"/>
+      </Group>
+      <Group guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup2" priority="0x0002">
+        <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar"/>
+      </Group>
+    </Groups>
+
+    <Menus>
+      <Menu guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar" type="ToolWindowToolbar">
+        <CommandFlag>DefaultDocked</CommandFlag>
+        <Strings>
+          <ButtonText>WindowToolbar</ButtonText>
+        </Strings>
+      </Menu>
+    </Menus>
+
+    <!--This section defines the elements the user can interact with, like a menu command or a button
+        or combo box in a toolbar. -->
+    <Buttons>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences" priority="0x0100" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesToolsGroup" />
+        <Icon guid="ImageCatalogGuid" id="QuickFind" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Find GUID References</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.FindGuidReferences</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="OpenReferenceResults" priority="0x0100" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesViewGroup"/>
+        <Icon guid="ImageCatalogGuid" id="DocumentOutline"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Data Reference Results</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.OpenReferenceResults</LocCanonicalName>
+        </Strings>
+      </Button>
+      
+      <!-- Results Window Toolbar Buttons-->
+      <Button guid="ReferenceResultsToolbarCommandSet_Guid" id="ClearAllResults">
+        <Icon guid="ImageCatalogGuid" id="ClearWindowContent"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Clear All</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.ReferenceResults.ClearAll</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="ReferenceResultsToolbarCommandSet_Guid" id="CollapseAllResults">
+        <Icon guid="ImageCatalogGuid" id="CollapseAll"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Collapse All</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.ReferenceResults.CollapseAll</LocCanonicalName>
+        </Strings>
+      </Button>
+    </Buttons>
+
+    <Combos>
+      <Combo guid="ReferenceResultsToolbarCommandSet_Guid" id="FilterResults" type="MRUCombo" defaultWidth="150" idCommandList="0">
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+          <ButtonText>Filter: </ButtonText>
+          <ToolTipText>Filter search results</ToolTipText>
+          <LocCanonicalName>.DataReferenceFinder.ReferenceResults.Filter</LocCanonicalName>
+        </Strings>
+      </Combo>
+    </Combos>
+  </Commands>
+
+  <CommandPlacements>
+    <CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="FilterResults" priority="0x0001">
+      <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup0"/>
+    </CommandPlacement>
+    <CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="ClearAllResults" priority="0x0002">
+      <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup1"/>
+    </CommandPlacement>
+    <CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="CollapseAllResults" priority="0x0003">
+      <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup2"/>
+    </CommandPlacement>
+  </CommandPlacements>
+
+  <Symbols>
+    <GuidSymbol name ="DataReferenceFinderPackage_Guid" value ="{f45b95a6-2eab-4919-a16f-81bb14ca671f}"/>
+    
+    <GuidSymbol name="DataReferenceFinderCommandSet_Guid" value="{4bb2a331-cebe-4cf2-a093-203a5a7f2e95}">
+      <IDSymbol name="FindDataReferencesToolsGroup" value="0x0001" />
+      <IDSymbol name="FindDataReferencesViewGroup" value="0x0002" />
+      <IDSymbol name="FindGuidReferences" value="0x0010" />
+      <IDSymbol name="OpenReferenceResults" value="0x0020" />
+    </GuidSymbol>
+
+    <GuidSymbol name="ReferenceResultsToolbarCommandSet_Guid" value="{f5e1e0b2-af34-4f67-b8d5-813bf2bc7eda}">
+      <IDSymbol name="ClearAllResults" value="0x1100"/>
+      <IDSymbol name="CollapseAllResults" value="0x1200"/>
+      <IDSymbol name="FilterResults" value="0x1300"/>
+      <IDSymbol name="ReferenceResultsToolbar" value="0x1010"/>
+      <IDSymbol name="ReferenceResultsToolbarGroup0" value="0x1020"/>
+      <IDSymbol name="ReferenceResultsToolbarGroup1" value="0x1030"/>
+      <IDSymbol name="ReferenceResultsToolbarGroup2" value="0x1040"/>
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>
