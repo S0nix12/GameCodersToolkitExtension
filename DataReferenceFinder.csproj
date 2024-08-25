@@ -46,6 +46,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Commands\ClearFindResultsCommand.cs" />
+    <Compile Include="Commands\OpenConfigFileCommand.cs" />
     <Compile Include="Commands\OpenReferenceResultsWindow.cs" />
     <Compile Include="Commands\SaveConfigCommand.cs" />
     <Compile Include="Configuration\DataLocationsConfiguration.cs" />

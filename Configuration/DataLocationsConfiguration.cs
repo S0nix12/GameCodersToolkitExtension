@@ -71,7 +71,7 @@ namespace DataReferenceFinder.Configuration
 			ThreadHelper.JoinableTaskFactory.Run(async delegate { await LoadConfigAsync(eventArgs.FullPath); });
 		}
 
-		private string GetConfigFilePath()
+		public string GetConfigFilePath()
 		{
 			lock (SolutionFolder)
 			{

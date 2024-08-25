@@ -8,11 +8,8 @@
 
   <Commands package="DataReferenceFinderPackage_Guid">
     <Groups>
-      <Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesToolsGroup" priority="0x0600">
-        <Parent guid="VSMainMenu" id="Tools"/>
-      </Group>
-      <Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesViewGroup" priority="0x0600">
-        <Parent guid="VSMainMenu" id="View"/>
+      <Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup" priority="0x0200">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu"/>
       </Group>
       <Group guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup0" priority="0x0000">
         <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar"/>
@@ -38,8 +35,14 @@
           <ButtonText>WindowToolbar</ButtonText>
         </Strings>
       </Menu>
-      <Menu guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesEditMenu" type="Menu">
-        <Parent guid="VSMainMenu" id="Edit.GoToGroup" priority="0x0200"/>
+      <Menu guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesEditMenu" type="Menu" priority="0x0200">
+        <Parent guid="VSMainMenu" id="Edit.GoToGroup"/>
+        <Strings>
+          <ButtonText>Data Reference Finder</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu" type="Menu" priority="0x8010">
+        <Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
         <Strings>
           <ButtonText>Data Reference Finder</ButtonText>
         </Strings>
@@ -50,7 +53,7 @@
         or combo box in a toolbar. -->
     <Buttons>
       <Button guid="DataReferenceFinderCommandSet_Guid" id="OpenReferenceResults" priority="0x0100" type="Button">
-        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesViewGroup"/>
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup"/>
         <Icon guid="ImageCatalogGuid" id="DocumentOutline"/>
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
@@ -58,9 +61,18 @@
           <LocCanonicalName>.DataReferenceFinder.OpenReferenceResults</LocCanonicalName>
         </Strings>
       </Button>
-      <Button guid="DataReferenceFinderCommandSet_Guid" id="SaveDataReferenceFinderConfig" priority="0x0100" type="Button">
-        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesToolsGroup"/>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="OpenConfigFile" priority="0x0200" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup"/>
         <Icon guid="ImageCatalogGuid" id="ConfigurationFile"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Open Config File</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.OpenConfig</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="SaveDataReferenceFinderConfig" priority="0x0300" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="SaveAs"/>
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
           <ButtonText>Save Data Reference Finder Config</ButtonText>
@@ -197,11 +209,11 @@
     <GuidSymbol name ="DataReferenceFinderPackage_Guid" value ="{f45b95a6-2eab-4919-a16f-81bb14ca671f}"/>
 
     <GuidSymbol name="DataReferenceFinderCommandSet_Guid" value="{4bb2a331-cebe-4cf2-a093-203a5a7f2e95}">
-      <IDSymbol name="FindDataReferencesToolsGroup" value="0x0001" />
-      <IDSymbol name="FindDataReferencesViewGroup" value="0x0002" />
       <IDSymbol name="FindDataReferencesEditMenu" value="0x0003" />
       <IDSymbol name="FindDataReferencesMenuGroupAll" value="0x0004" />
       <IDSymbol name="FindDataReferencesMenuGroupSpecific" value="0x0005" />
+      <IDSymbol name="FindDataReferencesExtensionsMenu" value="0x0006" />
+      <IDSymbol name="FindDataReferencesExtensionsMenuGroup" value="0x0007" />
       <IDSymbol name="FindGuidReferences_AllLocations" value="0x0010" />
       <IDSymbol name="FindGuidReferences_Location1" value="0x0020" />
       <IDSymbol name="FindGuidReferences_Location2" value="0x0030" />
@@ -209,6 +221,7 @@
       <IDSymbol name="FindGuidReferences_Location4" value="0x0050" />
       <IDSymbol name="FindGuidReferences_Location5" value="0x0060" />
       <IDSymbol name="OpenReferenceResults" value="0x1010" />
+      <IDSymbol name="OpenConfigFile" value="0x1020" />
       <IDSymbol name="SaveDataReferenceFinderConfig" value="0x1030" />
     </GuidSymbol>
 
