@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DataReferenceFinder.ReferenceFinder;
+using Microsoft.VisualStudio.Text;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -9,20 +10,56 @@ namespace DataReferenceFinder.ViewModels
 {
 	public class CLineResultViewModel : ObservableObject
 	{
+		public CLineResultViewModel(CFileResultsViewModel parentFileResult)
+		{
+			m_parentFileResult = parentFileResult;
+		}
+
+		public async Task ShowEntryAsync()
+		{
+			DocumentView document = await VS.Documents.OpenInPreviewTabAsync(m_parentFileResult.FilePath);
+			string searchTerm = m_parentFileResult.ParentOperationResult.SearchTerm;
+			if (document != null)
+			{
+				var lineSnapShot = document.TextBuffer.CurrentSnapshot.GetLineFromLineNumber(LineNumber - 1);
+				int searchTermIndex = lineSnapShot.GetText().IndexOf(searchTerm);
+				if (searchTermIndex >= 0)
+				{
+					SnapshotSpan selectionSpan = new SnapshotSpan(lineSnapShot.Start.Add(searchTermIndex), searchTerm.Length);
+					document.TextView.Selection.Select(selectionSpan, false);
+					document.TextView.ViewScroller.EnsureSpanVisible(selectionSpan);
+				}
+				else
+				{
+					document.TextView.Caret.MoveTo(lineSnapShot.Start);
+					document.TextView.Caret.EnsureVisible();
+				}
+			}
+		}
+
 		private string m_lineText = "";
 		public string LineText { get => m_lineText; set => SetProperty(ref m_lineText, value); }
 
 		private int m_lineNumber = 0;
 		public int LineNumber { get => m_lineNumber; set => SetProperty(ref m_lineNumber, value); }
+
+		private CFileResultsViewModel m_parentFileResult;
 	}
 
 	public class CFileResultsViewModel : ObservableObject
 	{
+		public CFileResultsViewModel(COperationResultsViewModel inParentOperationResult)
+		{
+			ParentOperationResult = inParentOperationResult;
+		}
+
 		private string m_filePath = "";
 		public string FilePath { get => m_filePath; set => SetProperty(ref m_filePath, value); }
 
 		private ObservableCollection<CLineResultViewModel> m_lineResults = new ObservableCollection<CLineResultViewModel>();
 		public ObservableCollection<CLineResultViewModel> LineResults { get => m_lineResults; set => SetProperty(ref m_lineResults, value); }
+
+		public COperationResultsViewModel ParentOperationResult { get; private set; }
 
 	}
 
@@ -83,7 +120,7 @@ namespace DataReferenceFinder.ViewModels
 
 				if (fileResultsViewModel == null)
 				{
-					fileResultsViewModel = new CFileResultsViewModel();
+					fileResultsViewModel = new CFileResultsViewModel(this);
 					fileResultsViewModel.FilePath = fileEntry.Key;
 					FileResults.Insert(0, fileResultsViewModel);
 				}
@@ -92,7 +129,7 @@ namespace DataReferenceFinder.ViewModels
 				{
 					if (!fileResultsViewModel.LineResults.Any((existingResult) => { return existingResult.LineNumber == lineResultEntry.Line; }))
 					{
-						CLineResultViewModel newResult = new CLineResultViewModel();
+						CLineResultViewModel newResult = new CLineResultViewModel(fileResultsViewModel);
 						newResult.LineNumber = lineResultEntry.Line;
 						newResult.LineText = lineResultEntry.Text;
 						fileResultsViewModel.LineResults.Insert(0, newResult);

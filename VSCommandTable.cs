@@ -28,8 +28,17 @@ namespace DataReferenceFinder
     {
         public const int FindDataReferencesToolsGroup = 0x0001;
         public const int FindDataReferencesViewGroup = 0x0002;
-        public const int FindGuidReferences = 0x0010;
-        public const int OpenReferenceResults = 0x0020;
+        public const int FindDataReferencesEditMenu = 0x0003;
+        public const int FindDataReferencesMenuGroupAll = 0x0004;
+        public const int FindDataReferencesMenuGroupSpecific = 0x0005;
+        public const int FindGuidReferences_AllLocations = 0x0010;
+        public const int FindGuidReferences_Location1 = 0x0020;
+        public const int FindGuidReferences_Location2 = 0x0030;
+        public const int FindGuidReferences_Location3 = 0x0040;
+        public const int FindGuidReferences_Location4 = 0x0050;
+        public const int FindGuidReferences_Location5 = 0x0060;
+        public const int OpenReferenceResults = 0x1010;
+        public const int SaveDataReferenceFinderConfig = 0x1030;
         public const int ClearAllResults = 0x1100;
         public const int CollapseAllResults = 0x1200;
         public const int FilterResults = 0x1300;

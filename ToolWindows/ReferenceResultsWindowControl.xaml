@@ -20,27 +20,41 @@
 		<vm:CReferenceResultsWindowViewModel />
 	</UserControl.DataContext>
 	<Grid>
-		<TreeView Focusable="False" ItemsSource="{Binding OperationResults}">
+		<TreeView Focusable="False" ItemsSource="{Binding OperationResults}" SelectedItemChanged="TreeView_SelectedItemChanged">
 			<TreeView.Resources>
 				<DataTemplate DataType="{x:Type vm:CLineResultViewModel}">
-					<TextBlock>
-						<TextBlock.Text>
-							<MultiBinding StringFormat="Line: {0} Found: {1}">
-								<Binding Path="LineNumber"/>
-								<Binding Path="LineText"/>
-							</MultiBinding>
-						</TextBlock.Text>
-					</TextBlock>
+					<Border Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseDown="Border_MouseDown">
+						<StackPanel Orientation="Horizontal">
+							<TextBlock Text="{Binding LineNumber, StringFormat=Line: {0}}" />
+							<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
+							<TextBlock Text="{Binding LineText, StringFormat=Found: {0}}" />
+						</StackPanel>
+					</Border>
 				</DataTemplate>
 				<HierarchicalDataTemplate DataType="{x:Type vm:CFileResultsViewModel}" ItemsSource="{Binding LineResults}">
-					<Label Content="{Binding FilePath}"/>
+					<DockPanel>
+						<TextBlock Text="{Binding FilePath}" Margin="1,1,1,1"/>
+						<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
+						<TextBlock Text="{Binding LineResults.Count, StringFormat=Matches: {0}}"/>
+					</DockPanel>
 				</HierarchicalDataTemplate>
 				<HierarchicalDataTemplate DataType="{x:Type vm:COperationResultsViewModel}" ItemsSource="{Binding FileResults}">
-					<StackPanel Orientation="Horizontal">
-						<Label Content="{Binding SearchTerm}" ContentStringFormat="Searching for: {0}"/>
-						<Label Content="{Binding SearchPath}" ContentStringFormat="Path: {0}"/>
-					</StackPanel>
+					<DockPanel>
+						<TextBlock VerticalAlignment="Center" Text="{Binding SearchTerm, StringFormat=Searching for: {0}}" />
+						<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
+						<TextBlock VerticalAlignment="Center" Text="{Binding SearchPath, StringFormat=Paths: {0}}"/>
+						<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
+						<TextBlock VerticalAlignment="Center" Text="{Binding ResultsCount, StringFormat=Matches: {0}}"/>
+					</DockPanel>
 				</HierarchicalDataTemplate>
+				<SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                      Color="{DynamicResource {x:Static platformUI:TreeViewColors.SelectedItemActiveColorKey}}" />
+				<SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
+                      Color="{DynamicResource {x:Static platformUI:TreeViewColors.SelectedItemActiveTextColorKey}}" />
+				<SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
+                      Color="{DynamicResource {x:Static platformUI:TreeViewColors.SelectedItemInactiveColorKey}}" />
+				<SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
+                      Color="{DynamicResource {x:Static platformUI:TreeViewColors.SelectedItemInactiveTextColorKey}}" />
 			</TreeView.Resources>
 		</TreeView>
 	</Grid>
