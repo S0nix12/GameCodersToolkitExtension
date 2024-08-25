@@ -27,7 +27,7 @@ namespace DataReferenceFinder
 			string searchPaths = "";
 			foreach (CDataLocationEntry entry in searchLocations)
 			{
-				searchPaths += entry.Path;
+				searchPaths += Path.GetFullPath(entry.Path);
 				searchPaths += "; ";
 			}
 			ResultsOutput = DataReferenceFinderPackage.FindReferenceResultsStorage.AddNewOperationEntry(searchPaths, searchString);
@@ -52,32 +52,46 @@ namespace DataReferenceFinder
 
 		void ScanFile(string file)
 		{
-			using StreamReader reader = CreateStreamReader(file);
-			string line = reader.ReadLine();
-			int lineCounter = 0;
-			while (line is not null)
+			try
 			{
-				lineCounter++;
-				if (line.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >= 0)
+				using StreamReader reader = CreateStreamReader(file);
+				string line = reader.ReadLine();
+				int lineCounter = 0;
+				while (line is not null)
 				{
-					SFoundLineEntry entry = new SFoundLineEntry();
-					entry.lineText = line;
-					entry.lineNumber = lineCounter;
-
-					var fileBag = FoundOccurences.GetOrAdd(file, new ConcurrentBag<SFoundLineEntry>());
-					fileBag.Add(entry);
-
-					SPendingResult pendingResult = new SPendingResult
+					lineCounter++;
+					if (line.IndexOf(searchString, StringComparison.OrdinalIgnoreCase) >= 0)
 					{
-						Line = lineCounter,
-						Text = line,
-						File = file
-					};
-					pendingResults.Enqueue(pendingResult);
+						SFoundLineEntry entry = new SFoundLineEntry();
+						entry.lineText = line;
+						entry.lineNumber = lineCounter;
+
+						var fileBag = FoundOccurences.GetOrAdd(file, new ConcurrentBag<SFoundLineEntry>());
+						fileBag.Add(entry);
+
+						SPendingResult pendingResult = new SPendingResult
+						{
+							Line = lineCounter,
+							Text = line,
+							File = file
+						};
+						pendingResults.Enqueue(pendingResult);
+					}
+					line = reader.ReadLine();
 				}
-				line = reader.ReadLine();
 			}
-			Interlocked.Increment(ref progressCounter);
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine(ex.Message);
+				System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+				DataReferenceFinderPackage.ExtensionOutput.WriteLine("Failed to Scan File: " + file);
+				DataReferenceFinderPackage.ExtensionOutput.WriteLine(ex.Message);
+				DataReferenceFinderPackage.ExtensionOutput.WriteLine(ex.StackTrace);
+			}
+			finally 
+			{
+				Interlocked.Increment(ref progressCounter);
+			}
 		}
 
 		async Task TransferResultsWorkerAsync(CancellationToken cancellationToken)

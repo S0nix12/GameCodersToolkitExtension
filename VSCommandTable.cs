@@ -41,7 +41,8 @@ namespace DataReferenceFinder
         public const int SaveDataReferenceFinderConfig = 0x1030;
         public const int ClearAllResults = 0x1100;
         public const int CollapseAllResults = 0x1200;
-        public const int FilterResults = 0x1300;
+        public const int ExpandAllResults = 0x1300;
+        public const int FilterResults = 0x1400;
         public const int ReferenceResultsToolbar = 0x1010;
         public const int ReferenceResultsToolbarGroup0 = 0x1020;
         public const int ReferenceResultsToolbarGroup1 = 0x1030;

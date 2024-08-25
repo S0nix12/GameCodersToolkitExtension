@@ -4,11 +4,10 @@ global using System;
 global using Task = System.Threading.Tasks.Task;
 using DataReferenceFinder.Configuration;
 using DataReferenceFinder.ReferenceFinder;
+using DataReferenceFinder.ToolWindows;
 using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.Shell.Interop;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace DataReferenceFinder
 {
@@ -18,17 +17,34 @@ namespace DataReferenceFinder
 	[Guid(PackageGuids.DataReferenceFinderPackage_GuidString)]
 	[ProvideToolWindow(typeof(ReferenceResultsWindow.Pane), Style = VsDockStyle.Tabbed, Window = WindowGuids.OutputWindow)]
 	[ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOpening_string, PackageAutoLoadFlags.BackgroundLoad)]
+	[ProvideService(typeof(ReferenceResultsWindowMessenger), IsAsyncQueryable = true)]
 	public sealed class DataReferenceFinderPackage : ToolkitPackage
 	{
 		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
 		{
-			await this.RegisterCommandsAsync();
-			this.RegisterToolWindows();
-			FindReferenceResultsStorage = new CFindReferenceResultsStorage();
-			ExtensionOutput = await VS.Windows.CreateOutputWindowPaneAsync("FindGuidOutput");
+			try
+			{
+				AddService(typeof(ReferenceResultsWindowMessenger), (_, _, _) => Task.FromResult<object>(new ReferenceResultsWindowMessenger()));
 
-			DataLocationsConfig = new CDataLocationsConfiguration();
-			await DataLocationsConfig.InitAsync();
+				await this.RegisterCommandsAsync();
+				this.RegisterToolWindows();
+				FindReferenceResultsStorage = new CFindReferenceResultsStorage();
+				ExtensionOutput = await VS.Windows.CreateOutputWindowPaneAsync("FindGuidOutput");
+
+				DataLocationsConfig = new CDataLocationsConfiguration();
+				await DataLocationsConfig.InitAsync();
+			}
+			catch (Exception ex)
+			{
+				var output = await VS.Windows.GetOutputWindowPaneAsync(Community.VisualStudio.Toolkit.Windows.VSOutputWindowPane.General);
+				await output.WriteLineAsync("Data Reference Finder Package Loading failed. Exception was thrown");
+				await output.WriteLineAsync(ex.Message);
+				await output.WriteLineAsync(ex.StackTrace);
+				System.Diagnostics.Debug.WriteLine(ex.Message);
+				System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+
+				throw ex;
+			}
 		}
 
 		public static OutputWindowPane ExtensionOutput { get; set; }

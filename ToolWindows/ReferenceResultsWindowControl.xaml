@@ -20,7 +20,7 @@
 		<vm:CReferenceResultsWindowViewModel />
 	</UserControl.DataContext>
 	<Grid>
-		<TreeView Focusable="False" ItemsSource="{Binding OperationResults}" SelectedItemChanged="TreeView_SelectedItemChanged">
+		<TreeView x:Name="ResultsTree" Focusable="False" ItemsSource="{Binding OperationResults}" SelectedItemChanged="TreeView_SelectedItemChanged">
 			<TreeView.Resources>
 				<DataTemplate DataType="{x:Type vm:CLineResultViewModel}">
 					<Border Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseDown="Border_MouseDown">

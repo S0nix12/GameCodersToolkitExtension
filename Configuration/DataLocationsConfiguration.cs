@@ -24,6 +24,7 @@ namespace DataReferenceFinder.Configuration
 
 		public async Task InitAsync()
 		{
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			bool isSolutionOpen = await VS.Solutions.IsOpenAsync();
 
 			if (isSolutionOpen)
@@ -41,12 +42,20 @@ namespace DataReferenceFinder.Configuration
 
 		private void HandleOpenSolution(Solution? solution = null)
 		{
+			if (solution != null)
+			{
+				lock (SolutionFolder)
+				{
+					SolutionFolder = Path.GetDirectoryName(solution.FullPath);
+				}
+			}
 			ThreadHelper.JoinableTaskFactory.Run(LoadSolutionConfigAsync);
 		}
 
 		public async Task LoadSolutionConfigAsync()
 		{
-			string configFilePath = await GetConfigFilePathAsync();
+			string configFilePath = GetConfigFilePath();
+			await LoadConfigAsync(configFilePath);
 
 			ConfigFileWatcher?.Dispose();
 			ConfigFileWatcher = new FileSystemWatcher(Path.GetDirectoryName(configFilePath));
@@ -54,9 +63,7 @@ namespace DataReferenceFinder.Configuration
 			ConfigFileWatcher.Changed += OnConfigFileChanged;
 			ConfigFileWatcher.IncludeSubdirectories = false;
 			ConfigFileWatcher.Filter = "*.json";
-			ConfigFileWatcher.NotifyFilter = NotifyFilters.LastWrite;
-
-			await LoadConfigAsync(configFilePath);
+			ConfigFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastAccess;
 		}
 
 		private void OnConfigFileChanged(object sender, FileSystemEventArgs eventArgs)
@@ -64,23 +71,43 @@ namespace DataReferenceFinder.Configuration
 			ThreadHelper.JoinableTaskFactory.Run(async delegate { await LoadConfigAsync(eventArgs.FullPath); });
 		}
 
-		private async Task<string> GetConfigFilePathAsync()
+		private string GetConfigFilePath()
 		{
-			var solution = await VS.Solutions.GetCurrentSolutionAsync();
-			string configDir = Path.GetDirectoryName(solution.FullPath);
-			string configFilePath = Path.Combine(configDir, cConfigFilePath);
-			return configFilePath;
+			lock (SolutionFolder)
+			{
+				string configFilePath = Path.Combine(SolutionFolder, cConfigFilePath);
+				return configFilePath;
+			}
 		}
 
 		private async Task LoadConfigAsync(string filePath)
 		{
 			try
 			{
-				FileOptions combinedOption = FileOptions.Asynchronous | FileOptions.SequentialScan | FileOptions.None;
-				using var fileStream = new FileStream(
-					filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, combinedOption);
+				if (File.Exists(filePath))
+				{
+					FileOptions combinedOption = FileOptions.Asynchronous | FileOptions.SequentialScan | FileOptions.None;
+					using var fileStream = new FileStream(
+						filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, combinedOption);
 
-				DataLocationsConfig = await JsonSerializer.DeserializeAsync<CDataLocationsConfig>(fileStream);
+					DataLocationsConfig = await JsonSerializer.DeserializeAsync<CDataLocationsConfig>(fileStream);
+					List<CDataLocationEntry> entries = DataLocationsConfig.DataLocationEntries;
+					foreach (CDataLocationEntry entry in entries)
+					{
+						if (!Path.IsPathRooted(entry.Path))
+						{
+							lock (SolutionFolder)
+							{
+								entry.Path = Path.Combine(SolutionFolder, entry.Path);
+							}
+						}
+					}
+				}
+				else
+				{
+					Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+					File.Create(filePath).Dispose();
+				}
 			}
 			catch (Exception ex)
 			{
@@ -119,13 +146,15 @@ namespace DataReferenceFinder.Configuration
 			DataLocationsConfig.DataLocationEntries.Add(smallDataConfigEntry);
 
 			var options = new JsonSerializerOptions { WriteIndented = true };
-			string configFilePath = await GetConfigFilePathAsync();
-			
+			string configFilePath = GetConfigFilePath();
+
 			using FileStream fileStream = File.Create(configFilePath);
 			await JsonSerializer.SerializeAsync(fileStream, DataLocationsConfig, options);
 		}
 
 		private CDataLocationsConfig DataLocationsConfig { get; set; } = new CDataLocationsConfig();
 		private FileSystemWatcher ConfigFileWatcher { get; set; }
+
+		private string SolutionFolder { get; set; } = "";
 	}
 }

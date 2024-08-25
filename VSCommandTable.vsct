@@ -156,6 +156,14 @@
           <LocCanonicalName>.DataReferenceFinder.ReferenceResults.CollapseAll</LocCanonicalName>
         </Strings>
       </Button>
+      <Button guid="ReferenceResultsToolbarCommandSet_Guid" id="ExpandAllResults">
+        <Icon guid="ImageCatalogGuid" id="ExpandAll"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Collapse All</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.ReferenceResults.ExpandAll</LocCanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
 
     <Combos>
@@ -178,6 +186,9 @@
       <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup1"/>
     </CommandPlacement>
     <CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="CollapseAllResults" priority="0x0003">
+      <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup2"/>
+    </CommandPlacement>
+    <CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="ExpandAllResults" priority="0x0004">
       <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup2"/>
     </CommandPlacement>
   </CommandPlacements>
@@ -204,7 +215,8 @@
     <GuidSymbol name="ReferenceResultsToolbarCommandSet_Guid" value="{f5e1e0b2-af34-4f67-b8d5-813bf2bc7eda}">
       <IDSymbol name="ClearAllResults" value="0x1100"/>
       <IDSymbol name="CollapseAllResults" value="0x1200"/>
-      <IDSymbol name="FilterResults" value="0x1300"/>
+      <IDSymbol name="ExpandAllResults" value="0x1300"/>
+      <IDSymbol name="FilterResults" value="0x1400"/>
       <IDSymbol name="ReferenceResultsToolbar" value="0x1010"/>
       <IDSymbol name="ReferenceResultsToolbarGroup0" value="0x1020"/>
       <IDSymbol name="ReferenceResultsToolbarGroup1" value="0x1030"/>

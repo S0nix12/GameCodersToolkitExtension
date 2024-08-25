@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Imaging;
+﻿using DataReferenceFinder.ToolWindows;
+using Microsoft.VisualStudio.Imaging;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -13,9 +14,10 @@ namespace DataReferenceFinder
 
 		public override Type PaneType => typeof(Pane);
 
-		public override Task<FrameworkElement> CreateAsync(int toolWindowId, CancellationToken cancellationToken)
+		public override async Task<FrameworkElement> CreateAsync(int toolWindowId, CancellationToken cancellationToken)
 		{
-			return Task.FromResult<FrameworkElement>(new ReferenceResultsWindowControl());
+			ReferenceResultsWindowMessenger messenger = await Package.GetServiceAsync<ReferenceResultsWindowMessenger, ReferenceResultsWindowMessenger>();
+			return new ReferenceResultsWindowControl(messenger);
 		}
 
 		[Guid("a41b151f-a0f0-42a6-bf69-505d80cf8235")]
