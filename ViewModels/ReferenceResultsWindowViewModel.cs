@@ -133,6 +133,8 @@ namespace DataReferenceFinder.ViewModels
 						newResult.LineNumber = lineResultEntry.Line;
 						newResult.LineText = lineResultEntry.Text;
 						fileResultsViewModel.LineResults.Insert(0, newResult);
+
+						ResultsCount++;
 					}
 				}
 			}
