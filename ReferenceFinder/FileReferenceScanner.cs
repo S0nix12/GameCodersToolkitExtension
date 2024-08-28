@@ -1,13 +1,11 @@
 ﻿using DataReferenceFinder.Configuration;
 using DataReferenceFinder.ReferenceFinder;
-using Microsoft.VisualStudio.Shell.Interop;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Windows.Controls;
 
 namespace DataReferenceFinder
 {
@@ -27,7 +25,7 @@ namespace DataReferenceFinder
 			string searchPaths = "";
 			foreach (CDataLocationEntry entry in searchLocations)
 			{
-				searchPaths += Path.GetFullPath(entry.Path);
+				searchPaths += entry.Path;
 				searchPaths += "; ";
 			}
 			ResultsOutput = DataReferenceFinderPackage.FindReferenceResultsStorage.AddNewOperationEntry(searchPaths, searchString);
@@ -35,7 +33,7 @@ namespace DataReferenceFinder
 
 		public CFileReferenceScanner(string inPath, string inSearchString)
 		{
-			searchPath = inPath;
+			searchPath = Path.GetFullPath(inPath);
 			searchString = inSearchString;
 
 			ResultsOutput = DataReferenceFinderPackage.FindReferenceResultsStorage.AddNewOperationEntry(searchPath, searchString);
@@ -88,7 +86,7 @@ namespace DataReferenceFinder
 				DataReferenceFinderPackage.ExtensionOutput.WriteLine(ex.Message);
 				DataReferenceFinderPackage.ExtensionOutput.WriteLine(ex.StackTrace);
 			}
-			finally 
+			finally
 			{
 				Interlocked.Increment(ref progressCounter);
 			}
@@ -136,36 +134,43 @@ namespace DataReferenceFinder
 
 		public async Task ScanAsync()
 		{
-			Stopwatch stopwatch = Stopwatch.StartNew();
-			var files = GetFilesToScan();
-			filesToScan = files.Count;
-			ResultsOutput.NotifyOperationStarted(filesToScan);
-			stopwatch.Stop();
-
-			GetFilesDuration = stopwatch.Elapsed;
-			stopwatch.Restart();
-
-			IList<Task> scanFileTaskList = new List<Task>();
-			foreach (var file in files)
+			try
 			{
-				scanFileTaskList.Add(Task.Run(() => { ScanFile(file); }));
+				Stopwatch stopwatch = Stopwatch.StartNew();
+				var files = GetFilesToScan();
+				filesToScan = files.Count;
+				ResultsOutput.NotifyOperationStarted(filesToScan);
+				stopwatch.Stop();
+
+				GetFilesDuration = stopwatch.Elapsed;
+				stopwatch.Restart();
+
+				IList<Task> scanFileTaskList = new List<Task>();
+				foreach (var file in files)
+				{
+					scanFileTaskList.Add(Task.Run(() => { ScanFile(file); }));
+				}
+
+				CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+				CancellationToken transferResultsCancelToken = cancellationTokenSource.Token;
+				Task transferResults = TransferResultsWorkerAsync(transferResultsCancelToken);
+
+				await Task.WhenAll(scanFileTaskList);
+				cancellationTokenSource.Cancel();
+				await transferResults;
+
+				stopwatch.Stop();
+				ResultsOutput.NotifyOperationDone(stopwatch.Elapsed);
+				ScanDuration = stopwatch.Elapsed;
+
+				if (pendingResults.Count != 0)
+				{
+					ResultsOutput.AddResults(pendingResults);
+				}
 			}
-
-			CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-			CancellationToken transferResultsCancelToken = cancellationTokenSource.Token;
-			Task transferResults = TransferResultsWorkerAsync(transferResultsCancelToken);
-
-			await Task.WhenAll(scanFileTaskList);
-			cancellationTokenSource.Cancel();
-			await transferResults;
-
-			stopwatch.Stop();
-			ResultsOutput.NotifyOperationDone(stopwatch.Elapsed);
-			ScanDuration = stopwatch.Elapsed;
-
-			if (pendingResults.Count != 0)
+			finally
 			{
-				ResultsOutput.AddResults(pendingResults);
+				progressCounter = filesToScan;
 			}
 		}
 

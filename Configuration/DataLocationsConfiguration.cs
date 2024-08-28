@@ -101,6 +101,7 @@ namespace DataReferenceFinder.Configuration
 								entry.Path = Path.Combine(SolutionFolder, entry.Path);
 							}
 						}
+						entry.Path = Path.GetFullPath(entry.Path);
 					}
 				}
 				else

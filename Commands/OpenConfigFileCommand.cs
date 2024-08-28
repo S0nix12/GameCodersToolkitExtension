@@ -8,6 +8,7 @@ namespace DataReferenceFinder
 		protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
 		{
 			string configFilePath = DataReferenceFinderPackage.DataLocationsConfig.GetConfigFilePath();
+			configFilePath = Path.GetFullPath(configFilePath);
 			if (!string.IsNullOrEmpty(configFilePath) && File.Exists(configFilePath))
 			{
 				await VS.Documents.OpenAsync(configFilePath);
