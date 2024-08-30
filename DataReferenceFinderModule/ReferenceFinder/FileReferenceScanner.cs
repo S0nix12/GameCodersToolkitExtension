@@ -1,5 +1,5 @@
-﻿using DataReferenceFinder.Configuration;
-using DataReferenceFinder.ReferenceFinder;
+﻿using GameCodersToolkit.Configuration;
+using GameCodersToolkit.ReferenceFinder;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 
-namespace DataReferenceFinder
+namespace GameCodersToolkit.ReferenceFinder
 {
 	struct SFoundLineEntry
 	{
@@ -28,7 +28,7 @@ namespace DataReferenceFinder
 				searchPaths += entry.Path;
 				searchPaths += "; ";
 			}
-			ResultsOutput = DataReferenceFinderPackage.FindReferenceResultsStorage.AddNewOperationEntry(searchPaths, searchString);
+			ResultsOutput = GameCodersToolkitPackage.FindReferenceResultsStorage.AddNewOperationEntry(searchPaths, searchString);
 		}
 
 		public CFileReferenceScanner(string inPath, string inSearchString)
@@ -36,7 +36,7 @@ namespace DataReferenceFinder
 			searchPath = Path.GetFullPath(inPath);
 			searchString = inSearchString;
 
-			ResultsOutput = DataReferenceFinderPackage.FindReferenceResultsStorage.AddNewOperationEntry(searchPath, searchString);
+			ResultsOutput = GameCodersToolkitPackage.FindReferenceResultsStorage.AddNewOperationEntry(searchPath, searchString);
 		}
 
 		StreamReader CreateStreamReader(string path)
@@ -82,9 +82,9 @@ namespace DataReferenceFinder
 			{
 				System.Diagnostics.Debug.WriteLine(ex.Message);
 				System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-				DataReferenceFinderPackage.ExtensionOutput.WriteLine("Failed to Scan File: " + file);
-				DataReferenceFinderPackage.ExtensionOutput.WriteLine(ex.Message);
-				DataReferenceFinderPackage.ExtensionOutput.WriteLine(ex.StackTrace);
+				GameCodersToolkitPackage.ExtensionOutput.WriteLine("Failed to Scan File: " + file);
+				GameCodersToolkitPackage.ExtensionOutput.WriteLine(ex.Message);
+				GameCodersToolkitPackage.ExtensionOutput.WriteLine(ex.StackTrace);
 			}
 			finally
 			{

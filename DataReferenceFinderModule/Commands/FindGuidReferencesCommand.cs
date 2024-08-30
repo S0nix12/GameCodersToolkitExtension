@@ -1,23 +1,24 @@
-﻿using DataReferenceFinder.Configuration;
-using DataReferenceFinder.ReferenceFinder;
+﻿using GameCodersToolkit.Configuration;
+using GameCodersToolkit.ReferenceFinder;
+using GameCodersToolkit.ReferenceFinder.ToolWindows;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DataReferenceFinder.Commands
+namespace GameCodersToolkit.ReferenceFinder.Commands
 {
 	public abstract class FindGuidReferencesCommandBase<T> : BaseCommand<T>
 		where T : class, new()
 	{
 		protected async Task ExecuteFindReferencesAsync(List<CDataLocationEntry> dataLocationEntries)
 		{
-			var textWriter = await DataReferenceFinderPackage.ExtensionOutput.CreateOutputPaneTextWriterAsync();
+			var textWriter = await GameCodersToolkitPackage.ExtensionOutput.CreateOutputPaneTextWriterAsync();
 
 			string searchText = await TextUtilFunctions.FindGuidUnderCaretAsync();
 
 			if (string.IsNullOrEmpty(searchText))
 			{
-				await DataReferenceFinderPackage.ExtensionOutput.ActivateAsync();
+				await GameCodersToolkitPackage.ExtensionOutput.ActivateAsync();
 				await textWriter.WriteLineAsync("No Guid selection found");
 				return;
 			}
@@ -34,7 +35,7 @@ namespace DataReferenceFinder.Commands
 			}
 			catch (Exception ex)
 			{
-				await DataReferenceFinderPackage.ExtensionOutput.ActivateAsync();
+				await GameCodersToolkitPackage.ExtensionOutput.ActivateAsync();
 				await textWriter.WriteLineAsync("Exeception occured:");
 				await textWriter.WriteLineAsync(ex.Message);
 				await textWriter.WriteLineAsync(ex.StackTrace);
@@ -72,7 +73,7 @@ namespace DataReferenceFinder.Commands
 	{
 		protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
 		{
-			await ExecuteFindReferencesAsync(DataReferenceFinderPackage.DataLocationsConfig.GetLocationEntries());
+			await ExecuteFindReferencesAsync(GameCodersToolkitPackage.DataLocationsConfig.GetLocationEntries());
 		}
 
 		protected override void BeforeQueryStatus(EventArgs e)
@@ -92,7 +93,7 @@ namespace DataReferenceFinder.Commands
 
 		protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
 		{
-			List<CDataLocationEntry> dataLocationEntries = DataReferenceFinderPackage.DataLocationsConfig.GetLocationEntries();
+			List<CDataLocationEntry> dataLocationEntries = GameCodersToolkitPackage.DataLocationsConfig.GetLocationEntries();
 			if (dataLocationEntries.Count > SpecificLocationIndex)
 			{
 				await ExecuteFindReferencesAsync(new List<CDataLocationEntry> { dataLocationEntries[SpecificLocationIndex] });
@@ -104,7 +105,7 @@ namespace DataReferenceFinder.Commands
 			string guidText = ThreadHelper.JoinableTaskFactory.Run(TextUtilFunctions.FindGuidUnderCaretAsync);
 			Command.Enabled = !string.IsNullOrEmpty(guidText);
 
-			List<CDataLocationEntry> dataLocationEntries = DataReferenceFinderPackage.DataLocationsConfig.GetLocationEntries();
+			List<CDataLocationEntry> dataLocationEntries = GameCodersToolkitPackage.DataLocationsConfig.GetLocationEntries();
 			bool hasEnoughEntries = dataLocationEntries.Count > SpecificLocationIndex;
 			Command.Visible = hasEnoughEntries;
 			if (hasEnoughEntries)

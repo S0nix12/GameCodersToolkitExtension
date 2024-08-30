@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataReferenceFinder.ToolWindows
+namespace GameCodersToolkit.ReferenceFinder.ToolWindows
 {
 	public enum EReferenceResultsWindowToolbarAction
 	{

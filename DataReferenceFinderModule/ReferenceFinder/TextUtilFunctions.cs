@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace DataReferenceFinder.ReferenceFinder
+namespace GameCodersToolkit.ReferenceFinder
 {
 	public static class TextUtilFunctions
 	{

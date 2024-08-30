@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace DataReferenceFinder.Configuration
+namespace GameCodersToolkit.Configuration
 {
 	public class CDataLocationEntry
 	{
@@ -114,8 +114,8 @@ namespace DataReferenceFinder.Configuration
 			{
 				System.Diagnostics.Debug.WriteLine(ex.Message);
 				System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-				await DataReferenceFinderPackage.ExtensionOutput.WriteLineAsync(ex.Message);
-				await DataReferenceFinderPackage.ExtensionOutput.WriteLineAsync(ex.StackTrace);
+				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.Message);
+				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.StackTrace);
 			}
 		}
 

@@ -1,12 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using DataReferenceFinder.ReferenceFinder;
+using GameCodersToolkit.ReferenceFinder;
 using Microsoft.VisualStudio.Text;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 
-namespace DataReferenceFinder.ViewModels
+namespace GameCodersToolkit.ReferenceFinder.ViewModels
 {
 	public class CLineResultViewModel : ObservableObject
 	{
@@ -171,7 +171,7 @@ namespace DataReferenceFinder.ViewModels
 	{
 		public CReferenceResultsWindowViewModel()
 		{
-			DataReferenceFinderPackage.FindReferenceResultsStorage.Results.CollectionChanged += HandleResultsCollectionChanged;
+			GameCodersToolkitPackage.FindReferenceResultsStorage.Results.CollectionChanged += HandleResultsCollectionChanged;
 		}
 
 		void HandleResultsCollectionChanged(object storage, NotifyCollectionChangedEventArgs eventArgs)

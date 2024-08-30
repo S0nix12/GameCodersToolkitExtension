@@ -6,7 +6,7 @@
   <Include href="KnownImageIds.vsct"/>
   <Include href="VSGlobals.vsct"/>
 
-  <Commands package="DataReferenceFinderPackage_Guid">
+  <Commands package="GameCodersToolkitPackage_Guid">
     <Groups>
       <Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup" priority="0x0200">
         <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu"/>
@@ -206,7 +206,7 @@
   </CommandPlacements>
 
   <Symbols>
-    <GuidSymbol name ="DataReferenceFinderPackage_Guid" value ="{f45b95a6-2eab-4919-a16f-81bb14ca671f}"/>
+    <GuidSymbol name ="GameCodersToolkitPackage_Guid" value ="{f45b95a6-2eab-4919-a16f-81bb14ca671f}"/>
 
     <GuidSymbol name="DataReferenceFinderCommandSet_Guid" value="{4bb2a331-cebe-4cf2-a093-203a5a7f2e95}">
       <IDSymbol name="FindDataReferencesEditMenu" value="0x0003" />

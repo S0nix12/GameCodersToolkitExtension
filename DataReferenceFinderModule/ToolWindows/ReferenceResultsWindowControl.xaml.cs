@@ -1,11 +1,10 @@
-﻿using DataReferenceFinder.ToolWindows;
-using DataReferenceFinder.ViewModels;
+﻿using GameCodersToolkit.ReferenceFinder.ViewModels;
 using Microsoft.VisualStudio.Package;
 using System.Runtime.InteropServices.Expando;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace DataReferenceFinder
+namespace GameCodersToolkit.ReferenceFinder.ToolWindows
 {
 	public partial class ReferenceResultsWindowControl : UserControl
 	{

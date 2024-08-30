@@ -2,23 +2,23 @@
 global using Microsoft.VisualStudio.Shell;
 global using System;
 global using Task = System.Threading.Tasks.Task;
-using DataReferenceFinder.Configuration;
-using DataReferenceFinder.ReferenceFinder;
-using DataReferenceFinder.ToolWindows;
+using GameCodersToolkit.Configuration;
+using GameCodersToolkit.ReferenceFinder;
+using GameCodersToolkit.ReferenceFinder.ToolWindows;
 using Microsoft.VisualStudio;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace DataReferenceFinder
+namespace GameCodersToolkit
 {
 	[PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
 	[InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
 	[ProvideMenuResource("Menus.ctmenu", 1)]
-	[Guid(PackageGuids.DataReferenceFinderPackage_GuidString)]
+	[Guid(PackageGuids.GameCodersToolkitPackage_GuidString)]
 	[ProvideToolWindow(typeof(ReferenceResultsWindow.Pane), Style = VsDockStyle.Tabbed, Window = WindowGuids.OutputWindow)]
 	[ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOpening_string, PackageAutoLoadFlags.BackgroundLoad)]
 	[ProvideService(typeof(ReferenceResultsWindowMessenger), IsAsyncQueryable = true)]
-	public sealed class DataReferenceFinderPackage : ToolkitPackage
+	public sealed class GameCodersToolkitPackage : ToolkitPackage
 	{
 		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
 		{

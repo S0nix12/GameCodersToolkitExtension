@@ -1,12 +1,11 @@
-﻿using DataReferenceFinder.ToolWindows;
-using Microsoft.VisualStudio.Imaging;
+﻿using Microsoft.VisualStudio.Imaging;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace DataReferenceFinder
+namespace GameCodersToolkit.ReferenceFinder.ToolWindows
 {
 	public class ReferenceResultsWindow : BaseToolWindow<ReferenceResultsWindow>
 	{

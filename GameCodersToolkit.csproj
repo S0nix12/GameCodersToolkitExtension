@@ -13,8 +13,8 @@
     <ProjectGuid>{DC088CC8-1842-4F5F-A27D-FA6A090CEDD2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DataReferenceFinder</RootNamespace>
-    <AssemblyName>DataReferenceFinder</AssemblyName>
+    <RootNamespace>GameCodersToolkit</RootNamespace>
+    <AssemblyName>GameCodersToolkit</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
@@ -45,30 +45,30 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Commands\ClearFindResultsCommand.cs" />
-    <Compile Include="Commands\OpenConfigFileCommand.cs" />
-    <Compile Include="Commands\OpenReferenceResultsWindow.cs" />
-    <Compile Include="Commands\SaveConfigCommand.cs" />
-    <Compile Include="Configuration\DataLocationsConfiguration.cs" />
+    <Compile Include="DataReferenceFinderModule\Commands\ClearFindResultsCommand.cs" />
+    <Compile Include="DataReferenceFinderModule\Commands\OpenConfigFileCommand.cs" />
+    <Compile Include="DataReferenceFinderModule\Commands\OpenReferenceResultsWindow.cs" />
+    <Compile Include="DataReferenceFinderModule\Commands\SaveConfigCommand.cs" />
+    <Compile Include="DataReferenceFinderModule\Configuration\DataLocationsConfiguration.cs" />
     <Compile Include="ExtensionMethods\ExtensionMethodsCollections.cs" />
     <Compile Include="ExtensionMethods\TreeViewExtensions.cs" />
-    <Compile Include="ReferenceFinder\FileReferenceScanner.cs" />
+    <Compile Include="DataReferenceFinderModule\ReferenceFinder\FileReferenceScanner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Commands\FindGuidReferencesCommand.cs" />
-    <Compile Include="DataReferenceFinderPackage.cs" />
-    <Compile Include="ReferenceFinder\FindReferenceResultsStorage.cs" />
-    <Compile Include="ReferenceFinder\TextUtilFunctions.cs" />
+    <Compile Include="DataReferenceFinderModule\Commands\FindGuidReferencesCommand.cs" />
+    <Compile Include="GameCodersToolkitPackage.cs" />
+    <Compile Include="DataReferenceFinderModule\ReferenceFinder\FindReferenceResultsStorage.cs" />
+    <Compile Include="DataReferenceFinderModule\ReferenceFinder\TextUtilFunctions.cs" />
     <Compile Include="source.extension.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>source.extension.vsixmanifest</DependentUpon>
     </Compile>
-    <Compile Include="ToolWindows\ReferenceResultsWindow.cs" />
-    <Compile Include="ToolWindows\ReferenceResultsWindowControl.xaml.cs">
+    <Compile Include="DataReferenceFinderModule\ToolWindows\ReferenceResultsWindow.cs" />
+    <Compile Include="DataReferenceFinderModule\ToolWindows\ReferenceResultsWindowControl.xaml.cs">
       <DependentUpon>ReferenceResultsWindowControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ToolWindows\ReferenceResultsWindowMessenger.cs" />
-    <Compile Include="ViewModels\ReferenceResultsWindowViewModel.cs" />
+    <Compile Include="DataReferenceFinderModule\ToolWindows\ReferenceResultsWindowMessenger.cs" />
+    <Compile Include="DataReferenceFinderModule\ViewModels\ReferenceResultsWindowViewModel.cs" />
     <Compile Include="VSCommandTable.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -118,7 +118,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="ToolWindows\ReferenceResultsWindowControl.xaml">
+    <Page Include="DataReferenceFinderModule\ToolWindows\ReferenceResultsWindowControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
