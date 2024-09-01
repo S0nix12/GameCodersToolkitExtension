@@ -58,6 +58,10 @@
     <Compile Include="GameCodersToolkitPackage.cs" />
     <Compile Include="DataReferenceFinderModule\ReferenceFinder\FindReferenceResultsStorage.cs" />
     <Compile Include="DataReferenceFinderModule\ReferenceFinder\TextUtilFunctions.cs" />
+    <Compile Include="QuickAttach\Commands\QuickAttachCommand.cs" />
+    <Compile Include="QuickAttach\Commands\QuickAttachSelectionCommand.cs" />
+    <Compile Include="QuickAttach\Options\QuickAttachOptions.cs" />
+    <Compile Include="QuickAttach\QuickAttachService.cs" />
     <Compile Include="source.extension.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

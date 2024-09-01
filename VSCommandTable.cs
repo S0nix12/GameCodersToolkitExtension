@@ -20,6 +20,9 @@ namespace GameCodersToolkit
 
         public const string ReferenceResultsToolbarCommandSet_GuidString = "f5e1e0b2-af34-4f67-b8d5-813bf2bc7eda";
         public static Guid ReferenceResultsToolbarCommandSet_Guid = new Guid(ReferenceResultsToolbarCommandSet_GuidString);
+
+        public const string QuickAttachCommandSet_GuidString = "ffea98d0-3d8b-4f5c-be66-0df1926b700a";
+        public static Guid QuickAttachCommandSet_Guid = new Guid(QuickAttachCommandSet_GuidString);
     }
     /// <summary>
     /// Helper class that encapsulates all CommandIDs uses across VS Package.
@@ -48,5 +51,10 @@ namespace GameCodersToolkit
         public const int ReferenceResultsToolbarGroup0 = 0x1020;
         public const int ReferenceResultsToolbarGroup1 = 0x1030;
         public const int ReferenceResultsToolbarGroup2 = 0x1040;
+        public const int QuickAttachToolbar = 0x0010;
+        public const int QuickAttachToolbarGroup = 0x0020;
+        public const int QuickAttachCommand = 0x0100;
+        public const int QuickAttachSelector = 0x0200;
+        public const int QuickAttachSelectorListCmd = 0x0300;
     }
 }

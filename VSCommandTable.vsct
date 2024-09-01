@@ -26,6 +26,9 @@
       <Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesMenuGroupSpecific" priority="0x0002">
         <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesEditMenu"/>
       </Group>
+      <Group guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbarGroup" priority="0x0000">
+        <Parent guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbar"/>
+      </Group>
     </Groups>
 
     <Menus>
@@ -41,10 +44,16 @@
           <ButtonText>Data Reference Finder</ButtonText>
         </Strings>
       </Menu>
-      <Menu guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu" type="Menu" priority="0x8010">
+      <Menu guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu" type="Menu" priority="0x0900">
         <Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
         <Strings>
           <ButtonText>Data Reference Finder</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbar" type="Toolbar">
+        <CommandFlag>DefaultDocked</CommandFlag>
+        <Strings>
+          <ButtonText>Quick Attach</ButtonText>
         </Strings>
       </Menu>
     </Menus>
@@ -151,7 +160,7 @@
         </Strings>
       </Button>
 
-      <!-- Results Window Toolbar Buttons-->
+      <!-- Reference Results Window Toolbar Buttons-->
       <Button guid="ReferenceResultsToolbarCommandSet_Guid" id="ClearAllResults">
         <Icon guid="ImageCatalogGuid" id="ClearWindowContent"/>
         <CommandFlag>IconIsMoniker</CommandFlag>
@@ -176,9 +185,21 @@
           <LocCanonicalName>.DataReferenceFinder.ReferenceResults.ExpandAll</LocCanonicalName>
         </Strings>
       </Button>
+
+      <!-- Quick Attach Toolbar-->
+      <Button guid="QuickAttachCommandSet_Guid" id="QuickAttachCommand" priority="0x0000">
+        <Parent guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbarGroup"/>
+        <Icon guid="ImageCatalogGuid" id="RunFilter"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Quick Attach</ButtonText>
+          <LocCanonicalName>.GameCodersToolkit.QuickAttach</LocCanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
 
     <Combos>
+      <!-- Reference Results Window-->
       <Combo guid="ReferenceResultsToolbarCommandSet_Guid" id="FilterResults" type="MRUCombo" defaultWidth="150" idCommandList="0">
         <CommandFlag>IconAndText</CommandFlag>
         <Strings>
@@ -187,10 +208,21 @@
           <LocCanonicalName>.DataReferenceFinder.ReferenceResults.Filter</LocCanonicalName>
         </Strings>
       </Combo>
+
+      <!-- Quick Attach Toolbar-->
+      <Combo guid="QuickAttachCommandSet_Guid" id="QuickAttachSelector" type="IndexCombo" defaultWidth="300" idCommandList="QuickAttachSelectorListCmd">
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+          <ButtonText>Quick Attach:</ButtonText>
+          <ToolTipText>Select Target to Quick Attach</ToolTipText>
+          <LocCanonicalName>.GameCodersToolkit.QuickAttachSelector</LocCanonicalName>
+        </Strings>
+      </Combo>
     </Combos>
   </Commands>
 
   <CommandPlacements>
+    <!-- Reference Results Window-->
     <CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="FilterResults" priority="0x0001">
       <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup0"/>
     </CommandPlacement>
@@ -202,6 +234,11 @@
     </CommandPlacement>
     <CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="ExpandAllResults" priority="0x0004">
       <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup2"/>
+    </CommandPlacement>
+
+    <!-- Quick Attach Toolbar-->
+    <CommandPlacement guid="QuickAttachCommandSet_Guid" id="QuickAttachSelector" priority="0x0010">
+      <Parent guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbarGroup"/>
     </CommandPlacement>
   </CommandPlacements>
 
@@ -234,6 +271,14 @@
       <IDSymbol name="ReferenceResultsToolbarGroup0" value="0x1020"/>
       <IDSymbol name="ReferenceResultsToolbarGroup1" value="0x1030"/>
       <IDSymbol name="ReferenceResultsToolbarGroup2" value="0x1040"/>
+    </GuidSymbol>
+
+    <GuidSymbol name="QuickAttachCommandSet_Guid" value="{ffea98d0-3d8b-4f5c-be66-0df1926b700a}">
+      <IDSymbol name="QuickAttachToolbar" value="0x0010"/>
+      <IDSymbol name="QuickAttachToolbarGroup" value="0x0020"/>
+      <IDSymbol name="QuickAttachCommand" value="0x0100"/>
+      <IDSymbol name="QuickAttachSelector" value="0x0200"/>
+      <IDSymbol name="QuickAttachSelectorListCmd" value="0x0300"/>
     </GuidSymbol>
   </Symbols>
 </CommandTable>

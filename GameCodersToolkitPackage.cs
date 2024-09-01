@@ -3,6 +3,7 @@ global using Microsoft.VisualStudio.Shell;
 global using System;
 global using Task = System.Threading.Tasks.Task;
 using GameCodersToolkit.Configuration;
+using GameCodersToolkit.QuickAttach;
 using GameCodersToolkit.ReferenceFinder;
 using GameCodersToolkit.ReferenceFinder.ToolWindows;
 using Microsoft.VisualStudio;
@@ -18,6 +19,8 @@ namespace GameCodersToolkit
 	[ProvideToolWindow(typeof(ReferenceResultsWindow.Pane), Style = VsDockStyle.Tabbed, Window = WindowGuids.OutputWindow)]
 	[ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOpening_string, PackageAutoLoadFlags.BackgroundLoad)]
 	[ProvideService(typeof(ReferenceResultsWindowMessenger), IsAsyncQueryable = true)]
+	[ProvideService(typeof(QuickAttachService), IsAsyncQueryable = true)]
+	[ProvideOptionPage(typeof(OptionsProvider.QuickAttachOptionsOptions), "Game Coders Toolkit", "Quick Attach", 0, 0, true, SupportsProfiles = true)]
 	public sealed class GameCodersToolkitPackage : ToolkitPackage
 	{
 		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
@@ -25,6 +28,7 @@ namespace GameCodersToolkit
 			try
 			{
 				AddService(typeof(ReferenceResultsWindowMessenger), (_, _, _) => Task.FromResult<object>(new ReferenceResultsWindowMessenger()));
+				AddService(typeof(QuickAttachService), (_, _, _) => Task.FromResult<object>(new QuickAttachService()));
 
 				await this.RegisterCommandsAsync();
 				this.RegisterToolWindows();
