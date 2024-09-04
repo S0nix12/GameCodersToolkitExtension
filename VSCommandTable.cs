@@ -23,6 +23,9 @@ namespace GameCodersToolkit
 
         public const string QuickAttachCommandSet_GuidString = "ffea98d0-3d8b-4f5c-be66-0df1926b700a";
         public static Guid QuickAttachCommandSet_Guid = new Guid(QuickAttachCommandSet_GuidString);
+
+        public const string FileTemplateCreatorSet_GuidString = "c614691e-88df-43e1-9d6e-28ca3a32fb57";
+        public static Guid FileTemplateCreatorSet_Guid = new Guid(FileTemplateCreatorSet_GuidString);
     }
     /// <summary>
     /// Helper class that encapsulates all CommandIDs uses across VS Package.
@@ -56,5 +59,8 @@ namespace GameCodersToolkit
         public const int QuickAttachCommand = 0x0100;
         public const int QuickAttachSelector = 0x0200;
         public const int QuickAttachSelectorListCmd = 0x0300;
+        public const int CreateFileFromTemplateExtensionsMenu = 0x0010;
+        public const int CreateFileFromTemplate = 0x0020;
+        public const int FileTemplateCreatorExtensionsMenuGroup = 0x0007;
     }
 }

@@ -1,0 +1,81 @@
+﻿<Window x:Class="GameCodersToolkit.FileTemplateCreator.Windows.CreateFileFromTemplateWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:imaging="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.Imaging"
+		xmlns:theming="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Imaging"
+		xmlns:util="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Utilities"
+		xmlns:catalog="clr-namespace:Microsoft.VisualStudio.Imaging;assembly=Microsoft.VisualStudio.ImageCatalog"
+		xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
+		xmlns:platformUI="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
+		xmlns:vshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+		xmlns:vm="clr-namespace:GameCodersToolkit.FileTemplateCreator.ViewModels"
+        xmlns:local="clr-namespace:GameCodersToolkit.FileTemplateCreator.Windows"
+        mc:Ignorable="d" 
+        Height="300"
+        Width="600"
+		toolkit:Themes.UseVsTheme="True">
+
+    <Window.Resources>
+        <GridLength x:Key="WindowContentMargin">15</GridLength>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{StaticResource WindowContentMargin}" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="{StaticResource WindowContentMargin}" />
+        </Grid.RowDefinitions>
+
+        <TreeView x:Name="TemplateTree" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Templates}">
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type vm:CFileTemplateCategoryViewModel}" ItemsSource="{Binding Children}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Name}" FontSize="16" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+                <DataTemplate DataType="{x:Type vm:CFileTemplateViewModel}">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding SelectCommand}">
+                            <TextBlock Text="{Binding Name}" FontSize="16" />
+                        </Button>
+                        <!--<imaging:CrispImage Width="24" Height="24" Moniker="{x:Static catalog:KnownMonikers.Document}" />-->
+                    </StackPanel>
+                </DataTemplate>
+            </TreeView.Resources>
+        </TreeView>
+
+        <TreeView x:Name="MakeFileTree" Grid.Row="1" Grid.Column="3" ItemsSource="{Binding MakeFileContent}">
+            <TreeView.Resources>
+                <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileUberFileViewModel}" ItemsSource="{Binding Groups}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Name}" FontSize="16" />
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileGroupViewModel}" ItemsSource="{Binding Files}">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding AddToGroup}">
+                            <TextBlock Text="{Binding Name}" FontSize="16" />
+                        </Button>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+                <DataTemplate DataType="{x:Type vm:CMakeFileFileViewModel}">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding SelectCommand}">
+                            <TextBlock Text="{Binding Name}" FontSize="16" />
+                        </Button>
+                        <!--<imaging:CrispImage Width="24" Height="24" Moniker="{x:Static catalog:KnownMonikers.Document}" />-->
+                    </StackPanel>
+                </DataTemplate>
+            </TreeView.Resources>
+        </TreeView>
+    </Grid>
+</Window>

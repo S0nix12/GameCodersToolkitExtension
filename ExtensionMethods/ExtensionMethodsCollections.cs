@@ -27,5 +27,22 @@ namespace System.Collections.Generic
 				}
 			}
 		}
+
+		public static IEnumerable<string> SplitIntoLines(this string input)
+		{
+			if (input == null)
+			{
+				yield break;
+			}
+
+			using (IO.StringReader reader = new IO.StringReader(input))
+			{
+				string line;
+				while ((line = reader.ReadLine()) != null)
+				{
+					yield return line;
+				}
+			}
+		}
 	}
 }

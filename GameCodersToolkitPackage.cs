@@ -37,6 +37,9 @@ namespace GameCodersToolkit
 
 				DataLocationsConfig = new CDataLocationsConfiguration();
 				await DataLocationsConfig.InitAsync();
+
+				FileTemplateCreatorConfig = new CFileTemplateConfiguration();
+				await FileTemplateCreatorConfig.InitAsync();
 			}
 			catch (Exception ex)
 			{
@@ -55,5 +58,6 @@ namespace GameCodersToolkit
 
 		internal static CFindReferenceResultsStorage FindReferenceResultsStorage { get; private set; }
 		public static CDataLocationsConfiguration DataLocationsConfig { get; private set; }
+		public static CFileTemplateConfiguration FileTemplateCreatorConfig { get; private set; }
 	}
 }

@@ -29,6 +29,9 @@
       <Group guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbarGroup" priority="0x0000">
         <Parent guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbar"/>
       </Group>
+      <Group guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup" priority="0x0400">
+        <Parent guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplateExtensionsMenu"/>
+      </Group>
     </Groups>
 
     <Menus>
@@ -54,6 +57,12 @@
         <CommandFlag>DefaultDocked</CommandFlag>
         <Strings>
           <ButtonText>Quick Attach</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplateExtensionsMenu" type="Menu" priority="0x0900">
+        <Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
+        <Strings>
+          <ButtonText>File Template Creator</ButtonText>
         </Strings>
       </Menu>
     </Menus>
@@ -196,6 +205,17 @@
           <LocCanonicalName>.GameCodersToolkit.QuickAttach</LocCanonicalName>
         </Strings>
       </Button>
+      
+      <!-- File Template Creator -->
+      <Button guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplate" priority="0x0100" type="Button">
+        <Parent guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="AddDocument"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Create File From Template</ButtonText>
+          <LocCanonicalName>.FileTemplateCreator.CreateFileFromTemplate</LocCanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
 
     <Combos>
@@ -279,6 +299,13 @@
       <IDSymbol name="QuickAttachCommand" value="0x0100"/>
       <IDSymbol name="QuickAttachSelector" value="0x0200"/>
       <IDSymbol name="QuickAttachSelectorListCmd" value="0x0300"/>
+    </GuidSymbol>
+
+
+    <GuidSymbol name="FileTemplateCreatorSet_Guid" value="{C614691E-88DF-43E1-9D6E-28CA3A32FB57}">
+      <IDSymbol name="CreateFileFromTemplateExtensionsMenu" value="0x0010"/>
+      <IDSymbol name="CreateFileFromTemplate" value="0x0020"/>
+      <IDSymbol name="FileTemplateCreatorExtensionsMenuGroup" value="0x0007" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>
