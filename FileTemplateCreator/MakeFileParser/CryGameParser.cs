@@ -76,17 +76,6 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 	[DebuggerDisplay("CryGameMakeFile ({UberFileEntries.Count} Uber Files)")]
 	public class CryGameMakeFile : IMakeFile
 	{
-		public bool AddFilesAndSave(string previousUberFileName, string uberFileName, string previousGroupName, string groupName, string previousFileName, IEnumerable<string> newFileNames)
-		{
-			if (!HasBeenModified && AddFilesAndSave_Internal(previousUberFileName, uberFileName, previousGroupName, groupName, previousFileName, newFileNames))
-			{
-				HasBeenModified = true;
-				return true;
-			}
-
-			return false;
-		}
-
 		public IEnumerable<IUberFileEntry> GetUberFileEntries()
 		{
 			return UberFileEntries;
@@ -105,93 +94,6 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 			}
 		}
 
-		private bool AddFilesAndSave_Internal(string previousUberFileName, string uberFileName, string previousGroupName, string groupName, string previousFileName, IEnumerable<string> newFileNames)
-		{
-			CryGameUberFileEntry uberFileEntry = UberFileEntries.Where((Entry) => Entry.Name == uberFileName).FirstOrDefault();
-
-			if (uberFileEntry == null)
-			{
-				// New uber file
-				int newUberFileLine = 0;
-
-				CryGameUberFileEntry previousUberFileEntry = UberFileEntries.Where((Entry) => Entry.Name == previousUberFileName).FirstOrDefault();
-				if (previousUberFileEntry != null)
-				{
-					newUberFileLine = previousUberFileEntry.EndLineNumber + 1;
-				}
-
-				List<string> newUberFileContent = new List<string>()
-				{
-					"add_sources(\"UBER_TOKEN.cpp\"",
-					"\tSOURCE_GROUP \"GROUP_TOKEN\"",
-					")"
-				};
-
-				newUberFileContent[0] = newUberFileContent[0].Replace("UBER_TOKEN", uberFileName);
-				newUberFileContent[1] = newUberFileContent[1].Replace("GROUP_TOKEN", groupName);
-
-				Lines.Insert(newUberFileLine, string.Empty);
-				newUberFileLine++;
-				Lines.Insert(newUberFileLine, newUberFileContent[0]);
-				newUberFileLine++;
-				Lines.Insert(newUberFileLine, newUberFileContent[1]);
-				newUberFileLine++;
-
-				InsertFileNames(newUberFileLine, newFileNames);
-				newUberFileLine += newFileNames.Count();
-
-				Lines.Insert(newUberFileLine, newUberFileContent[2]);
-				newUberFileLine++;
-
-				SaveLinesToFile();
-
-				return true;
-			}
-			else
-			{
-				CryGameSourceGroupEntry sourceGroupEntry = uberFileEntry.FileGroups.Where(Group => Group.Name == groupName).FirstOrDefault();
-				if (sourceGroupEntry == null)
-				{
-					// Existing uber file, new group
-
-					int newGroupLine = uberFileEntry.StartLineNumber + 1;
-
-					CryGameSourceGroupEntry previousGroupFileEntry = uberFileEntry.FileGroups.Where((Group) => Group.Name == previousGroupName).FirstOrDefault();
-					if (previousGroupFileEntry != null)
-					{
-						newGroupLine = previousGroupFileEntry.LineNumber + previousGroupFileEntry.RegularFiles.Count;
-					}
-
-					string newGroupContent = "\tSOURCE_GROUP \"GROUP_TOKEN\"";
-					newGroupContent = newGroupContent.Replace("GROUP_TOKEN", groupName);
-
-					Lines.Insert(newGroupLine, newGroupContent);
-					newGroupLine++;
-
-					InsertFileNames(newGroupLine, newFileNames);
-					SaveLinesToFile();
-
-					return true;
-				}
-
-				// Existing uber file, existing group
-				int lineToInsert = sourceGroupEntry.LineNumber + 1;
-				if (!string.IsNullOrWhiteSpace(previousFileName))
-				{
-					CryGameRegularFileEntry regularFileEntry = sourceGroupEntry.RegularFiles.Where(Entry => Entry.Name == previousFileName).First();
-					if (regularFileEntry != null)
-					{
-						lineToInsert = regularFileEntry.LineNumber + 1;
-					}
-				}
-
-				InsertFileNames(lineToInsert, newFileNames);
-				SaveLinesToFile();
-
-				return true;
-			}
-		}
-
 		private void InsertFileNames(int lineNumber, IEnumerable<string> fileNames)
 		{
 			foreach (string newFileName in fileNames)
@@ -200,6 +102,90 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 				Lines.Insert(lineNumber, newLine);
 				lineNumber++;
 			}
+		}
+
+		public IMakeFile AddUberFile(string previousUberFileName, string newUberFileName)
+		{
+			// New uber file
+			int newUberFileLine = 0;
+
+			CryGameUberFileEntry previousUberFileEntry = UberFileEntries.Where((Entry) => Entry.Name == previousUberFileName).FirstOrDefault();
+			if (previousUberFileEntry != null)
+			{
+				newUberFileLine = previousUberFileEntry.EndLineNumber + 1;
+			}
+
+			List<string> newUberFileContent = new List<string>()
+				{
+					"add_sources(\"UBER_TOKEN.cpp\"",
+					")"
+				};
+
+			newUberFileContent[0] = newUberFileContent[0].Replace("UBER_TOKEN", newUberFileName);
+
+			Lines.Insert(newUberFileLine, string.Empty);
+			newUberFileLine++;
+			Lines.InsertRange(newUberFileLine, newUberFileContent);
+			newUberFileLine++;
+
+			CryGameParser parser = new CryGameParser();
+			return parser.Parse(FilePath, Lines);
+		}
+
+		public IMakeFile AddGroup(string uberFileName, string previousGroupName, string newGroupName)
+		{
+			CryGameUberFileEntry uberFileEntry = UberFileEntries.Where((Entry) => Entry.Name == uberFileName).FirstOrDefault();
+			if (uberFileEntry == null)
+			{
+				return this;
+			}
+
+			int newGroupLine = uberFileEntry.StartLineNumber + 1;
+
+			CryGameSourceGroupEntry previousGroupFileEntry = uberFileEntry.FileGroups.Where((Group) => Group.Name == previousGroupName).FirstOrDefault();
+			if (previousGroupFileEntry != null)
+			{
+				newGroupLine = previousGroupFileEntry.LineNumber + previousGroupFileEntry.RegularFiles.Count;
+			}
+
+			string newGroupContent = "\tSOURCE_GROUP \"GROUP_TOKEN\"";
+			newGroupContent = newGroupContent.Replace("GROUP_TOKEN", newGroupName);
+
+			Lines.Insert(newGroupLine, newGroupContent);
+			newGroupLine++;
+
+			CryGameParser parser = new CryGameParser();
+			return parser.Parse(FilePath, Lines);
+		}
+
+		public IMakeFile AddFiles(string uberFileName, string groupName, string previousFileName, IEnumerable<string> newFileNames)
+		{
+			CryGameUberFileEntry uberFileEntry = UberFileEntries.Where((Entry) => Entry.Name == uberFileName).FirstOrDefault();
+			if (uberFileEntry == null)
+			{
+				return this;
+			}
+
+			CryGameSourceGroupEntry groupEntry = uberFileEntry.FileGroups.Where((Group) => Group.Name == groupName).FirstOrDefault();
+			if (groupEntry == null)
+			{
+				return this;
+			}
+
+			int lineToInsert = groupEntry.LineNumber + 1;
+			if (!string.IsNullOrWhiteSpace(previousFileName))
+			{
+				CryGameRegularFileEntry regularFileEntry = groupEntry.RegularFiles.Where(Entry => Entry.Name == previousFileName).First();
+				if (regularFileEntry != null)
+				{
+					lineToInsert = regularFileEntry.LineNumber + 1;
+				}
+			}
+
+			InsertFileNames(lineToInsert, newFileNames);
+
+			CryGameParser parser = new CryGameParser();
+			return parser.Parse(FilePath, Lines);
 		}
 
 		public string FilePath { get; set; }
@@ -212,13 +198,18 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 	{
 		public IMakeFile Parse(string filePath)
 		{
+			return Parse(filePath, File.ReadAllLines(filePath));
+		}
+		
+		public IMakeFile Parse(string originalFilePath, IEnumerable<string> lines)
+		{
 			try
 			{
-				if (File.Exists(filePath))
+				if (File.Exists(originalFilePath))
 				{
 					CryGameMakeFile makeFile = new CryGameMakeFile();
-					makeFile.FilePath = filePath;
-					makeFile.Lines = File.ReadAllLines(filePath).ToList();
+					makeFile.FilePath = originalFilePath;
+					makeFile.Lines = lines.ToList();
 
 					CryGameUberFileEntry currentUberFile = null;
 					CryGameSourceGroupEntry currentSourceGroup = null;
@@ -247,7 +238,7 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 						{
 							if (currentUberFile != null || currentSourceGroup != null)
 							{
-								throw new Exception($"MakeFile {filePath} is malformatted in line {i}: Found nested add_sources call");
+								throw new Exception($"MakeFile {originalFilePath} is malformatted in line {i}: Found nested add_sources call");
 							}
 
 							Match uberFileNameMatch = Regex.Match(line, "\"([^\"]*)\"", RegexOptions.IgnoreCase);

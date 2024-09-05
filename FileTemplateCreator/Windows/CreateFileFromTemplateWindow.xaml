@@ -53,16 +53,23 @@
             </TreeView.Resources>
         </TreeView>
 
-        <TreeView x:Name="MakeFileTree" Grid.Row="1" Grid.Column="3" ItemsSource="{Binding MakeFileContent}">
+        <TreeView x:Name="MakeFileTree" Grid.Row="1" Grid.Column="3" ItemsSource="{Binding UberFiles}">
             <TreeView.Resources>
+
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                </Style>
+
                 <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileUberFileViewModel}" ItemsSource="{Binding Groups}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Name}" FontSize="16" />
+                        <Button Command="{Binding SelectCommand}">
+                            <TextBlock Text="{Binding Name}" FontSize="16" />
+                        </Button>
                     </StackPanel>
                 </HierarchicalDataTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileGroupViewModel}" ItemsSource="{Binding Files}">
                     <StackPanel Orientation="Horizontal">
-                        <Button Command="{Binding AddToGroup}">
+                        <Button Command="{Binding SelectCommand}">
                             <TextBlock Text="{Binding Name}" FontSize="16" />
                         </Button>
                     </StackPanel>

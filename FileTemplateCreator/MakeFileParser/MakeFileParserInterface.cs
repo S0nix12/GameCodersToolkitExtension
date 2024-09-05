@@ -29,7 +29,9 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 
 	public interface IMakeFile
 	{
-		public abstract bool AddFilesAndSave(string previousUberFileName, string uberFileName, string previousGroupName, string groupName, string previousFileName, IEnumerable<string> newFileNames);
+		public abstract IMakeFile AddUberFile(string previousUberFileName, string newUberFileName);
+		public abstract IMakeFile AddGroup(string uberFileName, string previousGroupName, string newGroupName);
+		public abstract IMakeFile AddFiles(string uberFileName, string groupName, string previousFileName, IEnumerable<string> newFileNames);
 
 		public abstract IEnumerable<IUberFileEntry> GetUberFileEntries();
 		public bool IsValid();
