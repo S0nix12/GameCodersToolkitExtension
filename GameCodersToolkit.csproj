@@ -46,13 +46,20 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DataReferenceFinderModule\Commands\ClearFindResultsCommand.cs" />
+    <Compile Include="DataReferenceFinderModule\Commands\ClearReferenceDatabase.cs" />
     <Compile Include="DataReferenceFinderModule\Commands\OpenConfigFileCommand.cs" />
     <Compile Include="DataReferenceFinderModule\Commands\OpenReferenceResultsWindow.cs" />
+    <Compile Include="DataReferenceFinderModule\Commands\ParseAllDataLocation.cs" />
     <Compile Include="DataReferenceFinderModule\Commands\SaveConfigCommand.cs" />
     <Compile Include="DataReferenceFinderModule\Configuration\DataLocationsConfiguration.cs" />
+    <Compile Include="DataReferenceFinderModule\ReferenceDatabase\DataEntry.cs" />
+    <Compile Include="DataReferenceFinderModule\ReferenceDatabase\DataFileParser.cs" />
+    <Compile Include="DataReferenceFinderModule\ReferenceDatabase\DataParsingEngine.cs" />
+    <Compile Include="DataReferenceFinderModule\ReferenceDatabase\ReferenceDatabase.cs" />
     <Compile Include="ExtensionMethods\ExtensionMethodsCollections.cs" />
     <Compile Include="ExtensionMethods\TreeViewExtensions.cs" />
     <Compile Include="DataReferenceFinderModule\ReferenceFinder\FileReferenceScanner.cs" />
+    <Compile Include="ExtensionMethods\XmlExtensionMethods.cs" />
     <Compile Include="FileTemplateCreator\AddFileTemplateCommand.cs" />
     <Compile Include="FileTemplateCreator\Commands\CreateFileFromTemplateCommand.cs" />
     <Compile Include="FileTemplateCreator\Configuration\FileTemplateConfiguration.cs" />
@@ -117,6 +124,9 @@
     <Reference Include="System.Design" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml.Serialization" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>

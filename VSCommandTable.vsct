@@ -97,6 +97,24 @@
           <LocCanonicalName>.DataReferenceFinder.SaveConfig</LocCanonicalName>
         </Strings>
       </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="ParseAllDataLocation" priority="0x0400" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="DatabaseFile"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Parse All Data Locations</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.ParseAllLocations</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="ClearReferenceDatabase" priority="0x0500" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="DeleteDatabase"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Clear Reference Database</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.ClearReferenceDatabase</LocCanonicalName>
+        </Strings>
+      </Button>
       <!-- Find Data References Buttons-->
       <Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_AllLocations" priority="0x0100" type="Button">
         <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesMenuGroupAll" />
@@ -280,6 +298,8 @@
       <IDSymbol name="OpenReferenceResults" value="0x1010" />
       <IDSymbol name="OpenConfigFile" value="0x1020" />
       <IDSymbol name="SaveDataReferenceFinderConfig" value="0x1030" />
+      <IDSymbol name="ParseAllDataLocation" value="0x1040"/>
+      <IDSymbol name="ClearReferenceDatabase" value="0x1050"/>
     </GuidSymbol>
 
     <GuidSymbol name="ReferenceResultsToolbarCommandSet_Guid" value="{f5e1e0b2-af34-4f67-b8d5-813bf2bc7eda}">
