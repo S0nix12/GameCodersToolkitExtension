@@ -58,21 +58,21 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 
 	public class DataEntry
 	{
-		//public override bool Equals(object obj)
-		//{
-		//	if (obj is DataEntry otherEntry)
-		//	{
-		//		return Identifier.Equals(otherEntry.Identifier);
-		//	}
+		public override bool Equals(object obj)
+		{
+			if (obj is DataEntry otherEntry)
+			{
+				return Identifier.Equals(otherEntry.Identifier);
+			}
 
-		//	if (obj is GenericDataIdentifier dataIdentifier)
-		//	{
-		//		return Identifier.Equals(dataIdentifier);
-		//	}
+			if (obj is GenericDataIdentifier dataIdentifier)
+			{
+				return Identifier.Equals(dataIdentifier);
+			}
 
-		//	return false;
-		//}
-		/*public static bool operator ==(DataEntry lhs, DataEntry rhs)
+			return false;
+		}
+		public static bool operator ==(DataEntry lhs, DataEntry rhs)
 		{
 			if (lhs is null || rhs is null)
 			{
@@ -80,12 +80,12 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			}
 
 			return lhs.Equals(rhs);
-		}*/
-		//public static bool operator !=(DataEntry lhs, DataEntry rhs) { return !(lhs == rhs); }
-		//public override int GetHashCode()
-		//{
-		//	return Identifier.GetHashCode();
-		//}
+		}
+		public static bool operator !=(DataEntry lhs, DataEntry rhs) { return !(lhs == rhs); }
+		public override int GetHashCode()
+		{
+			return Identifier.GetHashCode();
+		}
 
 		public GenericDataIdentifier Identifier { get; set; }
 
