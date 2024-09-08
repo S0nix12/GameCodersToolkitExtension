@@ -48,6 +48,7 @@ namespace GameCodersToolkit
         public const int SaveDataReferenceFinderConfig = 0x1030;
         public const int ParseAllDataLocation = 0x1040;
         public const int ClearReferenceDatabase = 0x1050;
+        public const int FindGuidReferencesInDatabase = 0x1060;
         public const int ClearAllResults = 0x1100;
         public const int CollapseAllResults = 0x1200;
         public const int ExpandAllResults = 0x1300;

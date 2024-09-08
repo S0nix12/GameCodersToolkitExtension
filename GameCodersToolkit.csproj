@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="DataReferenceFinderModule\Commands\ClearFindResultsCommand.cs" />
     <Compile Include="DataReferenceFinderModule\Commands\ClearReferenceDatabase.cs" />
+    <Compile Include="DataReferenceFinderModule\Commands\FindGuidReferencesInDatabaseCommand.cs" />
     <Compile Include="DataReferenceFinderModule\Commands\OpenConfigFileCommand.cs" />
     <Compile Include="DataReferenceFinderModule\Commands\OpenReferenceResultsWindow.cs" />
     <Compile Include="DataReferenceFinderModule\Commands\ParseAllDataLocation.cs" />

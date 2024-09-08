@@ -29,6 +29,22 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			}
 		}
 
+		public void TrimDatabaseExcess()
+		{
+			lock (m_mutex)
+			{
+				foreach (var entry in EntriesPerFile)
+				{
+					entry.Value.TrimExcess();
+				}
+
+				foreach (var refEntry in ReferencedByEntries)
+				{
+					refEntry.Value.TrimExcess();
+				}
+			}
+		}
+
 		public void ClearDatabase()
 		{
 			EntriesPerFile.Clear();

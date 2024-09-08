@@ -90,6 +90,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			}
 
 			await parsingTask;
+			GameCodersToolkitPackage.ReferenceDatabase.TrimDatabaseExcess();
 			GC.Collect();
 		}
 
@@ -134,6 +135,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 		{
 			DataParsingErrorList errorList = new DataParsingErrorList();
 			List<DataEntry> parsedEntries = operation.Parse(errorList);
+			parsedEntries.TrimExcess();
 
 			var database = GameCodersToolkitPackage.ReferenceDatabase;
 			database.ClearEntriesForFile(operation.FilePath);

@@ -186,6 +186,18 @@
           <LocCanonicalName>.DataReferenceFinder.FindGuidReferences_Location5</LocCanonicalName>
         </Strings>
       </Button>
+        <Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferencesInDatabase" priority="0x0600" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesMenuGroupSpecific" />
+        <Icon guid="ImageCatalogGuid" id="FindDown" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DontCache</CommandFlag>
+        <Strings>
+          <ButtonText>Find GUID References In Database</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.FindGuidReferencesInDatabase</LocCanonicalName>
+        </Strings>
+      </Button>
 
       <!-- Reference Results Window Toolbar Buttons-->
       <Button guid="ReferenceResultsToolbarCommandSet_Guid" id="ClearAllResults">
@@ -300,6 +312,7 @@
       <IDSymbol name="SaveDataReferenceFinderConfig" value="0x1030" />
       <IDSymbol name="ParseAllDataLocation" value="0x1040"/>
       <IDSymbol name="ClearReferenceDatabase" value="0x1050"/>
+      <IDSymbol name="FindGuidReferencesInDatabase" value="0x1060"/>
     </GuidSymbol>
 
     <GuidSymbol name="ReferenceResultsToolbarCommandSet_Guid" value="{f5e1e0b2-af34-4f67-b8d5-813bf2bc7eda}">

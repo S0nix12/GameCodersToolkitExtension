@@ -10,14 +10,12 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 	{
 		public GenericDataIdentifier(Guid guidId)
 		{
-			GuidId = guidId;
-			NameId = null;
+			m_identifier = guidId;
 		}
 
 		public GenericDataIdentifier(string nameId)
 		{
-			GuidId = null;
-			NameId = nameId;
+			m_identifier = nameId;
 		}
 
 		public override bool Equals(object obj)
@@ -27,10 +25,10 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 
 		public override int GetHashCode()
 		{
-			return GuidId != null ? GuidId.GetHashCode() : NameId.GetHashCode();
+			return m_identifier.GetHashCode();
 		}
 
-		public static bool operator==(GenericDataIdentifier lhs, GenericDataIdentifier rhs)
+		public static bool operator ==(GenericDataIdentifier lhs, GenericDataIdentifier rhs)
 		{
 			if (lhs is null || rhs is null)
 			{
@@ -40,20 +38,28 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			return lhs.Equals(rhs);
 		}
 
-		public static bool operator!=(GenericDataIdentifier lhs, GenericDataIdentifier rhs) { return !(lhs == rhs); }
+		public static bool operator !=(GenericDataIdentifier lhs, GenericDataIdentifier rhs) { return !(lhs == rhs); }
 
 		public override string ToString()
 		{
-			return GuidId != null ? GuidId.ToString() : NameId;
+			return m_identifier.ToString();
 		}
 
 		public bool Equals(GenericDataIdentifier other)
 		{
-			return GuidId != null ? GuidId.Equals(other.GuidId) : NameId == other.NameId;
+			if (m_identifier is Guid thisGuid && other.m_identifier is Guid otherGuid)
+			{
+				return thisGuid.Equals(otherGuid);
+			}
+			else if (m_identifier is string thisNameId && other.m_identifier is string otherNameId)
+			{
+				return thisNameId.Equals(otherNameId);
+			}
+
+			return false;
 		}
 
-		public Guid? GuidId { get; private set; } = null;
-		public string NameId { get; private set; } = null;
+		private readonly object m_identifier = null;
 	}
 
 	public class DataEntry
