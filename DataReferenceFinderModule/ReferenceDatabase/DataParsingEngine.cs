@@ -114,7 +114,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 							finally
 							{
 								semaphore.Release();
-								progressCounter++;
+								Interlocked.Increment(ref progressCounter);
 								
 								TaskProgressData progressData = new TaskProgressData();
 								progressData.ProgressText = $"Parsing files: {progressCounter} of {totalCountToParse} done";
