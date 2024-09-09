@@ -3,6 +3,7 @@ global using Microsoft.VisualStudio.Shell;
 global using System;
 global using Task = System.Threading.Tasks.Task;
 using GameCodersToolkit.Configuration;
+using GameCodersToolkit.DataReferenceFinderModule;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.QuickAttach;
 using GameCodersToolkit.ReferenceFinder;
@@ -18,6 +19,7 @@ namespace GameCodersToolkit
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	[Guid(PackageGuids.GameCodersToolkitPackage_GuidString)]
 	[ProvideToolWindow(typeof(ReferenceResultsWindow.Pane), Style = VsDockStyle.Tabbed, Window = WindowGuids.OutputWindow)]
+	[ProvideToolWindow(typeof(DataExplorerWindow.Pane), Style = VsDockStyle.Tabbed, Window = WindowGuids.SolutionExplorer)]
 	[ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOpening_string, PackageAutoLoadFlags.BackgroundLoad)]
 	[ProvideService(typeof(ReferenceResultsWindowMessenger), IsAsyncQueryable = true)]
 	[ProvideService(typeof(QuickAttachService), IsAsyncQueryable = true)]

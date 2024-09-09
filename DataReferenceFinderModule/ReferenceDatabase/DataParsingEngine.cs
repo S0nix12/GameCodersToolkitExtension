@@ -28,6 +28,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			ITaskHandler taskHandler = taskStatusCenter.PreRegister(taskOptions, taskData);
 			Task parseTask = Task.Run(async delegate { await ParseAllDataLocationsAsync(taskHandler, taskData); });
 			taskHandler.RegisterTask(parseTask);
+			await parseTask;
 		}
 
 		public async Task ParseAllDataLocationsAsync(ITaskHandler taskHandler, TaskProgressData progressData)

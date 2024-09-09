@@ -1,4 +1,4 @@
-﻿using GameCodersToolkit.ReferenceFinder.ViewModels;
+﻿using GameCodersToolkit.DataReferenceFinderModule.ViewModels;
 using Microsoft.VisualStudio.Package;
 using System.Runtime.InteropServices.Expando;
 using System.Windows;

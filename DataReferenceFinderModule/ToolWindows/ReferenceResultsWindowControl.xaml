@@ -10,7 +10,7 @@
 		xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
 		xmlns:platformUI="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
 		xmlns:vshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
-		xmlns:vm="clr-namespace:GameCodersToolkit.ReferenceFinder.ViewModels"
+		xmlns:vm="clr-namespace:GameCodersToolkit.DataReferenceFinderModule.ViewModels"
 		toolkit:Themes.UseVsTheme="True"
 		mc:Ignorable="d"
 		d:DesignHeight="300"
@@ -20,7 +20,7 @@
 		<vm:CReferenceResultsWindowViewModel />
 	</UserControl.DataContext>
 	<Grid>
-		<TreeView x:Name="ResultsTree" Focusable="False" ItemsSource="{Binding OperationResults}" SelectedItemChanged="TreeView_SelectedItemChanged">
+		<TreeView x:Name="ResultsTree" Focusable="False" ItemsSource="{Binding OperationResults}" SelectedItemChanged="TreeView_SelectedItemChanged" VirtualizingPanel.VirtualizationMode="Recycling">
 			<TreeView.Resources>
 				<DataTemplate DataType="{x:Type vm:CLineResultViewModel}">
 					<Border Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseDown="Border_MouseDown">

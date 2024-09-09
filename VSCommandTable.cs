@@ -44,6 +44,7 @@ namespace GameCodersToolkit
         public const int FindGuidReferences_Location4 = 0x0050;
         public const int FindGuidReferences_Location5 = 0x0060;
         public const int OpenReferenceResults = 0x1010;
+        public const int OpenDataExplorer = 0x1011;
         public const int OpenConfigFile = 0x1020;
         public const int SaveDataReferenceFinderConfig = 0x1030;
         public const int ParseAllDataLocation = 0x1040;
