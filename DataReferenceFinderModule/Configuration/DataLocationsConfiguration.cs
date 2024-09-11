@@ -58,7 +58,6 @@ namespace GameCodersToolkit.Configuration
 				}
 			}
 
-			SaveConfigAsync();
 			ThreadHelper.JoinableTaskFactory.Run(LoadSolutionConfigAsync);
 		}
 
@@ -94,7 +93,6 @@ namespace GameCodersToolkit.Configuration
 		{
 			try
 			{
-				return;
 				if (File.Exists(filePath))
 				{
 					FileOptions combinedOption = FileOptions.Asynchronous | FileOptions.SequentialScan | FileOptions.None;
