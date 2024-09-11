@@ -1,0 +1,189 @@
+﻿using Perforce.P4;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace GameCodersToolkit.SourceControl
+{
+	public class PerforceWorkspace
+	{
+		public string Name { get; set; } = string.Empty;
+		public string Root { get; set; } = string.Empty;
+		public bool IsValid { get; set; } = false;
+	}
+
+	public class PerforceID
+	{
+		public PerforceID(string serverURI, string user_name, string client_spec)
+		{
+			mServerURI = serverURI;
+			mUserName = user_name;
+			mClientSpec = client_spec;
+		}
+		private string mServerURI;
+		public string ServerURI
+		{
+			get { return mServerURI; }
+		}
+		private string mUserName;
+		public string UserName
+		{
+			get { return mUserName; }
+		}
+		private string mClientSpec;
+		public string ClientSpec
+		{
+			get { return mClientSpec; }
+		}
+	}
+
+	public class PerforceConnection
+	{
+		private static Connection s_perforceConnection;
+		private static Repository s_repository;
+
+		public static async Task<bool> InitAsync(PerforceID id)
+		{
+			return await Task.Run(async () =>
+			{
+				if (s_perforceConnection != null && s_perforceConnection.Status == ConnectionStatus.Connected)
+					return true;
+
+				await ShutdownAsync();
+
+				Server server = new Server(new ServerAddress(id.ServerURI));
+				s_repository = new Repository(server);
+				s_perforceConnection = s_repository.Connection;
+
+				s_perforceConnection.UserName = id.UserName;
+				s_perforceConnection.Client = new Client();
+				s_perforceConnection.Client.Name = id.ClientSpec;
+
+				string path = Directory.GetCurrentDirectory();
+
+				Options opconnect = new Options();
+				try
+				{
+					bool result = s_perforceConnection.Connect(opconnect);
+					return result;
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine(ex.Message);
+					System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.Message);
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.StackTrace);
+
+					return false;
+				}
+			});
+		}
+
+		public static async Task<bool> ShutdownAsync()
+		{
+			return await Task.Run(() =>
+			{
+				if (s_perforceConnection != null && s_perforceConnection.Status == ConnectionStatus.Connected)
+				{
+					bool result = s_perforceConnection.Disconnect();
+					s_perforceConnection = null;
+
+					return result;
+				}
+
+				return true;
+			});
+		}
+
+		public static async Task<bool> TryAddFilesAsync(IList<string> filePaths)
+		{
+			return await Task.Run(async () =>
+			{
+				if (s_perforceConnection == null || s_perforceConnection.Status == ConnectionStatus.Disconnected)
+					return false;
+
+				Options options = new Options();
+				FileSpec[] fileSpecs = new FileSpec[filePaths.Count];
+
+				for (int i = 0; i < filePaths.Count; i++)
+				{
+					fileSpecs[i] = new FileSpec(new ClientPath(filePaths[i]));
+				}
+
+				try
+				{
+					IList<FileSpec> files = s_perforceConnection.Client.AddFiles(options, fileSpecs);
+					return files != null && files.Count > 0;
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine(ex.Message);
+					System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.Message);
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.StackTrace);
+					return false;
+				}
+			});
+		}
+
+		public static async Task<bool> TryCheckoutFilesAsync(IList<string> filePaths)
+		{
+			return await Task.Run(async () =>
+			{
+				if (s_perforceConnection == null || s_perforceConnection.Status == ConnectionStatus.Disconnected)
+					return false;
+
+				Options options = new Options();
+				FileSpec[] fileSpecs = new FileSpec[filePaths.Count];
+
+				for (int i = 0; i < filePaths.Count; i++)
+				{
+					fileSpecs[i] = new FileSpec(new ClientPath(filePaths[i]));
+				}
+
+				try
+				{
+					IList<FileSpec> files = s_perforceConnection.Client.EditFiles(options, fileSpecs);
+					return true;
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine(ex.Message);
+					System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.Message);
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.StackTrace);
+
+					return false;
+				}
+			});
+		}
+
+		public static async Task<PerforceWorkspace> FindWorkspaceAsync(string currentDirectory)
+		{
+			return await Task.Run(() =>
+			{
+				PerforceWorkspace foundWorkspace = new PerforceWorkspace();
+
+				ClientsCmdOptions opts = new ClientsCmdOptions(ClientsCmdFlags.None, null, null, 0, "");
+				foreach (Client client in s_repository?.GetClients(opts))
+				{
+					if (!currentDirectory.ToLower().StartsWith(client.Root.ToLower()))
+					{
+						continue;
+					}
+
+					foundWorkspace.Name = client.Name;
+					foundWorkspace.Root = client.Root;
+					break;
+				}
+
+				return foundWorkspace;
+			});
+		}
+	}
+}

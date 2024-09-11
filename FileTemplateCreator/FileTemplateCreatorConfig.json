@@ -1,0 +1,23 @@
+{
+  "CMakeFileEntries": [
+    {
+      "ID": "Default",
+      "Path": "FileTemplateCreator\\ExampleList.cmake"
+    }
+  ],
+  "FileTemplateEntries": [
+    {
+      "Name": "Schematyc Component - Entity",
+      "MakeFileID": "Default",
+      "Paths": [
+        "FileTemplateCreator\\Templates\\SchematycEntityComponent.h",
+        "FileTemplateCreator\\Templates\\SchematycEntityComponent.cpp"
+      ]
+    }
+  ],
+  "ParserName": "GameCodersToolkit.FileTemplateCreator.MakeFileParser.CryGameParser",
+  "PostChangeScriptPath": null,
+  "P4Server": "perforce:1666",
+  "P4UserName": "schadek",
+  "P4Workspace": "Main"
+}

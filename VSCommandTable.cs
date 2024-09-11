@@ -61,6 +61,8 @@ namespace GameCodersToolkit
         public const int QuickAttachSelectorListCmd = 0x0300;
         public const int CreateFileFromTemplateExtensionsMenu = 0x0010;
         public const int CreateFileFromTemplate = 0x0020;
+        public const int OpenTemplateFileCreatorConfigExtensionsMenu = 0x0030;
+        public const int OpenTemplateFileCreatorConfig = 0x0040;
         public const int FileTemplateCreatorExtensionsMenuGroup = 0x0007;
     }
 }

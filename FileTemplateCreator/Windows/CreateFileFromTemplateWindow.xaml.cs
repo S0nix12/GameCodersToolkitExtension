@@ -1,6 +1,13 @@
-﻿using System;
+﻿using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Imaging.Interop;
+using Microsoft.VisualStudio.Shell.Interop;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -23,6 +30,7 @@ namespace GameCodersToolkit.FileTemplateCreator.Windows
 		public CreateFileFromTemplateWindow()
 		{
 			InitializeComponent();
+
 		}
 	}
 }

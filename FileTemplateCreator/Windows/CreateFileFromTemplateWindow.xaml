@@ -11,16 +11,22 @@
 		xmlns:platformUI="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
 		xmlns:vshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
 		xmlns:vm="clr-namespace:GameCodersToolkit.FileTemplateCreator.ViewModels"
+        xmlns:usercontrols="clr-namespace:GameCodersToolkit.FileTemplateCreator.UserControls"
         xmlns:local="clr-namespace:GameCodersToolkit.FileTemplateCreator.Windows"
+        d:DataContext="{d:DesignInstance Type=vm:CFileTemplateDialogViewModel}"
         mc:Ignorable="d" 
-        Height="300"
+        Height="600"
         Width="600"
 		toolkit:Themes.UseVsTheme="True">
 
     <Window.Resources>
         <GridLength x:Key="WindowContentMargin">15</GridLength>
+        <Style TargetType="{x:Type TextBlock}" x:Key="VSTextBlockStyle">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static vshell:VsBrushes.WindowTextKey}}"/>
+            <Setter Property="FontSize" Value="16" />
+        </Style>
     </Window.Resources>
-    
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
@@ -35,51 +41,54 @@
             <RowDefinition Height="{StaticResource WindowContentMargin}" />
         </Grid.RowDefinitions>
 
-        <TreeView x:Name="TemplateTree" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Templates}">
+        <usercontrols:ExtendedTreeView x:Name="TemplateTree" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Templates}" SelectedItem_="{Binding SelectedTemplate, Mode=TwoWay}" toolkit:Themes.UseVsTheme="True">
             <TreeView.Resources>
+
+                <Style TargetType="{x:Type TreeViewItem}">
+                    <Setter Property="Focusable" Value="{Binding IsFocusable, Mode=TwoWay}"/>
+                </Style>
+
                 <HierarchicalDataTemplate DataType="{x:Type vm:CFileTemplateCategoryViewModel}" ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Name}" FontSize="16" />
+                        <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
                 <DataTemplate DataType="{x:Type vm:CFileTemplateViewModel}">
                     <StackPanel Orientation="Horizontal">
-                        <Button Command="{Binding SelectCommand}">
-                            <TextBlock Text="{Binding Name}" FontSize="16" />
-                        </Button>
-                        <!--<imaging:CrispImage Width="24" Height="24" Moniker="{x:Static catalog:KnownMonikers.Document}" />-->
+                        <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
                     </StackPanel>
                 </DataTemplate>
             </TreeView.Resources>
-        </TreeView>
+        </usercontrols:ExtendedTreeView>
 
-        <TreeView x:Name="MakeFileTree" Grid.Row="1" Grid.Column="3" ItemsSource="{Binding UberFiles}">
+        <TreeView x:Name="MakeFileTree" Grid.Row="1" Grid.Column="3" ItemsSource="{Binding MakeFileContent}" toolkit:Themes.UseVsTheme="True">
             <TreeView.Resources>
 
                 <Style TargetType="{x:Type TreeViewItem}">
                     <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                    <Setter Property="Focusable" Value="{Binding IsFocusable, Mode=TwoWay}"/>
                 </Style>
 
-                <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileUberFileViewModel}" ItemsSource="{Binding Groups}">
+                <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileUberFileViewModel}" ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
-                        <Button Command="{Binding SelectCommand}">
-                            <TextBlock Text="{Binding Name}" FontSize="16" />
-                        </Button>
+                        <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
-                <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileGroupViewModel}" ItemsSource="{Binding Files}">
+                <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileGroupViewModel}" ItemsSource="{Binding Children}">
                     <StackPanel Orientation="Horizontal">
-                        <Button Command="{Binding SelectCommand}">
-                            <TextBlock Text="{Binding Name}" FontSize="16" />
-                        </Button>
+                        <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
                     </StackPanel>
                 </HierarchicalDataTemplate>
+                <DataTemplate DataType="{x:Type vm:CSelectableEntryViewModel}">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding SelectCommand}">
+                            <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
+                        </Button>
+                    </StackPanel>
+                </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:CMakeFileFileViewModel}">
                     <StackPanel Orientation="Horizontal">
-                        <Button Command="{Binding SelectCommand}">
-                            <TextBlock Text="{Binding Name}" FontSize="16" />
-                        </Button>
-                        <!--<imaging:CrispImage Width="24" Height="24" Moniker="{x:Static catalog:KnownMonikers.Document}" />-->
+                        <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
                     </StackPanel>
                 </DataTemplate>
             </TreeView.Resources>
