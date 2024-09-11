@@ -3,6 +3,8 @@ global using Microsoft.VisualStudio.Shell;
 global using System;
 global using Task = System.Threading.Tasks.Task;
 using GameCodersToolkit.Configuration;
+using GameCodersToolkit.DataReferenceFinderModule;
+using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.QuickAttach;
 using GameCodersToolkit.ReferenceFinder;
 using GameCodersToolkit.ReferenceFinder.ToolWindows;
@@ -17,6 +19,7 @@ namespace GameCodersToolkit
 	[ProvideMenuResource("Menus.ctmenu", 1)]
 	[Guid(PackageGuids.GameCodersToolkitPackage_GuidString)]
 	[ProvideToolWindow(typeof(ReferenceResultsWindow.Pane), Style = VsDockStyle.Tabbed, Window = WindowGuids.OutputWindow)]
+	[ProvideToolWindow(typeof(DataExplorerWindow.Pane), Style = VsDockStyle.Tabbed, Window = WindowGuids.SolutionExplorer)]
 	[ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOpening_string, PackageAutoLoadFlags.BackgroundLoad)]
 	[ProvideService(typeof(ReferenceResultsWindowMessenger), IsAsyncQueryable = true)]
 	[ProvideService(typeof(QuickAttachService), IsAsyncQueryable = true)]
@@ -40,6 +43,9 @@ namespace GameCodersToolkit
 
 				FileTemplateCreatorConfig = new CFileTemplateConfiguration();
 				await FileTemplateCreatorConfig.InitAsync();
+
+				DataParsingEngine = new DataParsingEngine();
+				ReferenceDatabase = new Database();
 			}
 			catch (Exception ex)
 			{
@@ -59,5 +65,7 @@ namespace GameCodersToolkit
 		internal static CFindReferenceResultsStorage FindReferenceResultsStorage { get; private set; }
 		public static CDataLocationsConfiguration DataLocationsConfig { get; private set; }
 		public static CFileTemplateConfiguration FileTemplateCreatorConfig { get; private set; }
+		public static DataParsingEngine DataParsingEngine {  get; private set; }
+		public static DataReferenceFinderModule.ReferenceDatabase.Database ReferenceDatabase { get; private set; }
 	}
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 
 namespace GameCodersToolkit.Configuration
 {
@@ -10,11 +11,13 @@ namespace GameCodersToolkit.Configuration
 		public string Name { get; set; }
 		public string Path { get; set; }
 		public List<string> ExtensionFilters { get; set; } = new List<string>();
+		public List<string> UsedParsingDescriptions { get; set; } = new List<string>();
 	}
 
 	public class CDataLocationsConfig
 	{
 		public List<CDataLocationEntry> DataLocationEntries { get; set; } = new List<CDataLocationEntry>();
+		public List<DataParsingDescription> DataParsingDescriptions { get; set; } = new List<DataParsingDescription>();
 	}
 
 	public class CDataLocationsConfiguration
@@ -38,6 +41,11 @@ namespace GameCodersToolkit.Configuration
 		public List<CDataLocationEntry> GetLocationEntries()
 		{
 			return DataLocationsConfig.DataLocationEntries;
+		}
+
+		public List<DataParsingDescription> GetParsingDescriptions()
+		{
+			return DataLocationsConfig.DataParsingDescriptions;
 		}
 
 		private void HandleOpenSolution(Solution? solution = null)
@@ -64,7 +72,7 @@ namespace GameCodersToolkit.Configuration
 			ConfigFileWatcher.EnableRaisingEvents = true;
 			ConfigFileWatcher.Changed += OnConfigFileChanged;
 			ConfigFileWatcher.IncludeSubdirectories = false;
-			ConfigFileWatcher.Filter = "*.json";
+			ConfigFileWatcher.Filter = "*.*";
 			ConfigFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastAccess;
 		}
 

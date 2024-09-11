@@ -79,6 +79,15 @@
           <LocCanonicalName>.DataReferenceFinder.OpenReferenceResults</LocCanonicalName>
         </Strings>
       </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="OpenDataExplorer" priority="0x0200" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="DatabaseApplication"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Data Explorer</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.OpenDataExplorer</LocCanonicalName>
+        </Strings>
+      </Button>
       <Button guid="DataReferenceFinderCommandSet_Guid" id="OpenConfigFile" priority="0x0200" type="Button">
         <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup"/>
         <Icon guid="ImageCatalogGuid" id="ConfigurationFile"/>
@@ -95,6 +104,24 @@
         <Strings>
           <ButtonText>Save Data Reference Finder Config</ButtonText>
           <LocCanonicalName>.DataReferenceFinder.SaveConfig</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="ParseAllDataLocation" priority="0x0400" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="DatabaseFile"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Parse All Data Locations</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.ParseAllLocations</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="ClearReferenceDatabase" priority="0x0500" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="DeleteDatabase"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Clear Reference Database</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.ClearReferenceDatabase</LocCanonicalName>
         </Strings>
       </Button>
       <!-- Find Data References Buttons-->
@@ -168,6 +195,18 @@
           <LocCanonicalName>.DataReferenceFinder.FindGuidReferences_Location5</LocCanonicalName>
         </Strings>
       </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferencesInDatabase" priority="0x0600" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesMenuGroupSpecific" />
+        <Icon guid="ImageCatalogGuid" id="FindDown" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DontCache</CommandFlag>
+        <Strings>
+          <ButtonText>Find GUID References In Database</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.FindGuidReferencesInDatabase</LocCanonicalName>
+        </Strings>
+      </Button>
 
       <!-- Reference Results Window Toolbar Buttons-->
       <Button guid="ReferenceResultsToolbarCommandSet_Guid" id="ClearAllResults">
@@ -205,7 +244,7 @@
           <LocCanonicalName>.GameCodersToolkit.QuickAttach</LocCanonicalName>
         </Strings>
       </Button>
-      
+
       <!-- File Template Creator -->
       <Button guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplate" priority="0x0100" type="Button">
         <Parent guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup"/>
@@ -288,8 +327,12 @@
       <IDSymbol name="FindGuidReferences_Location4" value="0x0050" />
       <IDSymbol name="FindGuidReferences_Location5" value="0x0060" />
       <IDSymbol name="OpenReferenceResults" value="0x1010" />
+      <IDSymbol name="OpenDataExplorer" value="0x1011"/>
       <IDSymbol name="OpenConfigFile" value="0x1020" />
       <IDSymbol name="SaveDataReferenceFinderConfig" value="0x1030" />
+      <IDSymbol name="ParseAllDataLocation" value="0x1040"/>
+      <IDSymbol name="ClearReferenceDatabase" value="0x1050"/>
+      <IDSymbol name="FindGuidReferencesInDatabase" value="0x1060"/>
     </GuidSymbol>
 
     <GuidSymbol name="ReferenceResultsToolbarCommandSet_Guid" value="{f5e1e0b2-af34-4f67-b8d5-813bf2bc7eda}">

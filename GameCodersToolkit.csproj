@@ -47,13 +47,28 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="DataReferenceFinderModule\Commands\ClearFindResultsCommand.cs" />
+    <Compile Include="DataReferenceFinderModule\Commands\ClearReferenceDatabase.cs" />
+    <Compile Include="DataReferenceFinderModule\Commands\FindGuidReferencesInDatabaseCommand.cs" />
     <Compile Include="DataReferenceFinderModule\Commands\OpenConfigFileCommand.cs" />
+    <Compile Include="DataReferenceFinderModule\Commands\OpenDataExplorerWindowCommand.cs" />
     <Compile Include="DataReferenceFinderModule\Commands\OpenReferenceResultsWindow.cs" />
+    <Compile Include="DataReferenceFinderModule\Commands\ParseAllDataLocation.cs" />
     <Compile Include="DataReferenceFinderModule\Commands\SaveConfigCommand.cs" />
     <Compile Include="DataReferenceFinderModule\Configuration\DataLocationsConfiguration.cs" />
+    <Compile Include="DataReferenceFinderModule\ReferenceDatabase\DataEntry.cs" />
+    <Compile Include="DataReferenceFinderModule\ReferenceDatabase\DataFileParser.cs" />
+    <Compile Include="DataReferenceFinderModule\ReferenceDatabase\DataParsingEngine.cs" />
+    <Compile Include="DataReferenceFinderModule\ReferenceDatabase\ReferenceDatabase.cs" />
+    <Compile Include="DataReferenceFinderModule\ReferenceDatabase\ReferenceDatabaseUtils.cs" />
+    <Compile Include="DataReferenceFinderModule\ToolWindows\DataExplorerWindow.cs" />
+    <Compile Include="DataReferenceFinderModule\ToolWindows\DataExplorerWindowControl.xaml.cs">
+      <DependentUpon>DataExplorerWindowControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DataReferenceFinderModule\ViewModels\DataExplorerWindowViewModel.cs" />
     <Compile Include="ExtensionMethods\ExtensionMethodsCollections.cs" />
     <Compile Include="ExtensionMethods\TreeViewExtensions.cs" />
     <Compile Include="DataReferenceFinderModule\ReferenceFinder\FileReferenceScanner.cs" />
+    <Compile Include="ExtensionMethods\XmlExtensionMethods.cs" />
     <Compile Include="FileTemplateCreator\AddFileTemplateCommand.cs" />
     <Compile Include="FileTemplateCreator\Commands\CreateFileFromTemplateCommand.cs" />
     <Compile Include="FileTemplateCreator\Commands\OpenConfigurationCommand.cs" />
@@ -133,6 +148,9 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml.Serialization" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +171,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="DataReferenceFinderModule\ToolWindows\DataExplorerWindowControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DataReferenceFinderModule\ToolWindows\ReferenceResultsWindowControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
