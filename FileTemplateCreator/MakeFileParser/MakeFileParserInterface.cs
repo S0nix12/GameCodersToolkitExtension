@@ -8,20 +8,20 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 {
 
 
-	public interface IUberFileEntry
+	public interface IUberFileNode
 	{
 		string GetName();
-		IEnumerable<ISourceGroupEntry> GetSourceGroups();
+		IEnumerable<IGroupNode> GetGroups();
 	}
 
-	public interface ISourceGroupEntry
+	public interface IGroupNode
 	{
 		string GetName();
 		int GetLineNumber();
-		IEnumerable<IRegularFileEntry> GetFiles();
+		IEnumerable<IFileNode> GetFiles();
 	}
 
-	public interface IRegularFileEntry
+	public interface IFileNode
 	{
 		string GetName();
 		int GetLineNumber();
@@ -32,9 +32,10 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 		public abstract IMakeFile AddUberFile(string previousUberFileName, string newUberFileName);
 		public abstract IMakeFile AddGroup(string uberFileName, string previousGroupName, string newGroupName);
 		public abstract IMakeFile AddFiles(string uberFileName, string groupName, string previousFileName, IEnumerable<string> newFileNames);
+		public abstract void Save();
 
-		public abstract IEnumerable<IUberFileEntry> GetUberFileEntries();
-		public bool IsValid();
+		public abstract IEnumerable<IUberFileNode> GetUberFiles();
+		public abstract string GetOriginalFilePath();
 	}
 
 	public interface IMakeFileParser

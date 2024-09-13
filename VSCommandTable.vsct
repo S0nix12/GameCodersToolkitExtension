@@ -255,6 +255,16 @@
           <LocCanonicalName>.FileTemplateCreator.CreateFileFromTemplate</LocCanonicalName>
         </Strings>
       </Button>
+      
+      <Button guid="FileTemplateCreatorSet_Guid" id="OpenTemplateFileCreatorConfig" priority="0x0200" type="Button">
+        <Parent guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="ConfigurationEditor"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Open Config</ButtonText>
+          <LocCanonicalName>.FileTemplateCreator.OpenTemplateFileCreatorConfig</LocCanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
 
     <Combos>
@@ -348,6 +358,8 @@
     <GuidSymbol name="FileTemplateCreatorSet_Guid" value="{C614691E-88DF-43E1-9D6E-28CA3A32FB57}">
       <IDSymbol name="CreateFileFromTemplateExtensionsMenu" value="0x0010"/>
       <IDSymbol name="CreateFileFromTemplate" value="0x0020"/>
+      <IDSymbol name="OpenTemplateFileCreatorConfigExtensionsMenu" value="0x0030"/>
+      <IDSymbol name="OpenTemplateFileCreatorConfig" value="0x0040"/>
       <IDSymbol name="FileTemplateCreatorExtensionsMenuGroup" value="0x0007" />
     </GuidSymbol>
   </Symbols>

@@ -4,6 +4,7 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+  <PropertyGroup />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -70,12 +71,21 @@
     <Compile Include="ExtensionMethods\XmlExtensionMethods.cs" />
     <Compile Include="FileTemplateCreator\AddFileTemplateCommand.cs" />
     <Compile Include="FileTemplateCreator\Commands\CreateFileFromTemplateCommand.cs" />
+    <Compile Include="FileTemplateCreator\Commands\OpenConfigurationCommand.cs" />
     <Compile Include="FileTemplateCreator\Configuration\FileTemplateConfiguration.cs" />
+    <Compile Include="FileTemplateCreator\UserControls\ExtendedTreeView.cs" />
+    <Compile Include="FileTemplateCreator\ViewModels\ConfigurationViewModel.cs" />
     <Compile Include="FileTemplateCreator\ViewModels\FileTemplateDialogViewModel.cs" />
-    <Compile Include="FileTemplateCreator\MakeFileParser\CryGameParser.cs" />
+    <Compile Include="FileTemplateCreator\MakeFileParser\SimpleMakeFileParser.cs" />
     <Compile Include="FileTemplateCreator\MakeFileParser\MakeFileParserInterface.cs" />
+    <Compile Include="FileTemplateCreator\Windows\ConfigurationWindow.xaml.cs">
+      <DependentUpon>ConfigurationWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FileTemplateCreator\Windows\CreateFileFromTemplateWindow.xaml.cs">
       <DependentUpon>CreateFileFromTemplateWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FileTemplateCreator\Windows\NameDialogWindow.xaml.cs">
+      <DependentUpon>NameDialogWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DataReferenceFinderModule\Commands\FindGuidReferencesCommand.cs" />
@@ -97,6 +107,7 @@
     </Compile>
     <Compile Include="DataReferenceFinderModule\ToolWindows\ReferenceResultsWindowMessenger.cs" />
     <Compile Include="DataReferenceFinderModule\ViewModels\ReferenceResultsWindowViewModel.cs" />
+    <Compile Include="SourceControl\PerforceConnection.cs" />
     <Compile Include="VSCommandTable.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -113,6 +124,9 @@
     <Resource Include="Resources\ClearWindowContent.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Content Include="p4bridge.dll">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Resources\Icon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
@@ -131,6 +145,8 @@
     <Reference Include="System" />
     <Reference Include="System.Design" />
     <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
@@ -143,7 +159,13 @@
     <PackageReference Include="CommunityToolkit.Mvvm">
       <Version>8.2.2</Version>
     </PackageReference>
+    <PackageReference Include="FolderBrowserEx">
+      <Version>1.0.1</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.0.5232" />
+    <PackageReference Include="p4api.net">
+      <Version>2024.1.261.8274</Version>
+    </PackageReference>
     <PackageReference Include="System.Text.Json">
       <Version>8.0.4</Version>
     </PackageReference>
@@ -157,7 +179,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="FileTemplateCreator\Windows\ConfigurationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="FileTemplateCreator\Windows\CreateFileFromTemplateWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FileTemplateCreator\Windows\NameDialogWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -166,7 +196,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

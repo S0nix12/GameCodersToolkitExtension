@@ -57,6 +57,7 @@ namespace GameCodersToolkit.Configuration
 					SolutionFolder = Path.GetDirectoryName(solution.FullPath);
 				}
 			}
+
 			ThreadHelper.JoinableTaskFactory.Run(LoadSolutionConfigAsync);
 		}
 

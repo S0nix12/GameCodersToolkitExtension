@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.IO;
 
 namespace System.Collections.Generic
 {
@@ -43,6 +44,41 @@ namespace System.Collections.Generic
 					yield return line;
 				}
 			}
+		}
+
+		public static bool IsValidFileName(this string input)
+		{
+			return !string.IsNullOrWhiteSpace(input) && input.IndexOfAny(Path.GetInvalidFileNameChars()) < 0;
+		}
+
+		public static string MakeRelativePath(this string pathOrigin, string targetPath)
+		{
+			Uri originUri = new Uri(pathOrigin);
+			Uri targetUri = new Uri(targetPath);
+			return originUri.MakeRelativeUri(targetUri).ToString();
+		}
+
+		public static bool IsFileWritable(this string filePath)
+		{
+			if (File.Exists(filePath))
+			{
+				FileAttributes attributes = File.GetAttributes(filePath);
+				return !attributes.HasFlag(FileAttributes.ReadOnly);
+			}
+
+			return false;
+		}
+
+		public static bool MakeFileWritable(this string filePath)
+		{
+			if (File.Exists(filePath))
+			{
+				FileAttributes attributes = File.GetAttributes(filePath);
+				File.SetAttributes(filePath, attributes &~ FileAttributes.ReadOnly);
+				return true;
+			}
+
+			return false;
 		}
 	}
 }

@@ -1,0 +1,24 @@
+{
+  "CMakeFileEntries": [
+    {
+      "ID": "Default",
+      "Path": "FileTemplateCreator\\ExampleList.cmake"
+    }
+  ],
+  "FileTemplateEntries": [
+    {
+      "Name": "ECS/Entity/Component",
+      "MakeFileID": "Default",
+      "Paths": [
+        "FileTemplateCreator\\Templates\\EntityComponentTemplate.h",
+        "FileTemplateCreator\\Templates\\EntityComponentTemplate.cpp"
+      ]
+    }
+  ],
+  "ParserName": "GameCodersToolkit.FileTemplateCreator.MakeFileParser.SimpleMakeFileParser",
+  "ParserConfigPath": "FileTemplateCreator\\Config\\SimpleMakeFileParser.cfg",
+  "PostChangeScriptPath": null,
+  "P4Server": "1666",
+  "P4UserName": "NormalSchadek",
+  "P4Workspace": "TestEnvironment_Code"
+}

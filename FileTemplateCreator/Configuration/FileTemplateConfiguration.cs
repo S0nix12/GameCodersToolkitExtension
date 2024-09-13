@@ -4,6 +4,10 @@ using System.IO;
 using System.Threading.Tasks;
 using GameCodersToolkit.FileTemplateCreator.MakeFileParser;
 using System.Linq;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using GameCodersToolkit.SourceControl;
+using System.IO.Pipes;
 
 namespace GameCodersToolkit.Configuration
 {
@@ -11,6 +15,9 @@ namespace GameCodersToolkit.Configuration
 	{
 		public string ID { get; set; }
 		public string Path { get; set; }
+
+		[JsonIgnore]
+		public string AbsolutePath { get; set; }
 	}
 
 	public class CTemplateEntry
@@ -18,14 +25,32 @@ namespace GameCodersToolkit.Configuration
 		public string Name { get; set; }
 		public string MakeFileID { get; set; }
 		public List<string> Paths { get; set; } = new List<string>();
+
+		[JsonIgnore]
+		public List<string> AbsolutePaths { get; set; } = new List<string>();
 	}
 
 	public class CFileTemplateCreatorConfig
 	{
 		public List<CMakeFileEntry> CMakeFileEntries { get; set; } = new List<CMakeFileEntry>();
 		public List<CTemplateEntry> FileTemplateEntries { get; set; } = new List<CTemplateEntry>();
+
 		public string ParserName { get; set; }
+		public string ParserConfigPath { get; set; }
+		[JsonIgnore]
+		public string ParserConfigString { get; set; }
+
 		public string PostChangeScriptPath { get; set; }
+		[JsonIgnore]
+		public string PostChangeScriptAbsolutePath { get; set; }
+
+
+		[Editable(allowEdit: true)]
+		public string P4Server { get; set; }
+		[Editable(allowEdit: true)]
+		public string P4UserName { get; set; }
+		[Editable(allowEdit: true)]
+		public string P4Workspace { get; set; }
 	}
 
 	public class CFileTemplateConfiguration
@@ -99,7 +124,17 @@ namespace GameCodersToolkit.Configuration
 
 		public string GetMakeFilePathByID(string id)
 		{
-			return CreatorConfig.CMakeFileEntries.Where(makeFile => makeFile.ID == id).FirstOrDefault()?.Path;
+			return CreatorConfig.CMakeFileEntries.Where(makeFile => makeFile.ID == id).FirstOrDefault()?.AbsolutePath;
+		}
+
+		public CTemplateEntry GetTemplateByName(string name)
+		{
+			return CreatorConfig.FileTemplateEntries.Where(entry => entry.Name == name).FirstOrDefault();
+		}
+
+		public Type GetParserConfigAs<Type>()
+		{
+			return JsonSerializer.Deserialize<Type>(CreatorConfig.ParserConfigString);
 		}
 
 		private async Task LoadConfigAsync(string filePath)
@@ -116,11 +151,27 @@ namespace GameCodersToolkit.Configuration
 
 					// Post-Change Script
 					{
-						if (!Path.IsPathRooted(CreatorConfig.PostChangeScriptPath))
+						if (!string.IsNullOrWhiteSpace(CreatorConfig.PostChangeScriptPath) && !Path.IsPathRooted(CreatorConfig.PostChangeScriptPath))
 						{
 							lock (SolutionFolder)
 							{
-								CreatorConfig.PostChangeScriptPath = Path.Combine(SolutionFolder, CreatorConfig.PostChangeScriptPath);
+								CreatorConfig.PostChangeScriptAbsolutePath = Path.Combine(SolutionFolder, CreatorConfig.PostChangeScriptPath);
+							}
+						}
+					}
+
+					// Parser config path
+					{
+						if (!string.IsNullOrWhiteSpace(CreatorConfig.ParserConfigPath) && !Path.IsPathRooted(CreatorConfig.PostChangeScriptPath))
+						{
+							lock (SolutionFolder)
+							{
+								CreatorConfig.ParserConfigPath = Path.Combine(SolutionFolder, CreatorConfig.ParserConfigPath);
+							}
+
+							if (File.Exists(CreatorConfig.ParserConfigPath))
+							{
+								CreatorConfig.ParserConfigString = File.ReadAllText(CreatorConfig.ParserConfigPath);
 							}
 						}
 					}
@@ -131,14 +182,14 @@ namespace GameCodersToolkit.Configuration
 
 						foreach (CMakeFileEntry cmakeFileEntry in entries)
 						{
-							if (!Path.IsPathRooted(cmakeFileEntry.Path))
+							if (!string.IsNullOrWhiteSpace(CreatorConfig.PostChangeScriptPath) && !Path.IsPathRooted(cmakeFileEntry.Path))
 							{
 								lock (SolutionFolder)
 								{
-									cmakeFileEntry.Path = Path.Combine(SolutionFolder, cmakeFileEntry.Path);
+									cmakeFileEntry.AbsolutePath = Path.Combine(SolutionFolder, cmakeFileEntry.Path);
 								}
 							}
-							cmakeFileEntry.Path = Path.GetFullPath(cmakeFileEntry.Path);
+							cmakeFileEntry.AbsolutePath = Path.GetFullPath(cmakeFileEntry.Path);
 						}
 					}
 
@@ -148,24 +199,27 @@ namespace GameCodersToolkit.Configuration
 
 						foreach (CTemplateEntry entry in entries)
 						{
+							entry.AbsolutePaths = Enumerable.Repeat(string.Empty, entry.Paths.Count).ToList();
 							for (int i = entry.Paths.Count - 1; i >= 0; i--)
 							{
-								if (!Path.IsPathRooted(entry.Paths[i]))
+								if (!string.IsNullOrWhiteSpace(CreatorConfig.PostChangeScriptPath) && !Path.IsPathRooted(entry.Paths[i]))
 								{
 									lock (SolutionFolder)
 									{
-										entry.Paths[i] = Path.Combine(SolutionFolder, entry.Paths[i]);
+										entry.AbsolutePaths[i] = Path.Combine(SolutionFolder, entry.Paths[i]);
 									}
 								}
-								entry.Paths[i] = Path.GetFullPath(entry.Paths[i]);
+								entry.AbsolutePaths[i] = Path.GetFullPath(entry.Paths[i]);
 
-								if (!File.Exists(entry.Paths[i]))
+								if (!File.Exists(entry.AbsolutePaths[i]))
 								{
-									entry.Paths.RemoveAt(i);
+									entry.AbsolutePaths.RemoveAt(i);
 								}
 							}
 						}
 					}
+
+					await EstablishPerforceConnectionAsync();
 				}
 				else
 				{
@@ -182,7 +236,7 @@ namespace GameCodersToolkit.Configuration
 			}
 		}
 
-		public async Task SaveConfigAsync()
+		public void SaveExampleConfig()
 		{
 			// Add mock data
 			CreatorConfig.CMakeFileEntries.Clear();
@@ -204,11 +258,43 @@ namespace GameCodersToolkit.Configuration
 
 			CreatorConfig.ParserName = "GameCodersToolkit.FileTemplateCreator.MakeFileParser.CryGameParser";
 
+			CreatorConfig.P4UserName = "schadek";
+			CreatorConfig.P4Server = "perforce:1666";
+			CreatorConfig.P4Workspace = "Main";
+
 			var options = new JsonSerializerOptions { WriteIndented = true };
 			string configFilePath = GetConfigFilePath();
 
 			using FileStream fileStream = File.Create(configFilePath);
-			await JsonSerializer.SerializeAsync(fileStream, CreatorConfig, options);
+			JsonSerializer.Serialize(fileStream, CreatorConfig, options);
+		}
+
+		public async Task<bool> SaveConfigAsync()
+		{
+			var options = new JsonSerializerOptions { WriteIndented = true };
+			string configFilePath = GetConfigFilePath();
+
+			await EstablishPerforceConnectionAsync();
+			bool isWritable = configFilePath.IsFileWritable();
+
+			if (isWritable)
+			{
+				using FileStream fileStream = File.Create(configFilePath);
+				JsonSerializer.Serialize(fileStream, CreatorConfig, options);
+			}
+
+			return isWritable;
+		}
+
+		public async Task<bool> EstablishPerforceConnectionAsync()
+		{
+			if (!string.IsNullOrWhiteSpace(CreatorConfig.P4Server))
+			{
+				PerforceID id = new PerforceID(CreatorConfig.P4Server, CreatorConfig.P4UserName, CreatorConfig.P4Workspace);
+				await PerforceConnection.InitAsync(id);
+			}
+
+			return false;
 		}
 
 		public CFileTemplateCreatorConfig CreatorConfig { get; set; } = new CFileTemplateCreatorConfig();
