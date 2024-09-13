@@ -95,7 +95,9 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 
 		public GenericDataIdentifier Identifier { get; set; }
 
-		public string Name { get; set; }
+		public string Name { get; set; } = "Unkown";
+		public string BaseType { get; set; }
+		public string SubType { get; set; } = "NoSubType";
 		public string SourceFile { get; set; }
 		public int SourceLineNumber { get; set; }
 

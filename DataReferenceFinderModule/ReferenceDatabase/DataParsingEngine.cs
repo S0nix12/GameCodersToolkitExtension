@@ -114,14 +114,14 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 							}
 							finally
 							{
-								semaphore.Release();
-								Interlocked.Increment(ref progressCounter);
-								
-								TaskProgressData progressData = new TaskProgressData();
-								progressData.ProgressText = $"Parsing files: {progressCounter} of {totalCountToParse} done";
-								progressData.PercentComplete = (int)(((float)progressCounter) / totalCountToParse * 100);
-								taskHandler.Progress.Report(progressData);
-							}
+									semaphore.Release();
+									Interlocked.Increment(ref progressCounter);
+
+									TaskProgressData progressData = new TaskProgressData();
+									progressData.ProgressText = $"Parsing files: {progressCounter} of {totalCountToParse} done";
+									progressData.PercentComplete = (int)(((float)progressCounter) / totalCountToParse * 100);
+									taskHandler.Progress.Report(progressData);
+								}
 						});
 
 						runningOperations.Add(nextTask);
@@ -140,7 +140,10 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 
 			var database = GameCodersToolkitPackage.ReferenceDatabase;
 			database.ClearEntriesForFile(operation.FilePath);
-			database.AddEntriesForFile(operation.FilePath, new HashSet<DataEntry>(parsedEntries));
+			if (parsedEntries.Count > 0)
+			{
+				database.AddEntriesForFile(operation.FilePath, new HashSet<DataEntry>(parsedEntries));
+			}
 
 			if (errorList.HasEntries())
 			{

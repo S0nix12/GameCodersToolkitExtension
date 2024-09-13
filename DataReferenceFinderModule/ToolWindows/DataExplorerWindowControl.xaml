@@ -15,6 +15,9 @@
 		d:DesignHeight="300"
 		d:DesignWidth="300"
 		Name="MyToolWindow">
+	<UserControl.Resources>
+		<ResourceDictionary Source="pack://application:,,,/GameCodersToolkit;component/Resources/Styles/VSTreeViewStyles.xaml"/>
+	</UserControl.Resources>
 	<UserControl.DataContext>
 		<vm:DataExplorerWindowViewModel />
 	</UserControl.DataContext>
@@ -25,13 +28,13 @@
 					<ColumnDefinition Width="*"/>
 					<ColumnDefinition Width="Auto"/>
 				</Grid.ColumnDefinitions>
-				<ComboBox DockPanel.Dock="Left" Grid.Column="0" Height="16"/>
-				<Button Command="{Binding RefreshCommand}">
-					<imaging:CrispImage Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Refresh}" DockPanel.Dock="Right" Grid.Column="1"/>
+				<ComboBox Grid.Column="0" Height="20" Margin="1"/>
+				<Button Command="{Binding RefreshCommand}" Grid.Column="1" Margin="1" Padding="1">
+					<imaging:CrispImage Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Refresh}"/>
 				</Button>
 			</Grid>
-			<TextBox TextWrapping="Wrap" Text="Search..." DockPanel.Dock="Top"/>
-			<TreeView DockPanel.Dock="Bottom" x:Name="DataList" Focusable="False" ItemsSource="{Binding FileEntries}" VirtualizingPanel.VirtualizationMode="Recycling">
+			<TextBox Name="SearchFilterField" Padding="1" TextWrapping="Wrap" Text="{Binding SearchFilter, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Top" Margin="2" GotFocus="SearchFilterField_GotFocus"/>
+			<TreeView DockPanel.Dock="Bottom" x:Name="DataList" Focusable="False" ItemsSource="{Binding FileEntriesView}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ItemContainerStyle="{StaticResource VSTreeViewItem}">
 				<TreeView.Resources>
 					<DataTemplate DataType="{x:Type vm:DataExplorerEntryViewModel}">
 						<StackPanel Orientation="Horizontal">
@@ -45,11 +48,16 @@
 							<TextBlock Text="{Binding LineNumber, StringFormat=Line: {0}}" />
 						</StackPanel>
 					</DataTemplate>
-					<HierarchicalDataTemplate DataType="{x:Type vm:DataExplorerFileViewModel}" ItemsSource="{Binding DataEntries}">
+					<HierarchicalDataTemplate DataType="{x:Type vm:DataExplorerFileViewModel}" ItemsSource="{Binding EntriesView}">
 						<DockPanel>
 							<TextBlock Text="{Binding FilePath}" Margin="1,1,1,1"/>
 							<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
 							<TextBlock Text="{Binding DataEntries.Count, StringFormat=Entries: {0}}"/>
+						</DockPanel>
+					</HierarchicalDataTemplate>
+					<HierarchicalDataTemplate DataType="{x:Type vm:DataExplorerSubTypeViewModel}" ItemsSource="{Binding DataEntriesView}">
+						<DockPanel>
+							<TextBlock Text="{Binding Name}" Margin="1,1,1,1"/>
 						</DockPanel>
 					</HierarchicalDataTemplate>
 					<SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"

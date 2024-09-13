@@ -39,6 +39,8 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 						parentEntry = parentEntry.Parent;
 					}
 					result.Text = resultPath;
+
+					result.Text += " | " + entry.BaseType + " | " + entry.SubType;
 					results.Enqueue(result);
 				}
 				resultsOutput.AddResults(results);

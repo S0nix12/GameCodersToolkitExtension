@@ -14,5 +14,14 @@ namespace GameCodersToolkit.DataReferenceFinderModule
 		{
 			VS.MessageBox.Show("DataExplorerWindowControl", "Button clicked");
 		}
-	}
+
+		private void SearchFilterField_GotFocus(object sender, RoutedEventArgs e)
+		{
+			if (SearchFilterField.Text == "Search...")
+			{
+				SearchFilterField.Text = string.Empty;
+				SearchFilterField.GotFocus -= SearchFilterField_GotFocus;
+			}
+        }
+    }
 }

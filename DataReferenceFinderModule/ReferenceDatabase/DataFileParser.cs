@@ -92,6 +92,9 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 
 		// Optional expression to get a Parent Name. Can be used instead of a ParentIdentifier if the Parent is not a DataEntry itself and just used for better context
 		public string ParentNameExpression { get; set; }
+
+		// Optional expression to get the Sub Type of this Data Element. Used to group entries by in the Data Explorer
+		public string SubTypeExpression { get; set; }
 	}
 
 	internal class DataFileParser
@@ -142,6 +145,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			foreach (XElement baseElement in baseElements)
 			{
 				DataEntry parsedEntry = ParseDataElement(baseElement, parsingDescription, errorOutput);
+				parsedEntry.BaseType = parsingDescription.Name;
 				if (parsedEntry != null)
 				{
 					outEntries.Add(parsedEntry);
@@ -194,17 +198,10 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			// Parse Data Entry name
 			if (parsingDescription.NameExpression != null)
 			{
-				object nameResult = XmlExtensionMethods.GetSingleValueFromXPathResult(element.XPathEvaluate(parsingDescription.NameExpression));
+				string nameResult = XmlExtensionMethods.GetSingleValueFromXPathResult(element.XPathEvaluate(parsingDescription.NameExpression));
 				if (nameResult != null)
 				{
-					if (nameResult is string nameResultString)
-					{
-						outEntry.Name = nameResultString;
-					}
-					else
-					{
-						errorOutput.Error(lineInfo.LineNumber, "Name Expression did not return a string");
-					}
+					outEntry.Name = nameResult;
 				}
 				else
 				{
@@ -246,65 +243,52 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			}
 			errorOutput.PopContext();
 
+			errorOutput.PushContext("SubType");
+			if (!string.IsNullOrEmpty(parsingDescription.SubTypeExpression))
+			{
+				string subTypeName = XmlExtensionMethods.GetSingleValueFromXPathResult(element.XPathEvaluate(parsingDescription.SubTypeExpression));
+				if (subTypeName != null)
+				{
+					outEntry.SubType = subTypeName;
+				}
+				else
+				{
+					errorOutput.Error(lineInfo.LineNumber, "SubType failed to parse");
+				}
+			}
+
 			return outEntry;
 		}
 
 		private GenericDataIdentifier? ParseIdentifierObject(XElement element, string expression, DataParsingErrorList? errorOutput)
 		{
 			IXmlLineInfo lineInfo = element;
-			GenericDataIdentifier outIdentifier = null;
-			object expressionObject = element.XPathEvaluate(expression);
-			if (expressionObject == null)
+
+			string[] multiExpressions = expression.Split('|');
+			string combinedIdentifier = "";
+			foreach (string singleExpression in multiExpressions)
+			{
+				string result = XmlExtensionMethods.GetSingleValueFromXPathResult(element.XPathEvaluate(singleExpression));
+				if (result != null)
+				{
+					combinedIdentifier += result;
+				}
+			}
+
+			if (string.IsNullOrWhiteSpace(combinedIdentifier))
 			{
 				errorOutput?.Error(lineInfo.LineNumber, "No Identifier Elements found");
 				return null;
 			}
 
-			IEnumerable<string> identifierValues = XmlExtensionMethods.GetValuesFromXPathResult(expressionObject);
-			int identifierCount = identifierValues.Count();
-			if (identifierCount == 0)
+			if (Guid.TryParse(combinedIdentifier, out Guid guid))
 			{
-				errorOutput?.Error(lineInfo.LineNumber, "No Identifier Elements in collection");
-				return null;
-			}
-
-			if (identifierCount == 1)
-			{
-				string identifierString = identifierValues.First();
-				if (string.IsNullOrWhiteSpace(identifierString))
-				{
-					errorOutput?.Error(lineInfo.LineNumber, "Found Identifier Element did not contain any value");
-					return null;
-				}
-
-				if (Guid.TryParse(identifierString, out Guid guid))
-				{
-					outIdentifier = new GenericDataIdentifier(guid);
-				}
-				else
-				{
-					outIdentifier = new GenericDataIdentifier(identifierString);
-				}
+				return new GenericDataIdentifier(guid);
 			}
 			else
 			{
-				string combinedIdentifierString = "";
-				foreach (string identifierPart in identifierValues)
-				{
-					combinedIdentifierString += identifierPart;
-				}
-
-				if (string.IsNullOrWhiteSpace(combinedIdentifierString))
-				{
-					errorOutput?.Error(lineInfo.LineNumber, "Found Identifier Elements did not contain any values");
-					return null;
-				}
-
-				outIdentifier = new GenericDataIdentifier(combinedIdentifierString);
+				return new GenericDataIdentifier(combinedIdentifier);
 			}
-
-
-			return outIdentifier;
 		}
 
 		string m_fileContent;
