@@ -29,8 +29,8 @@ namespace GameCodersToolkit.ReferenceFinder.ToolWindows
 			if (e.ClickCount == 2)
 			{
 				Border borderControl = sender as Border;
-				CLineResultViewModel lineResult = borderControl?.DataContext as CLineResultViewModel;
-				await lineResult?.ShowEntryAsync();
+				DataEntryResultViewModel lineResult = borderControl?.DataContext as DataEntryResultViewModel;
+				await lineResult?.OpenInVisualStudioAsync();
 			}
 		}
 

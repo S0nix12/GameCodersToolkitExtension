@@ -68,7 +68,7 @@ namespace GameCodersToolkit.ReferenceFinder
 						var fileBag = FoundOccurences.GetOrAdd(file, new ConcurrentBag<SFoundLineEntry>());
 						fileBag.Add(entry);
 
-						SPendingResult pendingResult = new SPendingResult
+						PendingResult pendingResult = new PendingResult
 						{
 							Line = lineCounter,
 							Text = line,
@@ -206,12 +206,12 @@ namespace GameCodersToolkit.ReferenceFinder
 
 		int progressCounter = 0;
 		int filesToScan = 1;
-		ConcurrentQueue<SPendingResult> pendingResults = new ConcurrentQueue<SPendingResult>();
+		ConcurrentQueue<PendingResult> pendingResults = new ConcurrentQueue<PendingResult>();
 
 		public TimeSpan ScanDuration { get; private set; }
 		public TimeSpan GetFilesDuration { get; private set; }
 
-		public CFindReferenceOperationResults ResultsOutput { get; private set; }
+		public FindReferenceOperationResults ResultsOutput { get; private set; }
 
 		public ConcurrentDictionary<string, ConcurrentBag<SFoundLineEntry>> FoundOccurences { get; set; } = new ConcurrentDictionary<string, ConcurrentBag<SFoundLineEntry>>();
 	}

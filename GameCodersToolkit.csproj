@@ -55,6 +55,8 @@
     <Compile Include="DataReferenceFinderModule\Commands\ParseAllDataLocation.cs" />
     <Compile Include="DataReferenceFinderModule\Commands\SaveConfigCommand.cs" />
     <Compile Include="DataReferenceFinderModule\Configuration\DataLocationsConfiguration.cs" />
+    <Compile Include="DataReferenceFinderModule\DataEditorCommunication\DataEditorMessages.cs" />
+    <Compile Include="DataReferenceFinderModule\DataEditorCommunication\DataEditorConnection.cs" />
     <Compile Include="DataReferenceFinderModule\ReferenceDatabase\DataEntry.cs" />
     <Compile Include="DataReferenceFinderModule\ReferenceDatabase\DataFileParser.cs" />
     <Compile Include="DataReferenceFinderModule\ReferenceDatabase\DataParsingEngine.cs" />
@@ -64,6 +66,7 @@
     <Compile Include="DataReferenceFinderModule\ToolWindows\DataExplorerWindowControl.xaml.cs">
       <DependentUpon>DataExplorerWindowControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DataReferenceFinderModule\ViewModels\DataEntryViewModel.cs" />
     <Compile Include="DataReferenceFinderModule\ViewModels\DataExplorerWindowViewModel.cs" />
     <Compile Include="ExtensionMethods\ExtensionMethodsCollections.cs" />
     <Compile Include="ExtensionMethods\TreeViewExtensions.cs" />
@@ -164,11 +167,17 @@
       <Version>1.0.1</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.0.5232" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf">
+      <Version>1.1.135</Version>
+    </PackageReference>
     <PackageReference Include="p4api.net">
       <Version>2024.1.261.8274</Version>
     </PackageReference>
     <PackageReference Include="System.Text.Json">
       <Version>8.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="WatsonWebsocket">
+      <Version>4.1.2</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

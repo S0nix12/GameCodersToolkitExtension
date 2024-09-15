@@ -68,6 +68,9 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 		// Name to identify this parsing description
 		public string Name { get; set; }
 
+		// Type of data parsed with this description. If empty uses the name of the parsing Description
+		public string TypeName { get; set; }
+
 		// All expressions are using XPath syntax. After the BaseExpression all others are relative to the base Element
 		// All expressions should evaluate to a string value except the BaseExpression which should select elements
 
@@ -145,7 +148,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			foreach (XElement baseElement in baseElements)
 			{
 				DataEntry parsedEntry = ParseDataElement(baseElement, parsingDescription, errorOutput);
-				parsedEntry.BaseType = parsingDescription.Name;
+				parsedEntry.BaseType = string.IsNullOrEmpty(parsingDescription.TypeName) ? parsingDescription.Name : parsingDescription.TypeName;
 				if (parsedEntry != null)
 				{
 					outEntries.Add(parsedEntry);

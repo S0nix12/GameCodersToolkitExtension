@@ -4,6 +4,7 @@ global using System;
 global using Task = System.Threading.Tasks.Task;
 using GameCodersToolkit.Configuration;
 using GameCodersToolkit.DataReferenceFinderModule;
+using GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.QuickAttach;
 using GameCodersToolkit.ReferenceFinder;
@@ -36,7 +37,7 @@ namespace GameCodersToolkit
 
 				await this.RegisterCommandsAsync();
 				this.RegisterToolWindows();
-				FindReferenceResultsStorage = new CFindReferenceResultsStorage();
+				FindReferenceResultsStorage = new FindReferenceResultsStorage();
 				ExtensionOutput = await VS.Windows.CreateOutputWindowPaneAsync("GameCodersToolkit");
 
 				DataLocationsConfig = new CDataLocationsConfiguration();
@@ -47,6 +48,7 @@ namespace GameCodersToolkit
 
 				DataParsingEngine = new DataParsingEngine();
 				ReferenceDatabase = new Database();
+				DataEditorConnection = new DataEditorConnection();
 			}
 			catch (Exception ex)
 			{
@@ -62,10 +64,11 @@ namespace GameCodersToolkit
 
 		public static OutputWindowPane ExtensionOutput { get; set; }
 
-		internal static CFindReferenceResultsStorage FindReferenceResultsStorage { get; private set; }
+		internal static FindReferenceResultsStorage FindReferenceResultsStorage { get; private set; }
 		public static CDataLocationsConfiguration DataLocationsConfig { get; private set; }
 		public static CFileTemplateConfiguration FileTemplateCreatorConfig { get; private set; }
 		public static DataParsingEngine DataParsingEngine {  get; private set; }
 		public static DataReferenceFinderModule.ReferenceDatabase.Database ReferenceDatabase { get; private set; }
+		public static DataEditorConnection DataEditorConnection { get; private set; }
 	}
 }

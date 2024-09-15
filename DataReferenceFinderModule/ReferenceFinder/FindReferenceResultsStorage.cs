@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -7,10 +8,11 @@ using System.Threading;
 
 namespace GameCodersToolkit.ReferenceFinder
 {
-	public class CFoundReference
+	public class FoundReference
 	{
 		public int Line { get; set; } = 0;
 		public string Text { get; set; } = "";
+		public DataEntry DataEntry { get; set; } = null;
 	}
 
 	public enum EFindReferenceOperationStatus
@@ -21,27 +23,28 @@ namespace GameCodersToolkit.ReferenceFinder
 		Finished,
 	}
 
-	public struct SPendingResult
+	public struct PendingResult
 	{
 		public int Line { get; set; }
 		public string Text { get; set; }
 		public string File { get; set; }
+		public DataEntry DataEntry { get; set; }
 	}
 
-	public class CFindReferenceOperationResults
+	public class FindReferenceOperationResults
 	{
-		public CFindReferenceOperationResults(string searchPath, string searchTerm)
+		public FindReferenceOperationResults(string searchPath, string searchTerm)
 		{
 			SearchPath = searchPath;
 			SearchTerm = searchTerm;
 			OperationId = Guid.NewGuid();
 		}
 
-		public void AddResults(ConcurrentQueue<SPendingResult> resultsToAdd)
+		public void AddResults(ConcurrentQueue<PendingResult> resultsToAdd)
 		{
 			if (Monitor.TryEnter(mutex))
 			{
-				SPendingResult resultToAdd;
+				PendingResult resultToAdd;
 				while (resultsToAdd.TryDequeue(out resultToAdd))
 				{
 					AddResult(in resultToAdd);
@@ -55,10 +58,10 @@ namespace GameCodersToolkit.ReferenceFinder
 			ResultsUpdated?.Invoke(this, new EventArgs());
 		}
 
-		void AddResult(in SPendingResult inResult)
+		void AddResult(in PendingResult inResult)
 		{
-			List<CFoundReference> fileReferences = ResultsPerFile.GetOrCreate(inResult.File);
-			fileReferences.Add(new CFoundReference() { Line = inResult.Line, Text = inResult.Text });
+			List<FoundReference> fileReferences = ResultsPerFile.GetOrCreate(inResult.File);
+			fileReferences.Add(new FoundReference() { Line = inResult.Line, Text = inResult.Text, DataEntry = inResult.DataEntry });
 			ResultsCount++;
 		}
 
@@ -124,21 +127,21 @@ namespace GameCodersToolkit.ReferenceFinder
 
 		public EFindReferenceOperationStatus Status { get; private set; } = EFindReferenceOperationStatus.Pending;
 
-		public Dictionary<string, List<CFoundReference>> ResultsPerFile { get; private set; } = new Dictionary<string, List<CFoundReference>>();
+		public Dictionary<string, List<FoundReference>> ResultsPerFile { get; private set; } = new Dictionary<string, List<FoundReference>>();
 
 		public Guid OperationId { get; private set; }
 
 		private object mutex = new object();
 	}
 
-	internal class CFindReferenceResultsStorage
+	internal class FindReferenceResultsStorage
 	{
-		public CFindReferenceOperationResults AddNewOperationEntry(string searchPath, string searchTerm)
+		public FindReferenceOperationResults AddNewOperationEntry(string searchPath, string searchTerm)
 		{
-			Results.Add(new CFindReferenceOperationResults(searchPath, searchTerm));
+			Results.Add(new FindReferenceOperationResults(searchPath, searchTerm));
 			return Results.Last();
 		}
 
-		public ObservableCollection<CFindReferenceOperationResults> Results { get; private set; } = new ObservableCollection<CFindReferenceOperationResults>();
+		public ObservableCollection<FindReferenceOperationResults> Results { get; private set; } = new ObservableCollection<FindReferenceOperationResults>();
 	}
 }

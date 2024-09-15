@@ -1,7 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using GameCodersToolkit.DataReferenceFinderModule;
+using GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using Microsoft.VisualStudio.Shell.Internal.FileEnumerationService;
+using Microsoft.VisualStudio.Text;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,27 +17,6 @@ using System.Windows.Data;
 
 namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 {
-	public partial class DataExplorerEntryViewModel : ObservableObject
-	{
-		public DataExplorerEntryViewModel(DataEntry sourceEntry)
-		{
-			m_sourceEntry = sourceEntry;
-		}
-
-		[RelayCommand]
-		private void FindReferences()
-		{
-			ThreadHelper.JoinableTaskFactory.Run(async delegate { await ReferenceDatabaseUtils.ExecuteFindOperationOnDatabaseAsync(m_sourceEntry.Identifier, Name); });
-		}
-
-		private bool m_isExpanded;
-		public bool IsExpanded { get => m_isExpanded; set => SetProperty(ref m_isExpanded, value); }
-
-		private DataEntry m_sourceEntry;
-		public string Name { get => m_sourceEntry.Name; }
-		public int LineNumber { get => m_sourceEntry.SourceLineNumber; }
-	}
-
 	public class DataExplorerSubTypeViewModel : ObservableObject
 	{
 		public DataExplorerSubTypeViewModel(string inName)
@@ -44,7 +26,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			m_dataEntriesView = new ListCollectionView(DataEntries);
 			DataEntriesView.Filter = (object entry) =>
 			{
-				DataExplorerEntryViewModel dataEntry = entry as DataExplorerEntryViewModel;
+				DataEntryViewModel dataEntry = entry as DataEntryViewModel;
 				return searchTokens.Length == 0 
 				|| searchTokens.All(token => dataEntry.Name.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0);
 			};
@@ -60,7 +42,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		public bool IsExpanded { get => m_isExpanded; set => SetProperty(ref m_isExpanded, value); }
 		string[] searchTokens = { };
 		public string Name { get; private set; }
-		public ObservableCollection<DataExplorerEntryViewModel> DataEntries { get; private set; } = new ObservableCollection<DataExplorerEntryViewModel>();
+		public ObservableCollection<DataEntryViewModel> DataEntries { get; private set; } = new ObservableCollection<DataEntryViewModel>();
 		private ListCollectionView m_dataEntriesView;
 		public ICollectionView DataEntriesView { get => m_dataEntriesView; }
 	}
@@ -80,7 +62,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 						subTypeVM = new DataExplorerSubTypeViewModel(dataEntry.SubType);
 						Entries.Add(subTypeVM);
 					}
-					subTypeVM.DataEntries.Add(new DataExplorerEntryViewModel(dataEntry));
+					subTypeVM.DataEntries.Add(new DataEntryViewModel(dataEntry));
 				}
 			}
 

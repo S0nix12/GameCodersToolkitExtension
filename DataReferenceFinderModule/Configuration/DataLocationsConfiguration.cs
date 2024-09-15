@@ -20,6 +20,7 @@ namespace GameCodersToolkit.Configuration
 		public List<CDataLocationEntry> DataLocationEntries { get; set; } = new List<CDataLocationEntry>();
 		public List<DataParsingDescription> DataParsingDescriptions { get; set; } = new List<DataParsingDescription>();
 		public List<string> GuidFieldIdentifiers { get; set; } = new List<string>();
+		public string DataEditorServerUri { get; set; } = "";
 	}
 
 	public class CDataLocationsConfiguration
@@ -53,6 +54,11 @@ namespace GameCodersToolkit.Configuration
 		public List<string> GetGuidFieldIdentifiers()
 		{
 			return DataLocationsConfig.GuidFieldIdentifiers;
+		}
+
+		public string GetDataEditorServerUri()
+		{
+			return DataLocationsConfig.DataEditorServerUri;
 		}
 
 		private void HandleOpenSolution(Solution? solution = null)
@@ -132,6 +138,7 @@ namespace GameCodersToolkit.Configuration
 					"Exception while loading Data Reference Finder Config File",
 					ex);
 			}
+			ConfigLoaded.Invoke(this, new EventArgs());
 		}
 
 		public async Task SaveConfigAsync()
@@ -169,6 +176,7 @@ namespace GameCodersToolkit.Configuration
 			await JsonSerializer.SerializeAsync(fileStream, DataLocationsConfig, options);
 		}
 
+		public EventHandler ConfigLoaded { get; set; }
 		private CDataLocationsConfig DataLocationsConfig { get; set; } = new CDataLocationsConfig();
 		private FileSystemWatcher ConfigFileWatcher { get; set; }
 		private string SolutionFolder { get; set; } = "";

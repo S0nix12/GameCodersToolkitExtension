@@ -10,6 +10,7 @@
 		xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
 		xmlns:platformUI="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
 		xmlns:vm="clr-namespace:GameCodersToolkit.DataReferenceFinderModule.ViewModels"
+		xmlns:bh="http://schemas.microsoft.com/xaml/behaviors"
 		toolkit:Themes.UseVsTheme="True"
 		mc:Ignorable="d"
 		d:DesignHeight="300"
@@ -36,23 +37,26 @@
 			<TextBox Name="SearchFilterField" Padding="1" TextWrapping="Wrap" Text="{Binding SearchFilter, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Top" Margin="2" GotFocus="SearchFilterField_GotFocus"/>
 			<TreeView DockPanel.Dock="Bottom" x:Name="DataList" Focusable="False" ItemsSource="{Binding FileEntriesView}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ItemContainerStyle="{StaticResource VSTreeViewItemBoundExpanded}">
 				<TreeView.Resources>
-					<DataTemplate DataType="{x:Type vm:DataExplorerEntryViewModel}">
-						<StackPanel Orientation="Horizontal">
-							<StackPanel.ContextMenu>
-								<ContextMenu>
-									<MenuItem Header="Find References" Command="{Binding FindReferencesCommand}"/>
-								</ContextMenu>
-							</StackPanel.ContextMenu>
-							<TextBlock Text="{Binding Name}" />
-							<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
-							<TextBlock Text="{Binding LineNumber, StringFormat=Line: {0}}" />
-						</StackPanel>
+					<DataTemplate DataType="{x:Type vm:DataEntryViewModel}">
+						<Border Name="DataEntryVM_Border" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" PreviewMouseRightButtonDown="DataEntryVM_Border_PreviewMouseRightButtonDown" MouseLeftButtonDown="DataEntryVM_Border_LeftMouseDown">
+							<StackPanel Orientation="Horizontal">
+								<StackPanel.ContextMenu>
+									<ContextMenu>
+										<MenuItem Header="Find References" Command="{Binding FindReferencesCommand}"/>
+										<MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
+									</ContextMenu>
+								</StackPanel.ContextMenu>
+								<TextBlock Text="{Binding Name}" />
+								<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
+								<TextBlock Text="{Binding LineNumber, StringFormat=Line: {0}}" />
+							</StackPanel>
+						</Border>
 					</DataTemplate>
 					<HierarchicalDataTemplate DataType="{x:Type vm:DataExplorerFileViewModel}" ItemsSource="{Binding EntriesView}">
 						<DockPanel>
 							<TextBlock Text="{Binding FilePath}" Margin="1,1,1,1"/>
 							<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
-							<TextBlock Text="{Binding DataEntries.Count, StringFormat=Entries: {0}}"/>
+							<TextBlock Text="{Binding Entries.Count, StringFormat=Entries: {0}}"/>
 						</DockPanel>
 					</HierarchicalDataTemplate>
 					<HierarchicalDataTemplate DataType="{x:Type vm:DataExplorerSubTypeViewModel}" ItemsSource="{Binding DataEntriesView}">

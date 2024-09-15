@@ -20,28 +20,33 @@
 		<ResourceDictionary Source="pack://application:,,,/GameCodersToolkit;component/Resources/Styles/VSTreeViewStyles.xaml"/>
 	</UserControl.Resources>
 	<UserControl.DataContext>
-		<vm:CReferenceResultsWindowViewModel />
+		<vm:ReferenceResultsWindowViewModel />
 	</UserControl.DataContext>
 	<Grid>
 		<TreeView x:Name="ResultsTree" Focusable="False" ItemsSource="{Binding OperationResults}" SelectedItemChanged="TreeView_SelectedItemChanged" VirtualizingPanel.VirtualizationMode="Recycling" ItemContainerStyle="{StaticResource VSTreeViewItem}">
 			<TreeView.Resources>
-				<DataTemplate DataType="{x:Type vm:CLineResultViewModel}">
+				<DataTemplate DataType="{x:Type vm:DataEntryResultViewModel}">
 					<Border Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseDown="Border_MouseDown">
 						<StackPanel Orientation="Horizontal">
+							<StackPanel.ContextMenu>
+								<ContextMenu>
+									<MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
+								</ContextMenu>
+							</StackPanel.ContextMenu>
 							<TextBlock Text="{Binding LineNumber, StringFormat=Line: {0}}" />
 							<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
-							<TextBlock Text="{Binding LineText, StringFormat=Found: {0}}" />
+							<TextBlock Text="{Binding Name, StringFormat=Found: {0}}" />
 						</StackPanel>
 					</Border>
 				</DataTemplate>
-				<HierarchicalDataTemplate DataType="{x:Type vm:CFileResultsViewModel}" ItemsSource="{Binding LineResults}">
+				<HierarchicalDataTemplate DataType="{x:Type vm:FileResultsViewModel}" ItemsSource="{Binding DataEntryResults}">
 					<DockPanel>
 						<TextBlock Text="{Binding FilePath}" Margin="1,1,1,1"/>
 						<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
-						<TextBlock Text="{Binding LineResults.Count, StringFormat=Matches: {0}}"/>
+						<TextBlock Text="{Binding DataEntryResults.Count, StringFormat=Matches: {0}}"/>
 					</DockPanel>
 				</HierarchicalDataTemplate>
-				<HierarchicalDataTemplate DataType="{x:Type vm:COperationResultsViewModel}" ItemsSource="{Binding FileResults}">
+				<HierarchicalDataTemplate DataType="{x:Type vm:OperationResultsViewModel}" ItemsSource="{Binding FileResults}">
 					<DockPanel>
 						<TextBlock VerticalAlignment="Center" Text="{Binding SearchTerm, StringFormat=Searching for: {0}}" />
 						<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>

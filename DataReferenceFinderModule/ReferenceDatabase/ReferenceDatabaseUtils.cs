@@ -20,12 +20,13 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			resultsOutput.NotifyOperationStarted(GameCodersToolkitPackage.ReferenceDatabase.ReferencedByEntries.Count);
 			if (GameCodersToolkitPackage.ReferenceDatabase.ReferencedByEntries.TryGetValue(identifier, out HashSet<DataEntry> entries))
 			{
-				ConcurrentQueue<SPendingResult> results = new ConcurrentQueue<SPendingResult>();
+				ConcurrentQueue<PendingResult> results = new ConcurrentQueue<PendingResult>();
 				foreach (var entry in entries)
 				{
-					SPendingResult result = new SPendingResult();
+					PendingResult result = new PendingResult();
 					result.File = entry.SourceFile;
 					result.Line = entry.SourceLineNumber;
+					result.DataEntry = entry;
 
 					string resultPath = entry.Name;
 					DataEntry parentEntry = entry.Parent;

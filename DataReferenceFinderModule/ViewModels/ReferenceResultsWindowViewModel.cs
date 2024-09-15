@@ -1,26 +1,32 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.ReferenceFinder;
 using Microsoft.VisualStudio.Text;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 {
-	public class CLineResultViewModel : ObservableObject
+	public class DataEntryResultViewModel : DataEntryViewModel
 	{
-		public CLineResultViewModel(CFileResultsViewModel parentFileResult)
+		public DataEntryResultViewModel(FileResultsViewModel parentFileResult)
+			: base()
 		{
 			m_parentFileResult = parentFileResult;
 		}
 
-		public async Task ShowEntryAsync()
+		public override async Task<bool> OpenInVisualStudioAsync()
 		{
+			if (await base.OpenInVisualStudioAsync())
+				return true;
+
 			DocumentView document = await VS.Documents.OpenInPreviewTabAsync(m_parentFileResult.FilePath);
-			string searchTerm = m_parentFileResult.ParentOperationResult.SearchTerm;
 			if (document != null)
 			{
+				string searchTerm = m_parentFileResult.ParentOperationResult.SearchTerm;
 				var lineSnapShot = document.TextBuffer.CurrentSnapshot.GetLineFromLineNumber(LineNumber - 1);
 				int searchTermIndex = lineSnapShot.GetText().IndexOf(searchTerm);
 				if (searchTermIndex >= 0)
@@ -35,20 +41,16 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 					document.TextView.Caret.EnsureVisible();
 				}
 			}
+
+			return false;
 		}
 
-		private string m_lineText = "";
-		public string LineText { get => m_lineText; set => SetProperty(ref m_lineText, value); }
-
-		private int m_lineNumber = 0;
-		public int LineNumber { get => m_lineNumber; set => SetProperty(ref m_lineNumber, value); }
-
-		private CFileResultsViewModel m_parentFileResult;
+		private FileResultsViewModel m_parentFileResult;
 	}
 
-	public class CFileResultsViewModel : ObservableObject
+	public class FileResultsViewModel : ObservableObject
 	{
-		public CFileResultsViewModel(COperationResultsViewModel inParentOperationResult)
+		public FileResultsViewModel(OperationResultsViewModel inParentOperationResult)
 		{
 			ParentOperationResult = inParentOperationResult;
 		}
@@ -56,16 +58,16 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		private string m_filePath = "";
 		public string FilePath { get => m_filePath; set => SetProperty(ref m_filePath, value); }
 
-		private ObservableCollection<CLineResultViewModel> m_lineResults = new ObservableCollection<CLineResultViewModel>();
-		public ObservableCollection<CLineResultViewModel> LineResults { get => m_lineResults; set => SetProperty(ref m_lineResults, value); }
+		private ObservableCollection<DataEntryResultViewModel> m_dataEntryResults = new ObservableCollection<DataEntryResultViewModel>();
+		public ObservableCollection<DataEntryResultViewModel> DataEntryResults { get => m_dataEntryResults; set => SetProperty(ref m_dataEntryResults, value); }
 
-		public COperationResultsViewModel ParentOperationResult { get; private set; }
+		public OperationResultsViewModel ParentOperationResult { get; private set; }
 
 	}
 
-	public class COperationResultsViewModel : ObservableObject
+	public class OperationResultsViewModel : ObservableObject
 	{
-		public COperationResultsViewModel(CFindReferenceOperationResults model)
+		public OperationResultsViewModel(FindReferenceOperationResults model)
 		{
 			OperationId = model.OperationId;
 			SearchPath = model.SearchPath;
@@ -76,9 +78,9 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			model.ResultsUpdated += HandleResultsUpdate;
 		}
 
-		void HandleOperationStatusChanged(object operation, CFindReferenceOperationResults.OperationStatusEventArgs eventArgs)
+		void HandleOperationStatusChanged(object operation, FindReferenceOperationResults.OperationStatusEventArgs eventArgs)
 		{
-			CFindReferenceOperationResults model = (CFindReferenceOperationResults)operation;
+			FindReferenceOperationResults model = (FindReferenceOperationResults)operation;
 			Status = eventArgs.NewStatus;
 			switch (Status)
 			{
@@ -100,15 +102,15 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 		void HandleResultsUpdate(object operation, EventArgs eventArgs)
 		{
-			CFindReferenceOperationResults model = (CFindReferenceOperationResults)operation;
+			FindReferenceOperationResults model = (FindReferenceOperationResults)operation;
 			UpdateResultsFromModel(model);
 		}
 
-		void UpdateResultsFromModel(CFindReferenceOperationResults model)
+		void UpdateResultsFromModel(FindReferenceOperationResults model)
 		{
 			foreach (var fileEntry in model.ResultsPerFile)
 			{
-				CFileResultsViewModel? fileResultsViewModel = null;
+				FileResultsViewModel? fileResultsViewModel = null;
 				foreach (var fileResultVM in FileResults)
 				{
 					if (string.Compare(fileResultVM.FilePath, fileEntry.Key, StringComparison.OrdinalIgnoreCase) == 0)
@@ -120,19 +122,20 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 				if (fileResultsViewModel == null)
 				{
-					fileResultsViewModel = new CFileResultsViewModel(this);
+					fileResultsViewModel = new FileResultsViewModel(this);
 					fileResultsViewModel.FilePath = fileEntry.Key;
 					FileResults.Insert(0, fileResultsViewModel);
 				}
 
-				foreach (var lineResultEntry in fileEntry.Value)
+				foreach (var dataResultEntry in fileEntry.Value)
 				{
-					if (!fileResultsViewModel.LineResults.Any((existingResult) => { return existingResult.LineNumber == lineResultEntry.Line; }))
+					if (!fileResultsViewModel.DataEntryResults.Any((existingResult) => { return existingResult.LineNumber == dataResultEntry.Line; }))
 					{
-						CLineResultViewModel newResult = new CLineResultViewModel(fileResultsViewModel);
-						newResult.LineNumber = lineResultEntry.Line;
-						newResult.LineText = lineResultEntry.Text;
-						fileResultsViewModel.LineResults.Insert(0, newResult);
+						DataEntryResultViewModel newResult = new DataEntryResultViewModel(fileResultsViewModel);
+						newResult.LineNumber = dataResultEntry.Line;
+						newResult.Name = dataResultEntry.Text;
+						newResult.SourceEntry = dataResultEntry.DataEntry;
+						fileResultsViewModel.DataEntryResults.Insert(0, newResult);
 
 						ResultsCount++;
 					}
@@ -163,13 +166,13 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 		public Guid OperationId { get; private set; }
 
-		private ObservableCollection<CFileResultsViewModel> m_fileResults = new ObservableCollection<CFileResultsViewModel>();
-		public ObservableCollection<CFileResultsViewModel> FileResults { get => m_fileResults; set => SetProperty(ref m_fileResults, value); }
+		private ObservableCollection<FileResultsViewModel> m_fileResults = new ObservableCollection<FileResultsViewModel>();
+		public ObservableCollection<FileResultsViewModel> FileResults { get => m_fileResults; set => SetProperty(ref m_fileResults, value); }
 	}
 
-	public class CReferenceResultsWindowViewModel : ObservableObject
+	public class ReferenceResultsWindowViewModel : ObservableObject
 	{
-		public CReferenceResultsWindowViewModel()
+		public ReferenceResultsWindowViewModel()
 		{
 			GameCodersToolkitPackage.FindReferenceResultsStorage.Results.CollectionChanged += HandleResultsCollectionChanged;
 		}
@@ -179,13 +182,13 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			switch (eventArgs.Action)
 			{
 				case NotifyCollectionChangedAction.Add:
-					foreach (CFindReferenceOperationResults operation in eventArgs.NewItems)
+					foreach (FindReferenceOperationResults operation in eventArgs.NewItems)
 					{
-						OperationResults.Insert(0, new COperationResultsViewModel(operation));
+						OperationResults.Insert(0, new OperationResultsViewModel(operation));
 					}
 					break;
 				case NotifyCollectionChangedAction.Remove:
-					foreach (CFindReferenceOperationResults operation in eventArgs.OldItems)
+					foreach (FindReferenceOperationResults operation in eventArgs.OldItems)
 					{
 						OperationResults.RemoveAll((entry) => { return entry.OperationId == operation.OperationId; });
 					}
@@ -196,7 +199,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			}
 		}
 
-		private ObservableCollection<COperationResultsViewModel> m_operationResults = new ObservableCollection<COperationResultsViewModel>();
-		public ObservableCollection<COperationResultsViewModel> OperationResults { get => m_operationResults; set => SetProperty(ref m_operationResults, value); }
+		private ObservableCollection<OperationResultsViewModel> m_operationResults = new ObservableCollection<OperationResultsViewModel>();
+		public ObservableCollection<OperationResultsViewModel> OperationResults { get => m_operationResults; set => SetProperty(ref m_operationResults, value); }
 	}
 }
