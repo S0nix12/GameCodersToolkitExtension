@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="GameCodersToolkit.49757eef-0bb3-49a6-a9df-633cdee57064" Version="1.0" Language="en-US" Publisher="Henning Ax" />
+        <Identity Id="GameCodersToolkit.49757eef-0bb3-49a6-a9df-633cdee57064" Version="0.1.1" Language="en-US" Publisher="Henning Ax" />
         <DisplayName>GameCodersToolkit</DisplayName>
         <Description xml:space="preserve">Find references of your code in data files.</Description>
         <Icon>Resources\Icon.png</Icon>
