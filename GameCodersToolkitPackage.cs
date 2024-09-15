@@ -8,6 +8,7 @@ using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.QuickAttach;
 using GameCodersToolkit.ReferenceFinder;
 using GameCodersToolkit.ReferenceFinder.ToolWindows;
+using GameCodersToolkit.Utils;
 using Microsoft.VisualStudio;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -36,7 +37,7 @@ namespace GameCodersToolkit
 				await this.RegisterCommandsAsync();
 				this.RegisterToolWindows();
 				FindReferenceResultsStorage = new CFindReferenceResultsStorage();
-				ExtensionOutput = await VS.Windows.CreateOutputWindowPaneAsync("FindGuidOutput");
+				ExtensionOutput = await VS.Windows.CreateOutputWindowPaneAsync("GameCodersToolkit");
 
 				DataLocationsConfig = new CDataLocationsConfiguration();
 				await DataLocationsConfig.InitAsync();
@@ -50,11 +51,10 @@ namespace GameCodersToolkit
 			catch (Exception ex)
 			{
 				var output = await VS.Windows.GetOutputWindowPaneAsync(Community.VisualStudio.Toolkit.Windows.VSOutputWindowPane.General);
-				await output.WriteLineAsync("Data Reference Finder Package Loading failed. Exception was thrown");
-				await output.WriteLineAsync(ex.Message);
-				await output.WriteLineAsync(ex.StackTrace);
-				System.Diagnostics.Debug.WriteLine(ex.Message);
-				System.Diagnostics.Debug.WriteLine(ex.StackTrace);
+				await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+					"GameCodersToolkit Package Loading failed. Exception was thrown", 
+					ex, 
+					output);
 
 				throw ex;
 			}

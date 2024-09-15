@@ -34,7 +34,7 @@
 				</Button>
 			</Grid>
 			<TextBox Name="SearchFilterField" Padding="1" TextWrapping="Wrap" Text="{Binding SearchFilter, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Top" Margin="2" GotFocus="SearchFilterField_GotFocus"/>
-			<TreeView DockPanel.Dock="Bottom" x:Name="DataList" Focusable="False" ItemsSource="{Binding FileEntriesView}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ItemContainerStyle="{StaticResource VSTreeViewItem}">
+			<TreeView DockPanel.Dock="Bottom" x:Name="DataList" Focusable="False" ItemsSource="{Binding FileEntriesView}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ItemContainerStyle="{StaticResource VSTreeViewItemBoundExpanded}">
 				<TreeView.Resources>
 					<DataTemplate DataType="{x:Type vm:DataExplorerEntryViewModel}">
 						<StackPanel Orientation="Horizontal">

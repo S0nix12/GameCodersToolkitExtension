@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using GameCodersToolkit.Utils;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -299,10 +300,12 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine(ex.Message);
-				System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-				GameCodersToolkitPackage.ExtensionOutput.WriteLine(ex.Message);
-				GameCodersToolkitPackage.ExtensionOutput.WriteLine(ex.StackTrace);
+				ThreadHelper.JoinableTaskFactory.Run(async delegate
+				{
+					await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+					"Exception parsing makefile",
+					ex);
+				});
 			}
 
 			return null;

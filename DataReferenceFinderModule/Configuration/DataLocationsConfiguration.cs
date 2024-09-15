@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
+using GameCodersToolkit.Utils;
 
 namespace GameCodersToolkit.Configuration
 {
@@ -18,6 +19,7 @@ namespace GameCodersToolkit.Configuration
 	{
 		public List<CDataLocationEntry> DataLocationEntries { get; set; } = new List<CDataLocationEntry>();
 		public List<DataParsingDescription> DataParsingDescriptions { get; set; } = new List<DataParsingDescription>();
+		public List<string> GuidFieldIdentifiers { get; set; } = new List<string>();
 	}
 
 	public class CDataLocationsConfiguration
@@ -46,6 +48,11 @@ namespace GameCodersToolkit.Configuration
 		public List<DataParsingDescription> GetParsingDescriptions()
 		{
 			return DataLocationsConfig.DataParsingDescriptions;
+		}
+
+		public List<string> GetGuidFieldIdentifiers()
+		{
+			return DataLocationsConfig.GuidFieldIdentifiers;
 		}
 
 		private void HandleOpenSolution(Solution? solution = null)
@@ -121,10 +128,9 @@ namespace GameCodersToolkit.Configuration
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine(ex.Message);
-				System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.Message);
-				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.StackTrace);
+				await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+					"Exception while loading Data Reference Finder Config File",
+					ex);
 			}
 		}
 
@@ -154,6 +160,7 @@ namespace GameCodersToolkit.Configuration
 			smallDataConfigEntry.ExtensionFilters.Add(".json");
 
 			DataLocationsConfig.DataLocationEntries.Add(smallDataConfigEntry);
+			DataLocationsConfig.GuidFieldIdentifiers.Add("ExampleIdentifier");
 
 			var options = new JsonSerializerOptions { WriteIndented = true };
 			string configFilePath = GetConfigFilePath();
@@ -164,7 +171,6 @@ namespace GameCodersToolkit.Configuration
 
 		private CDataLocationsConfig DataLocationsConfig { get; set; } = new CDataLocationsConfig();
 		private FileSystemWatcher ConfigFileWatcher { get; set; }
-
 		private string SolutionFolder { get; set; } = "";
 	}
 }

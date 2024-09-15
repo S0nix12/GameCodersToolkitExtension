@@ -1,5 +1,6 @@
 ﻿using GameCodersToolkit.Configuration;
 using GameCodersToolkit.ReferenceFinder;
+using GameCodersToolkit.Utils;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -80,11 +81,12 @@ namespace GameCodersToolkit.ReferenceFinder
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine(ex.Message);
-				System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-				GameCodersToolkitPackage.ExtensionOutput.WriteLine("Failed to Scan File: " + file);
-				GameCodersToolkitPackage.ExtensionOutput.WriteLine(ex.Message);
-				GameCodersToolkitPackage.ExtensionOutput.WriteLine(ex.StackTrace);
+				ThreadHelper.JoinableTaskFactory.Run(async delegate
+				{
+					await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+					"Excpetion scanning file: " + file,
+					ex);
+				});
 			}
 			finally
 			{
@@ -117,15 +119,26 @@ namespace GameCodersToolkit.ReferenceFinder
 				IEnumerable<string> outFiles = new List<string>();
 				foreach (CDataLocationEntry dataLocation in searchLocations)
 				{
-					if (dataLocation.ExtensionFilters.Count == 0)
+					try
 					{
-						outFiles = outFiles.Union(Directory.EnumerateFiles(dataLocation.Path, "*", SearchOption.AllDirectories));
+						if (dataLocation.ExtensionFilters.Count == 0)
+						{
+							outFiles = outFiles.Union(Directory.EnumerateFiles(dataLocation.Path, "*", SearchOption.AllDirectories));
+						}
+						else
+						{
+							outFiles = outFiles.Union(Directory
+								.EnumerateFiles(dataLocation.Path, "*", SearchOption.AllDirectories)
+								.Where(file => dataLocation.ExtensionFilters.Contains(Path.GetExtension(file).ToLower())));
+						}
 					}
-					else
+					catch (Exception ex)
 					{
-						outFiles = outFiles.Union(Directory
-							.EnumerateFiles(dataLocation.Path, "*", SearchOption.AllDirectories)
-							.Where(file => dataLocation.ExtensionFilters.Contains(Path.GetExtension(file).ToLower())));
+						ThreadHelper.JoinableTaskFactory.Run(async delegate {
+							await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+							"Exception Scanning files for references",
+							ex);
+						});
 					}
 				}
 				return outFiles.ToList();
@@ -167,6 +180,12 @@ namespace GameCodersToolkit.ReferenceFinder
 				{
 					ResultsOutput.AddResults(pendingResults);
 				}
+			}
+			catch (Exception ex)
+			{
+				await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+					"Exception Scanning files for references",
+					ex);
 			}
 			finally
 			{

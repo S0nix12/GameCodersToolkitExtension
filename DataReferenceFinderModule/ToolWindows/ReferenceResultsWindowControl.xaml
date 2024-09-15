@@ -16,11 +16,14 @@
 		d:DesignHeight="300"
 		d:DesignWidth="300"
 		Name="MyToolWindow">
+	<UserControl.Resources>
+		<ResourceDictionary Source="pack://application:,,,/GameCodersToolkit;component/Resources/Styles/VSTreeViewStyles.xaml"/>
+	</UserControl.Resources>
 	<UserControl.DataContext>
 		<vm:CReferenceResultsWindowViewModel />
 	</UserControl.DataContext>
 	<Grid>
-		<TreeView x:Name="ResultsTree" Focusable="False" ItemsSource="{Binding OperationResults}" SelectedItemChanged="TreeView_SelectedItemChanged" VirtualizingPanel.VirtualizationMode="Recycling">
+		<TreeView x:Name="ResultsTree" Focusable="False" ItemsSource="{Binding OperationResults}" SelectedItemChanged="TreeView_SelectedItemChanged" VirtualizingPanel.VirtualizationMode="Recycling" ItemContainerStyle="{StaticResource VSTreeViewItem}">
 			<TreeView.Resources>
 				<DataTemplate DataType="{x:Type vm:CLineResultViewModel}">
 					<Border Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseDown="Border_MouseDown">

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using GameCodersToolkit.Utils;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -69,8 +70,12 @@ namespace GameCodersToolkit.QuickAttach
 			}
 			catch (Exception ex)
 			{
-				Debug.WriteLine(ex.Message);
-				Debug.WriteLine(ex.StackTrace);
+				ThreadHelper.JoinableTaskFactory.Run(async delegate
+				{
+					await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+					"QuickAttch: Exception updating process list",
+					ex);
+				});
 			}
 			finally
 			{
@@ -105,8 +110,12 @@ namespace GameCodersToolkit.QuickAttach
 			}
 			catch (Exception ex)
 			{
-				Debug.WriteLine(ex.Message);
-				Debug.WriteLine(ex.StackTrace);
+				ThreadHelper.JoinableTaskFactory.Run(async delegate
+				{
+					await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+					"QuickAttch: Exception getting matching ProcessId",
+					ex);
+				});
 			}
 			finally
 			{

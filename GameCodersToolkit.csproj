@@ -108,6 +108,7 @@
     <Compile Include="DataReferenceFinderModule\ToolWindows\ReferenceResultsWindowMessenger.cs" />
     <Compile Include="DataReferenceFinderModule\ViewModels\ReferenceResultsWindowViewModel.cs" />
     <Compile Include="SourceControl\PerforceConnection.cs" />
+    <Compile Include="Utils\DiagnosticUtils.cs" />
     <Compile Include="VSCommandTable.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using GameCodersToolkit.SourceControl;
 using System.IO.Pipes;
+using GameCodersToolkit.Utils;
 
 namespace GameCodersToolkit.Configuration
 {
@@ -229,10 +230,9 @@ namespace GameCodersToolkit.Configuration
 			}
 			catch (Exception ex)
 			{
-				System.Diagnostics.Debug.WriteLine(ex.Message);
-				System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.Message);
-				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.StackTrace);
+				await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+					"Exception while loading File Template Creator Config File", 
+					ex);
 			}
 		}
 

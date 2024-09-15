@@ -1,4 +1,5 @@
-﻿using Perforce.P4;
+﻿using GameCodersToolkit.Utils;
+using Perforce.P4;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -74,10 +75,9 @@ namespace GameCodersToolkit.SourceControl
 				}
 				catch (Exception ex)
 				{
-					System.Diagnostics.Debug.WriteLine(ex.Message);
-					System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.Message);
-					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.StackTrace);
+					await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+						"Exception initializing Perforce connection", 
+						ex);
 
 					return false;
 				}
@@ -122,10 +122,10 @@ namespace GameCodersToolkit.SourceControl
 				}
 				catch (Exception ex)
 				{
-					System.Diagnostics.Debug.WriteLine(ex.Message);
-					System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.Message);
-					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.StackTrace);
+					await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+						"Exception adding files to Perforce",
+						ex);
+
 					return false;
 				}
 			});
@@ -153,10 +153,9 @@ namespace GameCodersToolkit.SourceControl
 				}
 				catch (Exception ex)
 				{
-					System.Diagnostics.Debug.WriteLine(ex.Message);
-					System.Diagnostics.Debug.WriteLine(ex.StackTrace);
-					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.Message);
-					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(ex.StackTrace);
+					await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+						"Exception checking out file from Perforce",
+						ex);
 
 					return false;
 				}

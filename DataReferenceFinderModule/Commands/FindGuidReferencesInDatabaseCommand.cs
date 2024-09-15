@@ -1,6 +1,7 @@
 ﻿using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.ReferenceFinder;
 using GameCodersToolkit.ReferenceFinder.ToolWindows;
+using GameCodersToolkit.Utils;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,7 +15,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule
 		{
 			var textWriter = await GameCodersToolkitPackage.ExtensionOutput.CreateOutputPaneTextWriterAsync();
 
-			string searchText = await TextUtilFunctions.FindGuidUnderCaretAsync();
+			string searchText = await TextUtilFunctions.SearchForGuidUnderCaretAsync();
 
 			if (string.IsNullOrEmpty(searchText))
 			{
@@ -30,16 +31,14 @@ namespace GameCodersToolkit.DataReferenceFinderModule
 			catch (Exception ex)
 			{
 				await GameCodersToolkitPackage.ExtensionOutput.ActivateAsync();
-				await textWriter.WriteLineAsync("Exeception occured:");
-				await textWriter.WriteLineAsync(ex.Message);
-				await textWriter.WriteLineAsync(ex.StackTrace);
-				await textWriter.WriteLineAsync(ex.ToString());
+				await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+					"Expection finding Guid in Database",
+					ex);
 			}
 		}
 		protected override void BeforeQueryStatus(EventArgs e)
 		{
-			string guidText = ThreadHelper.JoinableTaskFactory.Run(TextUtilFunctions.FindGuidUnderCaretAsync);
-			Command.Enabled = !string.IsNullOrEmpty(guidText);
+			Command.Enabled = ThreadHelper.JoinableTaskFactory.Run(TextUtilFunctions.HasPotentialGuidUnderCaretAsync);
 		}
 	}
 }
