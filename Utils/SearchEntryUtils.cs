@@ -17,6 +17,7 @@ namespace GameCodersToolkit.Utils
 
 	public interface INestedSearchableViewModel : ISearchableViewModel
 	{
+		Predicate<object> AdditionalFilter { get; }
 		string[] SearchTokens { get; set; }
 		IEnumerable ChildEntries { get; }
 		ICollectionView FilteredView { get; }
@@ -49,14 +50,19 @@ namespace GameCodersToolkit.Utils
 				}
 			}
 
+			Predicate<object> additionalFilter = searchable.AdditionalFilter;
+
 			if (selfMatch)
 			{
-				searchable.FilteredView.Filter = null;
+				searchable.FilteredView.Filter = additionalFilter;
 			}
-			else if (searchable.FilteredView.Filter == null)
+			else if (searchable.FilteredView.Filter == additionalFilter)
 			{
 				searchable.FilteredView.Filter = entry =>
 				{
+					if (additionalFilter != null && !additionalFilter(entry))
+						return false;
+
 					if (entry is ISearchableViewModel searchableEntry)
 					{
 						return FilterChild(searchableEntry, searchable.SearchTokens);

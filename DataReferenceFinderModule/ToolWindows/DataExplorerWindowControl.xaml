@@ -29,7 +29,7 @@
 					<ColumnDefinition Width="*"/>
 					<ColumnDefinition Width="Auto"/>
 				</Grid.ColumnDefinitions>
-				<ComboBox Grid.Column="0" Height="20" Margin="1"/>
+				<ComboBox Grid.Column="0" Margin="1" Padding="5,0,0,0" ItemsSource="{Binding PossibleDataTypes}" SelectedItem="{Binding SelectedTypeFilter}"/>
 				<Button Command="{Binding RefreshCommand}" Grid.Column="1" Margin="1" Padding="1">
 					<imaging:CrispImage Width="16" Height="16" Moniker="{x:Static catalog:KnownMonikers.Refresh}"/>
 				</Button>

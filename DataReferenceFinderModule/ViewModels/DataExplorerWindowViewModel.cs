@@ -34,6 +34,32 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			return Name;
 		}
 
+		public void SetSelectedTypeFilter(string typeFilter)
+		{
+			if (m_selectedTypeFilter == typeFilter)
+				return;
+
+			m_selectedTypeFilter = typeFilter;
+			if (string.IsNullOrWhiteSpace(m_selectedTypeFilter))
+			{
+				HasAnyChildsMatchType = true;
+			}
+			else
+			{
+				HasAnyChildsMatchType = false;
+				foreach (var entryVM in DataEntries)
+				{
+					if (entryVM.SourceEntry != null && entryVM.SourceEntry.BaseType.Equals(typeFilter, StringComparison.OrdinalIgnoreCase))
+					{
+						HasAnyChildsMatchType = true;
+						break;
+					}
+				}
+			}
+
+			DataEntriesView.Refresh();
+		}
+
 		private bool m_isExpanded;
 		public bool IsExpanded { get => m_isExpanded; set => SetProperty(ref m_isExpanded, value); }
 		public string Name { get; private set; }
@@ -43,7 +69,18 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 		string[] m_searchTokens = { };
 
+		private string m_selectedTypeFilter = "";
+		public bool HasAnyChildsMatchType { get; private set; } = true;
+
 		// INestedSearchableViewModel
+		public Predicate<object> AdditionalFilter => (object entry) =>
+		{
+			if (string.IsNullOrWhiteSpace(m_selectedTypeFilter))
+				return true;
+
+			DataEntryViewModel entryVM = entry as DataEntryViewModel;
+			return entryVM.SourceEntry != null && entryVM.SourceEntry.BaseType.Equals(m_selectedTypeFilter, StringComparison.OrdinalIgnoreCase);
+		};
 		public string[] SearchTokens { get => m_searchTokens; set => m_searchTokens = value; }
 		public IEnumerable ChildEntries => DataEntries;
 		public ICollectionView FilteredView => DataEntriesView;
@@ -72,6 +109,23 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			m_entriesView = new ListCollectionView(Entries);
 		}
 
+		public void SetSelectedTypeFilter(string typeFilter)
+		{
+			if (m_selectedTypeFilter == typeFilter)
+				return;
+
+			m_selectedTypeFilter = typeFilter;
+			HasAnyChildsMatchType = string.IsNullOrWhiteSpace(m_selectedTypeFilter);
+
+			foreach (var entry in Entries)
+			{
+				entry.SetSelectedTypeFilter(typeFilter);
+				HasAnyChildsMatchType |= entry.HasAnyChildsMatchType;
+			}
+
+			EntriesView.Refresh();
+		}
+
 		public string GetSearchField()
 		{
 			return FilePath;
@@ -85,8 +139,12 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		private ListCollectionView m_entriesView;
 		public ICollectionView EntriesView { get => m_entriesView; }
 
+		private string m_selectedTypeFilter = "";
+		public bool HasAnyChildsMatchType { get; private set; } = true;
+
 		string[] m_searchTokens = { };
 		// INestedSearchableViewModel
+		public Predicate<object> AdditionalFilter => (entry) => ((DataExplorerSubTypeViewModel)entry).HasAnyChildsMatchType;
 		public string[] SearchTokens { get => m_searchTokens; set => m_searchTokens = value; }
 		public IEnumerable ChildEntries => Entries;
 		public ICollectionView FilteredView => EntriesView;
@@ -98,9 +156,14 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		public DataExplorerWindowViewModel()
 		{
 			PopulateEntries();
+			GameCodersToolkitPackage.DataLocationsConfig.ConfigLoaded += OnReferenceFinderConfigLoaded;
 			m_fileEntriesView = new ListCollectionView(FileEntries);
 			FileEntriesView.Filter = (object entry) =>
 			{
+				DataExplorerFileViewModel entryVM = entry as DataExplorerFileViewModel;
+				if (!entryVM.HasAnyChildsMatchType)
+					return false;
+
 				if (entry is ISearchableViewModel searchableEntry)
 				{
 					return SearchEntryUtils.FilterChild(searchableEntry, searchTokens);
@@ -108,6 +171,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 				return false;
 			};
 			GameCodersToolkitPackage.ReferenceDatabase.DatabaseUpdated += OnDatabaseUpdated;
+			UpdatePossibleDataTypes();
 		}
 
 		[RelayCommand]
@@ -141,6 +205,40 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			FileEntriesView.Refresh();
 		}
 
+		void OnSelectedTypeFilterUpdated()
+		{
+			if (m_selectedTypeFilter == "All")
+				m_selectedTypeFilter = "";
+
+			foreach (var entryVM in FileEntries)
+			{
+				entryVM.SetSelectedTypeFilter(m_selectedTypeFilter);
+			}
+			FileEntriesView.Refresh();
+		}
+
+		async void OnReferenceFinderConfigLoaded(object sender, EventArgs e)
+		{
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+			UpdatePossibleDataTypes();
+		}
+
+		void UpdatePossibleDataTypes()
+		{
+			PossibleDataTypes.Clear();
+			PossibleDataTypes.Add("All");
+			var parsingDescriptions = GameCodersToolkitPackage.DataLocationsConfig.GetParsingDescriptions();
+			foreach (var parsingDescription in parsingDescriptions)
+			{
+				string typeName = parsingDescription.TypeName ?? parsingDescription.Name;
+				if (!PossibleDataTypes.Contains(typeName))
+				{
+					PossibleDataTypes.Add(typeName);
+				}
+			}
+			SelectedTypeFilter = "All";
+		}
+
 		private void OnDatabaseUpdated(object sender, DatabaseUpdatedEventArgs e)
 		{
 			ThreadHelper.JoinableTaskFactory.RunAsync(async delegate
@@ -166,8 +264,13 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		string[] searchTokens = { };
 		string m_searchFilter = "Search...";
 		public string SearchFilter { get => m_searchFilter; set { SetProperty(ref m_searchFilter, value); OnSearchFilterUpdated(); } }
+
+		string m_selectedTypeFilter = "";
+		public string SelectedTypeFilter { get => string.IsNullOrWhiteSpace(m_selectedTypeFilter) ? "All" : m_selectedTypeFilter; set { SetProperty(ref m_selectedTypeFilter, value); OnSelectedTypeFilterUpdated(); } }
 		public ObservableCollection<DataExplorerFileViewModel> FileEntries { get; private set; } = new ObservableCollection<DataExplorerFileViewModel>();
 		private ListCollectionView m_fileEntriesView;
 		public ICollectionView FileEntriesView { get => m_fileEntriesView; }
+
+		public ObservableCollection<string> PossibleDataTypes { get; private set; } = new ObservableCollection<string>();
 	}
 }

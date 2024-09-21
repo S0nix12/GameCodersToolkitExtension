@@ -1,5 +1,6 @@
 ﻿using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.Utils;
+using Microsoft.VisualStudio.Threading;
 using System.Net.NetworkInformation;
 using System.Net.WebSockets;
 using System.Security.Policy;
@@ -51,7 +52,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 			lock (m_mutex)
 			{
 				m_socketStopped = false;
-				m_requestedAddress = address;
+				RequestedAddress = address;
 				m_socket = new ClientWebSocket();
 				PopulateSocketOptions(m_socket.Options);
 				SocketStatus = ESocketStatus.Connecting;
@@ -115,6 +116,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 				m_socket?.Dispose();
 				m_socket = null;
 				SocketStatus = ESocketStatus.Inactive;
+				m_reciveLoopCancellationSource = null;
 			}
 		}
 
@@ -175,7 +177,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 
 					try
 					{
-						await m_socket.ConnectAsync(m_requestedAddress, cancellationToken);
+						await m_socket.ConnectAsync(RequestedAddress, cancellationToken);
 					}
 					catch (WebSocketException)
 					{
@@ -265,9 +267,8 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 			}
 		}
 		public EventHandler<ConnectionStatusChangedEventArgs> SocketConnectionStatusChanged { get; set; }
-
+		public Uri RequestedAddress { get; private set; }
 		bool m_socketStopped = false;
-		Uri m_requestedAddress;
 
 		ClientWebSocket m_socket;
 
@@ -313,16 +314,24 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 			try
 			{
 				string serverAddress = GameCodersToolkitPackage.DataLocationsConfig.GetDataEditorServerUri();
+				if (m_socketRestartTask != null)
+				{
+					await m_socketRestartTask;
+				}
+
 				if (Uri.TryCreate(serverAddress, UriKind.RelativeOrAbsolute, out Uri serverUri))
 				{
-					ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+					if (serverUri != m_clientSocket.RequestedAddress)
 					{
-						await m_clientSocket.StopAsync();
-						if (DataReferenceFinderOptions.Instance.DataEditorSocketAutoConnect)
+						m_socketRestartTask = ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
 						{
-							await m_clientSocket.StartAsync(serverUri, true);
-						}
-					}).FireAndForget();
+							await m_clientSocket.StopAsync();
+							if (DataReferenceFinderOptions.Instance.DataEditorSocketAutoConnect)
+							{
+								await m_clientSocket.StartAsync(serverUri, true);
+							}
+						});
+					}
 				}
 				else
 				{
@@ -350,5 +359,6 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 		public bool IsConnectedToDataEditor { get => m_clientSocket.SocketStatus == ESocketStatus.Open; }
 
 		DataEditorClientSocket m_clientSocket;
+		JoinableTask m_socketRestartTask = null;
 	}
 }

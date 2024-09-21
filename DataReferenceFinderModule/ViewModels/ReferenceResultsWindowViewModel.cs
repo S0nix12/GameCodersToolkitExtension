@@ -81,6 +81,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 		private string[] m_searchTokens = [];
 		// INestedSearchableViewModel
+		public Predicate<object> AdditionalFilter => null;
 		public string[] SearchTokens { get => m_searchTokens; set => m_searchTokens = value; }
 		public IEnumerable ChildEntries => DataEntryResults;
 		public ICollectionView FilteredView => DataEntryResultsView;
@@ -211,6 +212,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 		string[] m_searchTokens = [];
 		// INestedSearchableViewModel
+		public Predicate<object> AdditionalFilter => null;
 		public string[] SearchTokens { get => m_searchTokens; set => m_searchTokens = value; }
 		public IEnumerable ChildEntries => FileResults;
 		public ICollectionView FilteredView => FileResultsView;
