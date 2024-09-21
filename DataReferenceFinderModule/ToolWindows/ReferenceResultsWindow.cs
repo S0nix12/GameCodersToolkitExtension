@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Imaging;
+﻿using GameCodersToolkit.DataReferenceFinderModule.ViewModels;
+using Microsoft.VisualStudio.Imaging;
 using System.ComponentModel.Design;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -16,7 +17,12 @@ namespace GameCodersToolkit.ReferenceFinder.ToolWindows
 		public override async Task<FrameworkElement> CreateAsync(int toolWindowId, CancellationToken cancellationToken)
 		{
 			ReferenceResultsWindowMessenger messenger = await Package.GetServiceAsync<ReferenceResultsWindowMessenger, ReferenceResultsWindowMessenger>();
-			return new ReferenceResultsWindowControl(messenger);
+			var newWindowControl = new ReferenceResultsWindowControl(messenger);
+			if (newWindowControl.DataContext is ReferenceResultsWindowViewModel viewModel)
+			{
+				viewModel.AttachMessenger(messenger);
+			}
+			return newWindowControl;
 		}
 
 		[Guid("a41b151f-a0f0-42a6-bf69-505d80cf8235")]

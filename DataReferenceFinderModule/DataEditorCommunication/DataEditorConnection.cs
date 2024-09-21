@@ -1,10 +1,8 @@
-﻿using EnvDTE;
-using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
+﻿using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.Utils;
-using Microsoft.VisualStudio.Threading;
-using System.Net.Sockets;
+using System.Net.NetworkInformation;
 using System.Net.WebSockets;
-using System.Text;
+using System.Security.Policy;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,7 +31,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 
 		public void Dispose()
 		{
-			m_tryReconnect = false;
+			m_socketStopped = true;
 			m_pendingConnectionCancellationSource?.Cancel();
 			m_reciveLoopCancellationSource?.Cancel();
 
@@ -52,10 +50,10 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 
 			lock (m_mutex)
 			{
-				m_tryReconnect = tryReconnect;
+				m_socketStopped = false;
 				m_requestedAddress = address;
 				m_socket = new ClientWebSocket();
-				m_socket.Options.AddSubProtocol("GameCodersToolkit.DataReferenceFinder");
+				PopulateSocketOptions(m_socket.Options);
 				SocketStatus = ESocketStatus.Connecting;
 
 				m_pendingConnectionCancellationSource = new CancellationTokenSource();
@@ -80,7 +78,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 		{
 			lock (m_mutex)
 			{
-				m_tryReconnect = false;
+				m_socketStopped = true;
 				m_pendingConnectionCancellationSource?.Cancel();
 			}
 
@@ -168,9 +166,8 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 			var cancellationToken = m_pendingConnectionCancellationSource.Token;
 			try
 			{
-				while (m_socket.State != WebSocketState.Open && !cancellationToken.IsCancellationRequested)
+				while (m_socket != null && m_socket.State != WebSocketState.Open && !cancellationToken.IsCancellationRequested)
 				{
-					await Task.Delay(2000, cancellationToken);
 					if (m_socket.State == WebSocketState.Open || cancellationToken.IsCancellationRequested)
 					{
 						break;
@@ -182,9 +179,19 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 					}
 					catch (WebSocketException)
 					{
-						// Retry connection, the exception results in our socket being disposed so create a new one
+						//The exception results in our socket being disposed, create a new one
 						m_socket = new ClientWebSocket();
-						m_socket.Options.AddSubProtocol("GameCodersToolkit.DataReferenceFinder");
+						PopulateSocketOptions(m_socket.Options);
+						if (TryAutoConnect)
+						{
+							// Retry connection, 
+							await Task.Delay(TimeSpan.FromSeconds(DataReferenceFinderOptions.Instance.DataEditorSocketAutoConnectInterval), cancellationToken);
+						}
+					}
+
+					if (!TryAutoConnect)
+					{ 
+						break;
 					}
 				}
 
@@ -215,24 +222,54 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 
 		private void RestartPendingConnectionLoop(Task receiveTask)
 		{
-			if (!m_tryReconnect || m_pendingConnectionCancellationSource.IsCancellationRequested)
+			if (!TryAutoConnect || m_socketStopped || m_pendingConnectionCancellationSource.IsCancellationRequested)
 				return;
 
 			m_socket = new ClientWebSocket();
-			m_socket.Options.AddSubProtocol("GameCodersToolkit.DataReferenceFinder");
+			PopulateSocketOptions(m_socket.Options);
 			SocketStatus = ESocketStatus.Connecting;
 
 			m_pendingConnectionCancellationSource = new CancellationTokenSource();
 			m_pendingConnectionLoop = Task.Run(PendingConnectLoopAsync).ContinueWith(StartReceiveLoop, TaskScheduler.Default);
 		}
 
-		public ESocketStatus SocketStatus { get; private set; }
+		private void PopulateSocketOptions(ClientWebSocketOptions socketOptions)
+		{
+			socketOptions.AddSubProtocol("GameCodersToolkit.DataReferenceFinder");
+			DataReferenceFinderOptions userOptions = DataReferenceFinderOptions.Instance;
+			socketOptions.KeepAliveInterval = userOptions.DataEditorSocketEnableKeepAlivePong ? TimeSpan.FromSeconds(userOptions.DataEditorSocketKeepAliveInterval) : TimeSpan.MaxValue;
+		}
 
+		private bool TryAutoConnect { get => DataReferenceFinderOptions.Instance.DataEditorSocketAutoConnect; }
+
+		private ESocketStatus m_socketStatus;
+		public ESocketStatus SocketStatus 
+		{
+			get => m_socketStatus;
+			private set
+			{
+				ESocketStatus oldValue = m_socketStatus;
+				m_socketStatus = value;
+				if (oldValue != m_socketStatus)
+				{
+					switch (m_socketStatus)
+					{
+						case ESocketStatus.Inactive:
+							SocketConnectionStatusChanged?.Invoke(this, new ConnectionStatusChangedEventArgs(false));
+							break;
+						case ESocketStatus.Open:
+							SocketConnectionStatusChanged?.Invoke(this, new ConnectionStatusChangedEventArgs(true));
+							break;
+					}
+				}
+			}
+		}
+		public EventHandler<ConnectionStatusChangedEventArgs> SocketConnectionStatusChanged { get; set; }
+
+		bool m_socketStopped = false;
 		Uri m_requestedAddress;
-		bool m_tryReconnect = false;
 
 		ClientWebSocket m_socket;
-		ClientWebSocketOptions m_options;
 
 		Task m_receiveLoop;
 		CancellationTokenSource m_reciveLoopCancellationSource;
@@ -249,6 +286,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 		{
 			GameCodersToolkitPackage.DataLocationsConfig.ConfigLoaded += OnConfigLoaded;
 			m_clientSocket = new DataEditorClientSocket();
+			m_clientSocket.SocketConnectionStatusChanged += OnConnectionStatusChanged;
 		}
 
 		public async Task OpenInDataEditorAsync(DataEntry dataEntry)
@@ -270,22 +308,42 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 			}
 		}
 
-		void OnConfigLoaded(object sender, EventArgs e)
+		async void OnConfigLoaded(object sender, EventArgs e)
 		{
-			string serverAddress = GameCodersToolkitPackage.DataLocationsConfig.GetDataEditorServerUri();
-			if (Uri.TryCreate(serverAddress, UriKind.RelativeOrAbsolute, out Uri serverUri))
+			try
 			{
-				ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+				string serverAddress = GameCodersToolkitPackage.DataLocationsConfig.GetDataEditorServerUri();
+				if (Uri.TryCreate(serverAddress, UriKind.RelativeOrAbsolute, out Uri serverUri))
+				{
+					ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+					{
+						await m_clientSocket.StopAsync();
+						if (DataReferenceFinderOptions.Instance.DataEditorSocketAutoConnect)
+						{
+							await m_clientSocket.StartAsync(serverUri, true);
+						}
+					}).FireAndForget();
+				}
+				else
 				{
 					await m_clientSocket.StopAsync();
-					await m_clientSocket.StartAsync(serverUri, true);
-				}).FireAndForget();
+				}
+			}
+			catch (Exception ex)
+			{
+				await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+					"Exception handling config loaded in DataEditorConnection",
+					ex);
 			}
 		}
 
 		void OnConnectionStatusChanged(object sender, ConnectionStatusChangedEventArgs args)
 		{
-			DataEditorConnectionStatusChanged?.Invoke(this, args);
+			ThreadHelper.JoinableTaskFactory.RunAsync(async delegate
+			{
+				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+				DataEditorConnectionStatusChanged?.Invoke(this, args);
+			}).FileAndForget("GameCodersToolkit.DataEditorConnection.ConnectionStatusChanged");
 		}
 
 		public EventHandler<ConnectionStatusChangedEventArgs> DataEditorConnectionStatusChanged { get; set; }

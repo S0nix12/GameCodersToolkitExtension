@@ -3,9 +3,11 @@ using CommunityToolkit.Mvvm.Input;
 using GameCodersToolkit.DataReferenceFinderModule;
 using GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
+using GameCodersToolkit.Utils;
 using Microsoft.VisualStudio.Shell.Internal.FileEnumerationService;
 using Microsoft.VisualStudio.Text;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -14,40 +16,41 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using System.Windows.Navigation;
 
 namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 {
-	public class DataExplorerSubTypeViewModel : ObservableObject
+	public class DataExplorerSubTypeViewModel : ObservableObject, INestedSearchableViewModel
 	{
 		public DataExplorerSubTypeViewModel(string inName)
 		{
 			Name = inName;
 
 			m_dataEntriesView = new ListCollectionView(DataEntries);
-			DataEntriesView.Filter = (object entry) =>
-			{
-				DataEntryViewModel dataEntry = entry as DataEntryViewModel;
-				return searchTokens.Length == 0 
-				|| searchTokens.All(token => dataEntry.Name.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0);
-			};
 		}
 
-		public void SetSearchFilter(string[] inSearchTokens)
+		public string GetSearchField()
 		{
-			searchTokens = inSearchTokens;
-			DataEntriesView.Refresh();
+			return Name;
 		}
 
 		private bool m_isExpanded;
 		public bool IsExpanded { get => m_isExpanded; set => SetProperty(ref m_isExpanded, value); }
-		string[] searchTokens = { };
 		public string Name { get; private set; }
 		public ObservableCollection<DataEntryViewModel> DataEntries { get; private set; } = new ObservableCollection<DataEntryViewModel>();
 		private ListCollectionView m_dataEntriesView;
 		public ICollectionView DataEntriesView { get => m_dataEntriesView; }
+
+		string[] m_searchTokens = { };
+
+		// INestedSearchableViewModel
+		public string[] SearchTokens { get => m_searchTokens; set => m_searchTokens = value; }
+		public IEnumerable ChildEntries => DataEntries;
+		public ICollectionView FilteredView => DataEntriesView;
+		// ~INestedSearchableViewModel
 	}
 
-	public class DataExplorerFileViewModel : ObservableObject
+	public class DataExplorerFileViewModel : ObservableObject, INestedSearchableViewModel
 	{
 		public DataExplorerFileViewModel(string filePath)
 		{
@@ -67,33 +70,27 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			}
 
 			m_entriesView = new ListCollectionView(Entries);
-			EntriesView.Filter = (object entry) =>
-			{
-				DataExplorerSubTypeViewModel subTypeEntry = entry as DataExplorerSubTypeViewModel;
-				return searchTokens.Length == 0
-				|| !subTypeEntry.DataEntriesView.IsEmpty
-				|| searchTokens.All(token => subTypeEntry.Name.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0);
-			};
 		}
 
-		public void SetSearchFilter(string[] inSearchTokens)
+		public string GetSearchField()
 		{
-			searchTokens = inSearchTokens;
-			foreach (var entry in Entries)
-			{
-				entry.SetSearchFilter(searchTokens);
-			}
-			EntriesView.Refresh();
+			return FilePath;
 		}
 
 		private bool m_isExpanded;
 		public bool IsExpanded { get => m_isExpanded; set => SetProperty(ref m_isExpanded, value); }
-		string[] searchTokens = { };
 		public string FilePath { get; private set; }
 		public ObservableCollection<DataExplorerSubTypeViewModel> Entries { get; private set; } = new ObservableCollection<DataExplorerSubTypeViewModel>();
 
 		private ListCollectionView m_entriesView;
 		public ICollectionView EntriesView { get => m_entriesView; }
+
+		string[] m_searchTokens = { };
+		// INestedSearchableViewModel
+		public string[] SearchTokens { get => m_searchTokens; set => m_searchTokens = value; }
+		public IEnumerable ChildEntries => Entries;
+		public ICollectionView FilteredView => EntriesView;
+		// ~INestedSearchableViewModel
 	}
 
 	public partial class DataExplorerWindowViewModel : ObservableObject
@@ -104,11 +101,13 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			m_fileEntriesView = new ListCollectionView(FileEntries);
 			FileEntriesView.Filter = (object entry) =>
 			{
-				DataExplorerFileViewModel fileEntry = entry as DataExplorerFileViewModel;
-				return searchTokens.Length == 0
-				|| !fileEntry.EntriesView.IsEmpty
-				|| searchTokens.All(token => fileEntry.FilePath.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0);
+				if (entry is ISearchableViewModel searchableEntry)
+				{
+					return SearchEntryUtils.FilterChild(searchableEntry, searchTokens);
+				}
+				return false;
 			};
+			GameCodersToolkitPackage.ReferenceDatabase.DatabaseUpdated += OnDatabaseUpdated;
 		}
 
 		[RelayCommand]
@@ -116,9 +115,10 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		{
 			Task.Run(async delegate
 			{
+				GameCodersToolkitPackage.ReferenceDatabase.ClearDatabase();
 				await GameCodersToolkitPackage.DataParsingEngine.StartDataParseAsync();
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-				PopulateEntries();
+				//PopulateEntries();
 			}).FireAndForget();
 		}
 
@@ -136,9 +136,31 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			searchTokens = m_searchFilter.Split(' ');
 			foreach (var fileEntry in FileEntries)
 			{
-				fileEntry.SetSearchFilter(searchTokens);
+				SearchEntryUtils.SetSearchTokens(fileEntry, searchTokens);
 			}
 			FileEntriesView.Refresh();
+		}
+
+		private void OnDatabaseUpdated(object sender, DatabaseUpdatedEventArgs e)
+		{
+			ThreadHelper.JoinableTaskFactory.RunAsync(async delegate
+			{
+				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+				switch (e.UpdateType)
+				{
+					case EDatabseUpdateEvent.EntriesAdded:
+						var newEntry = new DataExplorerFileViewModel(e.FilePath);
+						SearchEntryUtils.SetSearchTokens(newEntry, searchTokens);
+						FileEntries.Add(newEntry);
+						break;
+					case EDatabseUpdateEvent.EntriesRemoved:
+						FileEntries.RemoveAll(entry => entry.FilePath == e.FilePath);
+						break;
+					case EDatabseUpdateEvent.DatabaseCleared:
+						FileEntries.Clear();
+						break;
+				}
+			}).FireAndForget();
 		}
 
 		string[] searchTokens = { };

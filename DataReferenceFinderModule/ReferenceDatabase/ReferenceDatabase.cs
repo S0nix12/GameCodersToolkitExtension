@@ -7,6 +7,19 @@ using System.Threading.Tasks;
 
 namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 {
+	public enum EDatabseUpdateEvent
+	{
+		EntriesAdded,
+		EntriesRemoved,
+		DatabaseCleared
+	}
+
+	public class DatabaseUpdatedEventArgs
+	{
+		public string FilePath { get; set; }
+		public EDatabseUpdateEvent UpdateType { get; set; }
+	}
+
 	public class Database
 	{
 		public void AddEntriesForFile(string filePath, HashSet<DataEntry> entries)
@@ -26,6 +39,11 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 						ReferencedByEntries.GetOrCreate(reference).Add(newEntry);
 					}
 				}
+
+				DatabaseUpdatedEventArgs updateEventArgs = new DatabaseUpdatedEventArgs();
+				updateEventArgs.FilePath = filePath;
+				updateEventArgs.UpdateType = EDatabseUpdateEvent.EntriesAdded;
+				DatabaseUpdated?.Invoke(this, updateEventArgs);
 			}
 		}
 
@@ -50,6 +68,10 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			EntriesPerFile.Clear();
 			ReferencedByEntries.Clear();
 			GC.Collect();
+
+			DatabaseUpdatedEventArgs updateEventArgs = new DatabaseUpdatedEventArgs();
+			updateEventArgs.UpdateType = EDatabseUpdateEvent.DatabaseCleared;
+			DatabaseUpdated?.Invoke(this, updateEventArgs);
 		}
 
 		public void ClearEntriesForDirectory(string directoryPath)
@@ -92,10 +114,15 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 					}
 
 					EntriesPerFile.Remove(filePath);
+					DatabaseUpdatedEventArgs updateEventArgs = new DatabaseUpdatedEventArgs();
+					updateEventArgs.FilePath = filePath;
+					updateEventArgs.UpdateType = EDatabseUpdateEvent.EntriesRemoved;
+					DatabaseUpdated?.Invoke(this, updateEventArgs);
 				}
 			}
 		}
 
+		public EventHandler<DatabaseUpdatedEventArgs> DatabaseUpdated { get; set; }
 		public Dictionary<string, HashSet<DataEntry>> EntriesPerFile { get; private set; } = new Dictionary<string, HashSet<DataEntry>>();
 		public Dictionary<GenericDataIdentifier, HashSet<DataEntry>> ReferencedByEntries { get; private set; } = new Dictionary<GenericDataIdentifier, HashSet<DataEntry>>();
 

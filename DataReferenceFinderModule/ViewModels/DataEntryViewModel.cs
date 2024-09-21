@@ -2,12 +2,13 @@
 using CommunityToolkit.Mvvm.Input;
 using GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
+using GameCodersToolkit.Utils;
 using Microsoft.VisualStudio.Text;
 using System.Threading.Tasks;
 
 namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 {
-	public partial class DataEntryViewModel : ObservableObject
+	public partial class DataEntryViewModel : ObservableObject, ISearchableViewModel
 	{
 		public DataEntryViewModel()
 		{
@@ -75,11 +76,12 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 		void OnDataEditorConnectionStatusChanged(object sender, ConnectionStatusChangedEventArgs args)
 		{
-			ThreadHelper.JoinableTaskFactory.WithPriority(VsTaskRunContext.UIThreadIdlePriority).Run(async delegate
-			{
-				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-				CanOpenInDataEditor = args.IsConnected;
-			});
+			CanOpenInDataEditor = args.IsConnected;
+		}
+
+		public string GetSearchField()
+		{
+			return Name;
 		}
 
 		private AsyncRelayCommand openEntryInDataEditorCommand;

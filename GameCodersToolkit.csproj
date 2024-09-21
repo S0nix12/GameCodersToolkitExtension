@@ -57,6 +57,7 @@
     <Compile Include="DataReferenceFinderModule\Configuration\DataLocationsConfiguration.cs" />
     <Compile Include="DataReferenceFinderModule\DataEditorCommunication\DataEditorMessages.cs" />
     <Compile Include="DataReferenceFinderModule\DataEditorCommunication\DataEditorConnection.cs" />
+    <Compile Include="DataReferenceFinderModule\Options\DataReferenceFinderOptions.cs" />
     <Compile Include="DataReferenceFinderModule\ReferenceDatabase\DataEntry.cs" />
     <Compile Include="DataReferenceFinderModule\ReferenceDatabase\DataFileParser.cs" />
     <Compile Include="DataReferenceFinderModule\ReferenceDatabase\DataParsingEngine.cs" />
@@ -112,6 +113,7 @@
     <Compile Include="DataReferenceFinderModule\ViewModels\ReferenceResultsWindowViewModel.cs" />
     <Compile Include="SourceControl\PerforceConnection.cs" />
     <Compile Include="Utils\DiagnosticUtils.cs" />
+    <Compile Include="Utils\SearchEntryUtils.cs" />
     <Compile Include="VSCommandTable.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

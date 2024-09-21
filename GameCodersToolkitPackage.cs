@@ -25,7 +25,8 @@ namespace GameCodersToolkit
 	[ProvideAutoLoad(VSConstants.UICONTEXT.SolutionOpening_string, PackageAutoLoadFlags.BackgroundLoad)]
 	[ProvideService(typeof(ReferenceResultsWindowMessenger), IsAsyncQueryable = true)]
 	[ProvideService(typeof(QuickAttachService), IsAsyncQueryable = true)]
-	[ProvideOptionPage(typeof(OptionsProvider.QuickAttachOptionsOptions), "Game Coders Toolkit", "Quick Attach", 0, 0, true, SupportsProfiles = true)]
+	[ProvideOptionPage(typeof(QuickAttach.OptionsProvider.QuickAttachOptionsOptions), "Game Coders Toolkit", "Quick Attach", 0, 0, true, SupportsProfiles = true)]
+	[ProvideOptionPage(typeof(DataReferenceFinderModule.OptionsProvider.DataReferenceFinderOptionsOptions), "Game Coders Toolkit", "Data Reference Finder", 0, 0, true, SupportsProfiles = true)]
 	public sealed class GameCodersToolkitPackage : ToolkitPackage
 	{
 		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)

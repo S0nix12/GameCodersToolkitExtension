@@ -1,12 +1,17 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.ReferenceFinder;
+using GameCodersToolkit.ReferenceFinder.ToolWindows;
+using GameCodersToolkit.Utils;
 using Microsoft.VisualStudio.Text;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 {
@@ -48,24 +53,41 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		private FileResultsViewModel m_parentFileResult;
 	}
 
-	public class FileResultsViewModel : ObservableObject
+	public class FileResultsViewModel : ObservableObject, INestedSearchableViewModel
 	{
 		public FileResultsViewModel(OperationResultsViewModel inParentOperationResult)
 		{
 			ParentOperationResult = inParentOperationResult;
+			m_dataEntryResultsView = new ListCollectionView(DataEntryResults);
 		}
+
+		public string GetSearchField()
+		{
+			return FilePath;
+		}
+
+		private bool m_isExpanded;
+		public bool IsExpanded { get => m_isExpanded; set => SetProperty(ref m_isExpanded, value); }
 
 		private string m_filePath = "";
 		public string FilePath { get => m_filePath; set => SetProperty(ref m_filePath, value); }
+		public OperationResultsViewModel ParentOperationResult { get; private set; }
 
 		private ObservableCollection<DataEntryResultViewModel> m_dataEntryResults = new ObservableCollection<DataEntryResultViewModel>();
 		public ObservableCollection<DataEntryResultViewModel> DataEntryResults { get => m_dataEntryResults; set => SetProperty(ref m_dataEntryResults, value); }
 
-		public OperationResultsViewModel ParentOperationResult { get; private set; }
+		private ListCollectionView m_dataEntryResultsView;
+		public ICollectionView DataEntryResultsView { get => m_dataEntryResultsView; }
 
+		private string[] m_searchTokens = [];
+		// INestedSearchableViewModel
+		public string[] SearchTokens { get => m_searchTokens; set => m_searchTokens = value; }
+		public IEnumerable ChildEntries => DataEntryResults;
+		public ICollectionView FilteredView => DataEntryResultsView;
+		// ~INestedSearchableViewModel
 	}
 
-	public class OperationResultsViewModel : ObservableObject
+	public class OperationResultsViewModel : ObservableObject, INestedSearchableViewModel
 	{
 		public OperationResultsViewModel(FindReferenceOperationResults model)
 		{
@@ -76,6 +98,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 			model.OperationStatusChanged += HandleOperationStatusChanged;
 			model.ResultsUpdated += HandleResultsUpdate;
+			m_fileResultsView = new ListCollectionView(FileResults);
 		}
 
 		void HandleOperationStatusChanged(object operation, FindReferenceOperationResults.OperationStatusEventArgs eventArgs)
@@ -124,6 +147,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 				{
 					fileResultsViewModel = new FileResultsViewModel(this);
 					fileResultsViewModel.FilePath = fileEntry.Key;
+					SearchEntryUtils.SetSearchTokens(fileResultsViewModel, m_searchTokens);
 					FileResults.Insert(0, fileResultsViewModel);
 				}
 
@@ -141,7 +165,21 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 					}
 				}
 			}
+				FileResultsView.Refresh();
 		}
+		public void SetSearchFilter(string searchFilter)
+		{
+			m_searchTokens = searchFilter.Split(' ');
+			SearchEntryUtils.SetSearchTokens(this, m_searchTokens);
+		}
+
+		public string GetSearchField()
+		{
+			return "";
+		}
+
+		private bool m_isExpanded;
+		public bool IsExpanded { get => m_isExpanded; set => SetProperty(ref m_isExpanded, value); }
 
 		private string m_searchPath = "";
 		public string SearchPath { get => m_searchPath; set => SetProperty(ref m_searchPath, value); }
@@ -168,6 +206,15 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 		private ObservableCollection<FileResultsViewModel> m_fileResults = new ObservableCollection<FileResultsViewModel>();
 		public ObservableCollection<FileResultsViewModel> FileResults { get => m_fileResults; set => SetProperty(ref m_fileResults, value); }
+		private ListCollectionView m_fileResultsView;
+		public ICollectionView FileResultsView { get => m_fileResultsView; }
+
+		string[] m_searchTokens = [];
+		// INestedSearchableViewModel
+		public string[] SearchTokens { get => m_searchTokens; set => m_searchTokens = value; }
+		public IEnumerable ChildEntries => FileResults;
+		public ICollectionView FilteredView => FileResultsView;
+		// ~INestedSearchableViewModel
 	}
 
 	public class ReferenceResultsWindowViewModel : ObservableObject
@@ -177,6 +224,12 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			GameCodersToolkitPackage.FindReferenceResultsStorage.Results.CollectionChanged += HandleResultsCollectionChanged;
 		}
 
+		public void AttachMessenger(ReferenceResultsWindowMessenger messenger)
+		{
+			messenger.FilterProvider += () => m_searchFilter;
+			messenger.FilterUpdated += OnSearchFilterUpdated;
+		}
+
 		void HandleResultsCollectionChanged(object storage, NotifyCollectionChangedEventArgs eventArgs)
 		{
 			switch (eventArgs.Action)
@@ -184,7 +237,9 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 				case NotifyCollectionChangedAction.Add:
 					foreach (FindReferenceOperationResults operation in eventArgs.NewItems)
 					{
-						OperationResults.Insert(0, new OperationResultsViewModel(operation));
+						var newResult = new OperationResultsViewModel(operation);
+						newResult.SetSearchFilter(m_searchFilter);
+						OperationResults.Insert(0, newResult);
 					}
 					break;
 				case NotifyCollectionChangedAction.Remove:
@@ -198,6 +253,17 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 					break;
 			}
 		}
+
+		public void OnSearchFilterUpdated(object sender, string newFilter)
+		{
+			foreach (var operationVM in OperationResults)
+			{
+				operationVM.SetSearchFilter(newFilter);
+			}
+			m_searchFilter = newFilter;
+		}
+
+		string m_searchFilter = "";
 
 		private ObservableCollection<OperationResultsViewModel> m_operationResults = new ObservableCollection<OperationResultsViewModel>();
 		public ObservableCollection<OperationResultsViewModel> OperationResults { get => m_operationResults; set => SetProperty(ref m_operationResults, value); }

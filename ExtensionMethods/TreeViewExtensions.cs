@@ -18,7 +18,7 @@ namespace System.Windows.Controls
 			if (parent is TreeViewItem tvi)
 				tvi.IsExpanded = isExpanded;
 
-			if (parent.HasItems)
+			if (parent != null && parent.HasItems)
 				foreach (var item in parent
 					.Items
 					.Cast<object>()

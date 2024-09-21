@@ -39,13 +39,13 @@
 				<TreeView.Resources>
 					<DataTemplate DataType="{x:Type vm:DataEntryViewModel}">
 						<Border Name="DataEntryVM_Border" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" PreviewMouseRightButtonDown="DataEntryVM_Border_PreviewMouseRightButtonDown" MouseLeftButtonDown="DataEntryVM_Border_LeftMouseDown">
+							<Border.ContextMenu>
+								<ContextMenu>
+									<MenuItem Header="Find References" Command="{Binding FindReferencesCommand}"/>
+									<MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
+								</ContextMenu>
+							</Border.ContextMenu>
 							<StackPanel Orientation="Horizontal">
-								<StackPanel.ContextMenu>
-									<ContextMenu>
-										<MenuItem Header="Find References" Command="{Binding FindReferencesCommand}"/>
-										<MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
-									</ContextMenu>
-								</StackPanel.ContextMenu>
 								<TextBlock Text="{Binding Name}" />
 								<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
 								<TextBlock Text="{Binding LineNumber, StringFormat=Line: {0}}" />
