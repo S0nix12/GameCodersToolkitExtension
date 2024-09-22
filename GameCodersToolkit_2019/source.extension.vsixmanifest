@@ -15,5 +15,6 @@
     </Prerequisites>
     <Assets>
         <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+        <Asset d:Source="Project" d:ProjectName="DataReferenceCodeLensProvider_2019" Type="Microsoft.VisualStudio.CodeLensComponent" Path="|DataReferenceCodeLensProvider_2019|" />
     </Assets>
 </PackageManifest>

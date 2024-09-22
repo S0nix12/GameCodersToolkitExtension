@@ -129,6 +129,13 @@
       <Version>8.0.4</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DataReferenceCodeLensProvider_2019\DataReferenceCodeLensProvider_2019.csproj">
+      <Project>{31057F07-B486-48BC-9478-FB698DB33F3A}</Project>
+      <Name>DataReferenceCodeLensProvider_2019</Name>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="..\GameCodersToolkitShared\GameCodersToolkitShared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />

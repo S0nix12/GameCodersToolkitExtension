@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameCodersToolkit_2022", "G
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameCodersToolkit_2019", "GameCodersToolkit_2019\GameCodersToolkit_2019.csproj", "{4CE72DE4-54D6-4782-A3E3-5D3156A2C8C4}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DataReferenceCodeLensProviderShared", "DataReferenceCodeLensProviderShared\DataReferenceCodeLensProviderShared.shproj", "{C6CB0E3F-8673-4B49-9796-FAEDC9F08ECD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataReferenceCodeLensProvider_2019", "DataReferenceCodeLensProvider_2019\DataReferenceCodeLensProvider_2019.csproj", "{31057F07-B486-48BC-9478-FB698DB33F3A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataReferenceCodeLensProvider_2022", "DataReferenceCodeLensProvider_2022\DataReferenceCodeLensProvider_2022.csproj", "{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +49,30 @@ Global
 		{4CE72DE4-54D6-4782-A3E3-5D3156A2C8C4}.Release|arm64.Build.0 = Release|arm64
 		{4CE72DE4-54D6-4782-A3E3-5D3156A2C8C4}.Release|x86.ActiveCfg = Release|x86
 		{4CE72DE4-54D6-4782-A3E3-5D3156A2C8C4}.Release|x86.Build.0 = Release|x86
+		{31057F07-B486-48BC-9478-FB698DB33F3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31057F07-B486-48BC-9478-FB698DB33F3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31057F07-B486-48BC-9478-FB698DB33F3A}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{31057F07-B486-48BC-9478-FB698DB33F3A}.Debug|arm64.Build.0 = Debug|Any CPU
+		{31057F07-B486-48BC-9478-FB698DB33F3A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{31057F07-B486-48BC-9478-FB698DB33F3A}.Debug|x86.Build.0 = Debug|Any CPU
+		{31057F07-B486-48BC-9478-FB698DB33F3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31057F07-B486-48BC-9478-FB698DB33F3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31057F07-B486-48BC-9478-FB698DB33F3A}.Release|arm64.ActiveCfg = Release|Any CPU
+		{31057F07-B486-48BC-9478-FB698DB33F3A}.Release|arm64.Build.0 = Release|Any CPU
+		{31057F07-B486-48BC-9478-FB698DB33F3A}.Release|x86.ActiveCfg = Release|Any CPU
+		{31057F07-B486-48BC-9478-FB698DB33F3A}.Release|x86.Build.0 = Release|Any CPU
+		{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}.Debug|arm64.Build.0 = Debug|Any CPU
+		{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}.Debug|x86.Build.0 = Debug|Any CPU
+		{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}.Release|arm64.ActiveCfg = Release|Any CPU
+		{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}.Release|arm64.Build.0 = Release|Any CPU
+		{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}.Release|x86.ActiveCfg = Release|Any CPU
+		{BC2CB3BD-96FD-4EBE-8B30-7FE92ED2A8B3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,7 +81,10 @@ Global
 		SolutionGuid = {51005583-3FC8-48DC-BA2F-DE54E9BE2D71}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DataReferenceCodeLensProviderShared\DataReferenceCodeLensProviderShared.projitems*{31057f07-b486-48bc-9478-fb698db33f3a}*SharedItemsImports = 4
 		GameCodersToolkitShared\GameCodersToolkitShared.projitems*{4ce72de4-54d6-4782-a3e3-5d3156a2c8c4}*SharedItemsImports = 4
+		DataReferenceCodeLensProviderShared\DataReferenceCodeLensProviderShared.projitems*{bc2cb3bd-96fd-4ebe-8b30-7fe92ed2a8b3}*SharedItemsImports = 4
+		DataReferenceCodeLensProviderShared\DataReferenceCodeLensProviderShared.projitems*{c6cb0e3f-8673-4b49-9796-faedc9f08ecd}*SharedItemsImports = 13
 		GameCodersToolkitShared\GameCodersToolkitShared.projitems*{d457a2c8-77bb-40d4-9d58-e1bfc4b3ed36}*SharedItemsImports = 13
 		GameCodersToolkitShared\GameCodersToolkitShared.projitems*{dc088cc8-1842-4f5f-a27d-fa6a090cedd2}*SharedItemsImports = 4
 	EndGlobalSection
