@@ -7,10 +7,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule
 	{
 		protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
 		{
-			Stopwatch stopwatch = Stopwatch.StartNew();
-			await GameCodersToolkitPackage.DataParsingEngine.StartDataParseAsync();
-			stopwatch.Stop();
-			await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync("Finished Data Parsing. Took: " + stopwatch.ElapsedMilliseconds + "ms");
+			await GameCodersToolkitPackage.DataParsingEngine.ParseDataAsync();
 		}
 	}
 }

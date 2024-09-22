@@ -72,6 +72,7 @@ namespace GameCodersToolkit.Configuration
 			}
 
 			ThreadHelper.JoinableTaskFactory.Run(LoadSolutionConfigAsync);
+			SolutionConfigLoaded?.Invoke(this, new EventArgs());
 		}
 
 		public async Task LoadSolutionConfigAsync()
@@ -177,6 +178,7 @@ namespace GameCodersToolkit.Configuration
 		}
 
 		public EventHandler ConfigLoaded { get; set; }
+		public EventHandler SolutionConfigLoaded { get; set; }
 		private CDataLocationsConfig DataLocationsConfig { get; set; } = new CDataLocationsConfig();
 		private FileSystemWatcher ConfigFileWatcher { get; set; }
 		private string SolutionFolder { get; set; } = "";

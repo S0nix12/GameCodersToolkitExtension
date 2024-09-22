@@ -36,5 +36,11 @@ namespace GameCodersToolkit.DataReferenceFinderModule
 		[Description("If auto connect is enabled defines the interval in seconds in which connection is tried to establish")]
 		[DefaultValue(5.0)]
 		public double DataEditorSocketAutoConnectInterval { get; set; } = 5.0f;
+
+		[Category("Reference Database")]
+		[DisplayName("Auto Parse Data On Solution Load")]
+		[Description("Automatically start parsing of data files when opening a Solution")]
+		[DefaultValue(true)]
+		public bool ReferenceDatabaseAutoParseOnSolutionLoad { get; set; } = true;
 	}
 }

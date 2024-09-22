@@ -48,6 +48,8 @@ namespace GameCodersToolkit
 				await FileTemplateCreatorConfig.InitAsync();
 
 				DataParsingEngine = new DataParsingEngine();
+				DataParsingEngine.Init();
+
 				ReferenceDatabase = new Database();
 				DataEditorConnection = new DataEditorConnection();
 			}

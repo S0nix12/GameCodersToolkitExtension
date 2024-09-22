@@ -40,10 +40,13 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 					}
 				}
 
-				DatabaseUpdatedEventArgs updateEventArgs = new DatabaseUpdatedEventArgs();
-				updateEventArgs.FilePath = filePath;
-				updateEventArgs.UpdateType = EDatabseUpdateEvent.EntriesAdded;
-				DatabaseUpdated?.Invoke(this, updateEventArgs);
+				Task.Run(() =>
+				{
+					DatabaseUpdatedEventArgs updateEventArgs = new DatabaseUpdatedEventArgs();
+					updateEventArgs.FilePath = filePath;
+					updateEventArgs.UpdateType = EDatabseUpdateEvent.EntriesAdded;
+					DatabaseUpdated?.Invoke(this, updateEventArgs);
+				}).FireAndForget();
 			}
 		}
 

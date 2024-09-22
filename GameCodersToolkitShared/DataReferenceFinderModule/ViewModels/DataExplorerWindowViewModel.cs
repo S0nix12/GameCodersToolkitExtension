@@ -7,6 +7,7 @@ using GameCodersToolkit.Utils;
 using Microsoft.VisualStudio.Text;
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -176,13 +177,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		[RelayCommand]
 		void Refresh()
 		{
-			Task.Run(async delegate
-			{
-				GameCodersToolkitPackage.ReferenceDatabase.ClearDatabase();
-				await GameCodersToolkitPackage.DataParsingEngine.StartDataParseAsync();
-				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-				//PopulateEntries();
-			}).FireAndForget();
+			Task.Run(GameCodersToolkitPackage.DataParsingEngine.ParseDataAsync).FireAndForget();
 		}
 
 		void PopulateEntries()
@@ -238,27 +233,57 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			SelectedTypeFilter = "All";
 		}
 
-		private void OnDatabaseUpdated(object sender, DatabaseUpdatedEventArgs e)
+		private void OnDatabaseUpdated(object sender, DatabaseUpdatedEventArgs eventArgs)
 		{
-			ThreadHelper.JoinableTaskFactory.RunAsync(async delegate
+			bool needsNewWorker = false;
+			lock (m_databaseUpdateMutex)
 			{
-				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-				switch (e.UpdateType)
+				m_pendingDatabaseUpdateEvents.Enqueue(eventArgs);
+				needsNewWorker = !m_hasUpdateProcessor;
+				m_hasUpdateProcessor = true;
+			}
+
+			if (needsNewWorker)
+			{
+				ThreadHelper.JoinableTaskFactory.RunAsync(async delegate
 				{
-					case EDatabseUpdateEvent.EntriesAdded:
-						var newEntry = new DataExplorerFileViewModel(e.FilePath);
-						SearchEntryUtils.SetSearchTokens(newEntry, searchTokens);
-						FileEntries.Add(newEntry);
-						break;
-					case EDatabseUpdateEvent.EntriesRemoved:
-						FileEntries.RemoveAll(entry => entry.FilePath == e.FilePath);
-						break;
-					case EDatabseUpdateEvent.DatabaseCleared:
-						FileEntries.Clear();
-						break;
-				}
-			}).FireAndForget();
+					await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+					while (true)
+					{
+						while (m_pendingDatabaseUpdateEvents.TryDequeue(out DatabaseUpdatedEventArgs updateEvent))
+						{
+							switch (updateEvent.UpdateType)
+							{
+								case EDatabseUpdateEvent.EntriesAdded:
+									var newEntry = new DataExplorerFileViewModel(updateEvent.FilePath);
+									SearchEntryUtils.SetSearchTokens(newEntry, searchTokens);
+									FileEntries.Add(newEntry);
+									break;
+								case EDatabseUpdateEvent.EntriesRemoved:
+									FileEntries.RemoveAll(entry => entry.FilePath == updateEvent.FilePath);
+									break;
+								case EDatabseUpdateEvent.DatabaseCleared:
+									FileEntries.Clear();
+									break;
+							}
+						}
+
+						lock (m_databaseUpdateMutex)
+						{
+							if (m_pendingDatabaseUpdateEvents.IsEmpty)
+							{
+								m_hasUpdateProcessor = false;
+								break;
+							}
+						}
+					}
+				}).FireAndForget();
+			}
 		}
+
+		private ConcurrentQueue<DatabaseUpdatedEventArgs> m_pendingDatabaseUpdateEvents = new ConcurrentQueue<DatabaseUpdatedEventArgs>();
+		private bool m_hasUpdateProcessor = false;
+		private object m_databaseUpdateMutex = new();
 
 		string[] searchTokens = { };
 		string m_searchFilter = "Search...";

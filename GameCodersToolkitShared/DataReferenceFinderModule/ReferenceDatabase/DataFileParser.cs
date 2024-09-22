@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -109,18 +110,24 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			m_parsingDescriptions = dataParsingDescriptions;
 		}
 
-		public List<DataEntry> Parse(DataParsingErrorList errorOutput)
+		public List<DataEntry> Parse(DataParsingErrorList errorOutput, CancellationToken cancellationToken = default)
 		{
 			List<DataEntry> outEntries = new List<DataEntry>();
 			XDocument xmlDocument = XDocument.Parse(m_fileContent, LoadOptions.SetLineInfo);
 			foreach (DataParsingDescription parsingDescription in m_parsingDescriptions)
 			{
+				if (cancellationToken.IsCancellationRequested)
+					break;
+
 				outEntries.AddRange(Parse(xmlDocument, parsingDescription, errorOutput));
 			}
 
 			// Resolve Parent Entries
 			foreach (var dataEntry in outEntries.Where(entry => entry.Parent != null))
 			{
+				if (cancellationToken.IsCancellationRequested)
+					break;
+
 				DataEntry parent = outEntries.Find(entry => entry.Identifier.Equals(dataEntry.Parent.Identifier));
 				if (parent != null)
 				{
@@ -135,7 +142,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			return outEntries;
 		}
 
-		private List<DataEntry> Parse(XDocument xmlDocument, DataParsingDescription parsingDescription, DataParsingErrorList errorOutput)
+		private List<DataEntry> Parse(XDocument xmlDocument, DataParsingDescription parsingDescription, DataParsingErrorList errorOutput, CancellationToken cancellationToken = default)
 		{
 			List<DataEntry> outEntries = new List<DataEntry>();
 			if (parsingDescription.BaseExpression == null)
@@ -147,6 +154,9 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 
 			foreach (XElement baseElement in baseElements)
 			{
+				if (cancellationToken.IsCancellationRequested)
+					break;
+
 				DataEntry parsedEntry = ParseDataElement(baseElement, parsingDescription, errorOutput);
 				parsedEntry.BaseType = string.IsNullOrEmpty(parsingDescription.TypeName) ? parsingDescription.Name : parsingDescription.TypeName;
 				if (parsedEntry != null)
