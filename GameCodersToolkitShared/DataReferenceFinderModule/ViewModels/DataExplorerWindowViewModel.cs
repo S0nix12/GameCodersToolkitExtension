@@ -27,6 +27,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			Name = inName;
 
 			m_dataEntriesView = new ListCollectionView(DataEntries);
+			DataEntriesView.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
 		}
 
 		public string GetSearchField()
@@ -107,6 +108,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			}
 
 			m_entriesView = new ListCollectionView(Entries);
+			EntriesView.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
 		}
 
 		public void SetSelectedTypeFilter(string typeFilter)
@@ -170,6 +172,9 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 				}
 				return false;
 			};
+
+			FileEntriesView.SortDescriptions.Add(new SortDescription("FilePath", ListSortDirection.Ascending));
+
 			GameCodersToolkitPackage.ReferenceDatabase.DatabaseUpdated += OnDatabaseUpdated;
 			UpdatePossibleDataTypes();
 		}

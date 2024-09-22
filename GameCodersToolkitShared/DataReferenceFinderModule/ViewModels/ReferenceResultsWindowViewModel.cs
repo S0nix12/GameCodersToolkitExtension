@@ -59,6 +59,8 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		{
 			ParentOperationResult = inParentOperationResult;
 			m_dataEntryResultsView = new ListCollectionView(DataEntryResults);
+			DataEntryResultsView.SortDescriptions.Add(new SortDescription("LineNumber", ListSortDirection.Ascending));
+			DataEntryResultsView.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
 		}
 
 		public string GetSearchField()
@@ -100,6 +102,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			model.OperationStatusChanged += HandleOperationStatusChanged;
 			model.ResultsUpdated += HandleResultsUpdate;
 			m_fileResultsView = new ListCollectionView(FileResults);
+			FileResultsView.SortDescriptions.Add(new SortDescription("FilePath", ListSortDirection.Ascending));
 		}
 
 		void HandleOperationStatusChanged(object operation, FindReferenceOperationResults.OperationStatusEventArgs eventArgs)
