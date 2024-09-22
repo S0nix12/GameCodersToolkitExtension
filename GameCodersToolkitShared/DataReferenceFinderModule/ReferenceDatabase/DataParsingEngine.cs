@@ -106,22 +106,22 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 					while (operationQueue.TryDequeue(out DataFileParser nextOperation))
 					{
 						await semaphore.WaitAsync();
-						Task nextTask = Task.Run(async delegate 
-						{ 
+						Task nextTask = Task.Run(async delegate
+						{
 							try
 							{
 								await ExecuteParseOperationAsync(nextOperation);
 							}
 							finally
 							{
-									semaphore.Release();
-									Interlocked.Increment(ref progressCounter);
+								semaphore.Release();
+								Interlocked.Increment(ref progressCounter);
 
-									TaskProgressData progressData = new TaskProgressData();
-									progressData.ProgressText = $"Parsing files: {progressCounter} of {totalCountToParse} done";
-									progressData.PercentComplete = (int)(((float)progressCounter) / totalCountToParse * 100);
-									taskHandler.Progress.Report(progressData);
-								}
+								TaskProgressData progressData = new TaskProgressData();
+								progressData.ProgressText = $"Parsing files: {progressCounter} of {totalCountToParse} done";
+								progressData.PercentComplete = (int)(((float)progressCounter) / totalCountToParse * 100);
+								taskHandler.Progress.Report(progressData);
+							}
 						});
 
 						runningOperations.Add(nextTask);

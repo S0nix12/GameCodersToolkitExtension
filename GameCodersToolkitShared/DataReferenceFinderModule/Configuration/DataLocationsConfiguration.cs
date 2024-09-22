@@ -35,7 +35,7 @@ namespace GameCodersToolkit.Configuration
 
 			if (isSolutionOpen)
 			{
-				HandleOpenSolution();
+				HandleOpenSolution(await VS.Solutions.GetCurrentSolutionAsync());
 			}
 
 			VS.Events.SolutionEvents.OnAfterOpenSolution += HandleOpenSolution;
@@ -138,7 +138,7 @@ namespace GameCodersToolkit.Configuration
 					"Exception while loading Data Reference Finder Config File",
 					ex);
 			}
-			ConfigLoaded.Invoke(this, new EventArgs());
+			ConfigLoaded?.Invoke(this, new EventArgs());
 		}
 
 		public async Task SaveConfigAsync()

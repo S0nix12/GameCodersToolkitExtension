@@ -4,7 +4,6 @@ using GameCodersToolkit.DataReferenceFinderModule;
 using GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.Utils;
-using Microsoft.VisualStudio.Shell.Internal.FileEnumerationService;
 using Microsoft.VisualStudio.Text;
 using System;
 using System.Collections;

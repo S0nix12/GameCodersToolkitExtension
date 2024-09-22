@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>d457a2c8-77bb-40d4-9d58-e1bfc4b3ed36</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>GameCodersToolkitShared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\ClearFindResultsCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\ClearReferenceDatabase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\FindGuidReferencesCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\FindGuidReferencesInDatabaseCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\OpenConfigFileCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\OpenDataExplorerWindowCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\OpenReferenceResultsWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\ParseAllDataLocation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\SaveConfigCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Configuration\DataLocationsConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\DataEditorCommunication\DataEditorConnection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\DataEditorCommunication\DataEditorMessages.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Options\DataReferenceFinderOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ReferenceDatabase\DataEntry.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ReferenceDatabase\DataFileParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ReferenceDatabase\DataParsingEngine.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ReferenceDatabase\ReferenceDatabase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ReferenceDatabase\ReferenceDatabaseUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ReferenceFinder\FileReferenceScanner.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ReferenceFinder\FindReferenceResultsStorage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ReferenceFinder\TextUtilFunctions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ToolWindows\DataExplorerWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ToolWindows\DataExplorerWindowControl.xaml.cs">
+      <DependentUpon>DataExplorerWindowControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ToolWindows\ReferenceResultsWindow.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ToolWindows\ReferenceResultsWindowControl.xaml.cs">
+      <DependentUpon>ReferenceResultsWindowControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ToolWindows\ReferenceResultsWindowMessenger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ViewModels\DataEntryViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ViewModels\DataExplorerWindowViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ViewModels\ReferenceResultsWindowViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExtensionMethods\ExtensionMethodsCollections.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExtensionMethods\TreeViewExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ExtensionMethods\XmlExtensionMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\AddFileTemplateCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Commands\CreateFileFromTemplateCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Commands\OpenConfigurationCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Configuration\FileTemplateConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\MakeFileParser\MakeFileParserInterface.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\MakeFileParser\SimpleMakeFileParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\UserControls\ExtendedTreeView.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\ViewModels\ConfigurationViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\ViewModels\FileTemplateDialogViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Windows\ConfigurationWindow.xaml.cs">
+      <DependentUpon>ConfigurationWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Windows\CreateFileFromTemplateWindow.xaml.cs">
+      <DependentUpon>CreateFileFromTemplateWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Windows\NameDialogWindow.xaml.cs">
+      <DependentUpon>NameDialogWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)GameCodersToolkitPackage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QuickAttach\Commands\QuickAttachCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QuickAttach\Commands\QuickAttachSelectionCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QuickAttach\Options\QuickAttachOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QuickAttach\QuickAttachService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SourceControl\PerforceConnection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\DiagnosticUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\SearchEntryUtils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ToolWindows\DataExplorerWindowControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ToolWindows\ReferenceResultsWindowControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Windows\ConfigurationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Windows\CreateFileFromTemplateWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Windows\NameDialogWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Resources\Styles\VSTreeViewStyles.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+</Project>
