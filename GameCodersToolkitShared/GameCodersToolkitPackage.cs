@@ -52,6 +52,9 @@ namespace GameCodersToolkit
 
 				ReferenceDatabase = new Database();
 				DataEditorConnection = new DataEditorConnection();
+
+				IsLoaded = true;
+				PackageLoaded?.Invoke(this, new EventArgs());
 			}
 			catch (Exception ex)
 			{
@@ -73,5 +76,7 @@ namespace GameCodersToolkit
 		public static DataParsingEngine DataParsingEngine {  get; private set; }
 		public static DataReferenceFinderModule.ReferenceDatabase.Database ReferenceDatabase { get; private set; }
 		public static DataEditorConnection DataEditorConnection { get; private set; }
+		public static EventHandler PackageLoaded { get; set; }
+		public static bool IsLoaded { get; private set; }
 	}
 }

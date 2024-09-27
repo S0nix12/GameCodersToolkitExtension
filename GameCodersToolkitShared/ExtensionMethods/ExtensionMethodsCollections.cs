@@ -29,6 +29,21 @@ namespace System.Collections.Generic
 			}
 		}
 
+		public static void RemoveAtSwap<T>(this List<T> collection, int index)
+		{
+			if (index < collection.Count && index >= 0)
+			{
+				if (index == collection.Count - 1)
+				{
+					collection.RemoveAt(index);
+					return;
+				}
+
+				collection[index] = collection[collection.Count - 1];
+				collection.RemoveAt(collection.Count - 1);
+			}
+		}
+
 		public static IEnumerable<string> SplitIntoLines(this string input)
 		{
 			if (input == null)

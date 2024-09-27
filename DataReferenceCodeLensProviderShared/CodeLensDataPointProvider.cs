@@ -12,15 +12,15 @@ namespace DataReferenceCodeLensProviderShared
 {
 	[Export(typeof(IAsyncCodeLensDataPointProvider))]
 	[Name(Id)]
-	[ContentType("C/C++")]
+	[ContentType("code")]
 	[LocalizedName(typeof(Resources), Id)]
-	[Priority(210)]
+	[Priority(200)]
 	public class CodeLensDataPointProvider : IAsyncCodeLensDataPointProvider
 	{
 		public Task<bool> CanCreateDataPointAsync(CodeLensDescriptor descriptor, CodeLensDescriptorContext context, CancellationToken token)
 		{
-			var methodsOnly = descriptor.Kind == CodeElementKinds.Method || descriptor.Kind == CodeElementKinds.Function;
-			return Task.FromResult(methodsOnly);
+			System.Diagnostics.Debug.WriteLine($"Possible Code Lens Point. Kind {descriptor.Kind}, Desc: {descriptor.ElementDescription}");
+			return Task.FromResult((int)descriptor.Kind == 1 << 24);
 		}
 
 		public Task<IAsyncCodeLensDataPoint> CreateDataPointAsync(CodeLensDescriptor descriptor, CodeLensDescriptorContext descriptorContext, CancellationToken token)
@@ -31,5 +31,4 @@ namespace DataReferenceCodeLensProviderShared
 
 		internal const string Id = "DataReferenceCodeLensProvider";
 	}
-
 }

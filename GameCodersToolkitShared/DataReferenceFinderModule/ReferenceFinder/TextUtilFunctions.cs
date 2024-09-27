@@ -78,7 +78,7 @@ namespace GameCodersToolkit.ReferenceFinder
 			return foundWord;
 		}
 
-		private static List<string> FindWordsInLineSnapshot(ITextSnapshotLine lineSnapshot)
+		public static List<string> FindWordsInLineSnapshot(ITextSnapshotLine lineSnapshot)
 		{
 			string lineText = lineSnapshot.GetText();
 			Regex findWordsRegex = new(@"(\w+)");
@@ -134,19 +134,7 @@ namespace GameCodersToolkit.ReferenceFinder
 			if (string.IsNullOrEmpty(identifierWord) 
 				|| !guidFieldIdentifiers.Any(identifier => identifierWord.IndexOf(identifier, StringComparison.OrdinalIgnoreCase) != -1))
 			{
-				List<string> wordsInLine = FindWordsInLineSnapshot(caretSnapshotPoint.GetContainingLine());
-				if (wordsInLine.Count == 0)
-					return string.Empty;
-
-				foreach (string word in wordsInLine)
-				{
-					bool foundIdentifier = guidFieldIdentifiers.Any(identifier => word.IndexOf(identifier, StringComparison.OrdinalIgnoreCase) != -1);
-					if (foundIdentifier)
-					{
-						identifierWord = word;
-						break;
-					}
-				}
+				identifierWord = GetGuidIdentifierWordInLine(caretSnapshotPoint.GetContainingLine(), guidFieldIdentifiers);
 			}
 
 			if (string.IsNullOrEmpty(identifierWord))
@@ -204,6 +192,24 @@ namespace GameCodersToolkit.ReferenceFinder
 				await DiagnosticUtils.ReportExceptionFromExtensionAsync(
 					"Exception searching GUID in corresponding file",
 					ex);
+			}
+
+			return string.Empty;
+		}
+
+		public static string GetGuidIdentifierWordInLine(ITextSnapshotLine lineSnapshot, List<string> guidFieldIdentifiers)
+		{
+			List<string> wordsInLine = FindWordsInLineSnapshot(lineSnapshot);
+			if (wordsInLine.Count == 0)
+				return string.Empty;
+
+			foreach (string word in wordsInLine)
+			{
+				bool foundIdentifier = guidFieldIdentifiers.Any(identifier => word.IndexOf(identifier, StringComparison.OrdinalIgnoreCase) != -1);
+				if (foundIdentifier)
+				{
+					return word;
+				}
 			}
 
 			return string.Empty;
