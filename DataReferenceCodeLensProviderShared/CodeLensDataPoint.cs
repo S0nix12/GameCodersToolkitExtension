@@ -5,6 +5,8 @@ using Microsoft.VisualStudio.Threading;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.IO;
 
 namespace DataReferenceCodeLensProviderShared
 {
@@ -31,8 +33,6 @@ namespace DataReferenceCodeLensProviderShared
 				}
 			}
 
-			System.Diagnostics.Debug.WriteLine("Code Lens Data Point tries to call RPC function: " + nameof(ICodeLensDataService.GetReferenceCount));
-
 			if (!string.IsNullOrEmpty(dataIdentifier))
 			{
 				referenceCount = await m_callbackService.InvokeAsync<int>(
@@ -47,12 +47,71 @@ namespace DataReferenceCodeLensProviderShared
 			return descriptor;
 		}
 
-		public Task<CodeLensDetailsDescriptor> GetDetailsAsync(CodeLensDescriptorContext descriptorContext, CancellationToken token)
+		public async Task<CodeLensDetailsDescriptor> GetDetailsAsync(CodeLensDescriptorContext descriptorContext, CancellationToken token)
 		{
 			CodeLensDetailsDescriptor descriptor = new CodeLensDetailsDescriptor();
-			CodeLensDetailEntryDescriptor entryDescriptor = new CodeLensDetailEntryDescriptor();
-			
-			return Task.FromResult<CodeLensDetailsDescriptor>(null);
+
+			string dataIdentifier = "";
+			if (descriptorContext.Properties.TryGetValue("DataReferenceIdentifier", out object identifierObject))
+			{
+				if (identifierObject is string stringIdentifier)
+				{
+					dataIdentifier = stringIdentifier;
+				}
+			}
+
+			List<CodeLensDataReferenceDetails> referenceDetailsList = new List<CodeLensDataReferenceDetails>();
+			if (!string.IsNullOrEmpty(dataIdentifier))
+			{
+				referenceDetailsList = await m_callbackService.InvokeAsync<List<CodeLensDataReferenceDetails>>(
+					this,
+					nameof(ICodeLensDataService.GetReferenceDetails),
+					new[] { dataIdentifier },
+					token);
+			}
+
+			if (referenceDetailsList.Count > 0)
+			{
+				referenceDetailsList = referenceDetailsList.OrderBy(entry => entry.SourceFile).ThenBy(entry => entry.SourceLineNumber).ToList();
+				descriptor.Headers = new List<CodeLensDetailHeaderDescriptor>
+				{
+					new CodeLensDetailHeaderDescriptor
+					{
+						UniqueName = "FilePath",
+						DisplayName = "File",
+						Width = 0.2
+					},
+					new CodeLensDetailHeaderDescriptor
+					{
+						UniqueName = "DataPath",
+						DisplayName = "Data Path",
+						Width = 1.0
+					}
+				};
+
+				List<CodeLensDetailEntryDescriptor> detailEntries = new List<CodeLensDetailEntryDescriptor>();
+				foreach (var referenceDetails in referenceDetailsList)
+				{
+					CodeLensDetailEntryDescriptor entryDescriptor = new CodeLensDetailEntryDescriptor();
+					entryDescriptor.Tooltip = referenceDetails.Name;
+					entryDescriptor.Fields = new List<CodeLensDetailEntryField>
+					{
+						new CodeLensDetailEntryField
+						{
+							Text = Path.GetFileName(referenceDetails.SourceFile)
+						},
+						new CodeLensDetailEntryField
+						{
+							Text = $"{referenceDetails.SubType}: {referenceDetails.ParentPath}"
+						}
+					};
+					detailEntries.Add(entryDescriptor);
+				}
+				descriptor.Entries = detailEntries;
+				descriptor.SelectionMode = CodeLensDetailEntriesSelectionMode.Single;
+			}
+
+			return descriptor;
 		}
 
 		public CodeLensDescriptor Descriptor { get; }

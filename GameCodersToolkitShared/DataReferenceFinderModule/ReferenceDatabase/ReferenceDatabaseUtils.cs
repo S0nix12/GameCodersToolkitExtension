@@ -28,17 +28,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 					result.Line = entry.SourceLineNumber;
 					result.DataEntry = entry;
 
-					string resultPath = entry.Name;
-					DataEntry parentEntry = entry.Parent;
-					while (parentEntry != null)
-					{
-						resultPath = parentEntry.Name + " -> " + resultPath;
-						if (parentEntry.Parent == null && !string.IsNullOrEmpty(parentEntry.ParentName))
-						{
-							resultPath = parentEntry.ParentName + " -> " + resultPath;
-						}
-						parentEntry = parentEntry.Parent;
-					}
+					string resultPath = CreateDataEntryPathString(entry);
 					result.Text = resultPath;
 
 					result.Text += " | " + entry.BaseType + " | " + entry.SubType;
@@ -52,6 +42,22 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 
 			await ReferenceResultsWindow.ShowAsync();
 			await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync("Finding in database took " + stopwatch.ElapsedMilliseconds + "ms");
+		}
+
+		public static string CreateDataEntryPathString(DataEntry entry)
+		{
+			string resultPath = entry.Name;
+			DataEntry parentEntry = entry.Parent;
+			while (parentEntry != null)
+			{
+				resultPath = parentEntry.Name + " -> " + resultPath;
+				if (parentEntry.Parent == null && !string.IsNullOrEmpty(parentEntry.ParentName))
+				{
+					resultPath = parentEntry.ParentName + " -> " + resultPath;
+				}
+				parentEntry = parentEntry.Parent;
+			}
+			return resultPath;
 		}
 	}
 }

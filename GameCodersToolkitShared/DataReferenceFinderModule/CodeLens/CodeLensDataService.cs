@@ -3,6 +3,7 @@ using GameCodersToolkit;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using Microsoft.VisualStudio.Language.CodeLens;
 using Microsoft.VisualStudio.Utilities;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 
 namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
@@ -18,20 +19,25 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 	[ContentType("XML")]
 	public class CodeLensDataService : ICodeLensCallbackListener, ICodeLensDataService
 	{
+		private GenericDataIdentifier CreateDataIdentifier(string identifierString)
+		{
+			GenericDataIdentifier dataIdentifier;
+			if (Guid.TryParse(identifierString, out Guid referenceGuid))
+			{
+				dataIdentifier = new GenericDataIdentifier(referenceGuid);
+			}
+			else
+			{
+				dataIdentifier = new GenericDataIdentifier(identifierString);
+			}
+			return dataIdentifier;
+		}
+
 		public int GetReferenceCount(string identifier)
 		{
 			if (GameCodersToolkitPackage.ReferenceDatabase != null)
 			{
-				GenericDataIdentifier dataIdentifier;
-				if (Guid.TryParse(identifier, out Guid referenceGuid))
-				{
-					dataIdentifier = new GenericDataIdentifier(referenceGuid);
-				}
-				else
-				{
-					dataIdentifier = new GenericDataIdentifier(identifier);
-				}
-
+				GenericDataIdentifier dataIdentifier = CreateDataIdentifier(identifier);
 				if (GameCodersToolkitPackage.ReferenceDatabase.ReferencedByEntries.TryGetValue(dataIdentifier, out var entries))
 				{
 					return entries.Count;
@@ -39,6 +45,32 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 			}
 
 			return 0;
+		}
+
+		public List<CodeLensDataReferenceDetails> GetReferenceDetails(string identifier)
+		{
+			List<CodeLensDataReferenceDetails> outDetails = new List<CodeLensDataReferenceDetails>();
+
+			if (GameCodersToolkitPackage.ReferenceDatabase != null)
+			{
+				GenericDataIdentifier dataIdentifier = CreateDataIdentifier(identifier);
+				if (GameCodersToolkitPackage.ReferenceDatabase.ReferencedByEntries.TryGetValue(dataIdentifier, out var entries))
+				{
+					foreach (DataEntry entry in entries)
+					{
+						outDetails.Add(new CodeLensDataReferenceDetails
+						{
+							Name = entry.Name,
+							SubType = entry.SubType,
+							SourceFile = entry.SourceFile,
+							SourceLineNumber = entry.SourceLineNumber,
+							ParentPath = ReferenceDatabaseUtils.CreateDataEntryPathString(entry)
+						});
+					}
+				}
+			}
+
+			return outDetails;
 		}
 	}
 }
