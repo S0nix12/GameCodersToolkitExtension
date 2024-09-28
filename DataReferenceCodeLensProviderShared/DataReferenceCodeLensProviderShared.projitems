@@ -12,5 +12,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)CodeLensDataPoint.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodeLensDataPointProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Communication\ICodeLensDataService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Communication\CodeLensDataEntryDetails.cs" />
   </ItemGroup>
 </Project>
