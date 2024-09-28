@@ -113,7 +113,7 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLensTagging
 
 		private void OnPackageLoaded(object sender, EventArgs e)
 		{
-			ParseEntireBuffer();
+			ParseEntireBuffer();;
 		}
 
 		private void OnTextBufferChanged(object sender, TextContentChangedEventArgs e)
@@ -138,6 +138,24 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLensTagging
 			};
 		}
 
+		private SnapshotSpan GetLineSpanWithoutLeadingWhitespace(ITextSnapshotLine lineSnapshot)
+		{
+			if (lineSnapshot.Extent.IsEmpty)
+			{
+				return lineSnapshot.Extent;
+			}
+
+			string lineText = lineSnapshot.GetText();
+			int startOffset = 0;
+			while (startOffset < lineSnapshot.Length && char.IsWhiteSpace(lineText[startOffset]))
+			{
+				startOffset++;
+			}
+
+			SnapshotPoint startPoint = lineSnapshot.Start + startOffset;
+			return new SnapshotSpan(startPoint, lineSnapshot.End);
+		}
+
 		public IEnumerable<ITagSpan<ICodeLensTag>> GetTags(NormalizedSnapshotSpanCollection spans)
 		{
 			if (spans.Count == 0)
@@ -156,12 +174,12 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLensTagging
 					continue;
 
 				ITextSnapshotLine lineSnapshot = entire.Snapshot.GetLineFromLineNumber(guidResultLine.LineNumber);
-				if (string.IsNullOrWhiteSpace(lineSnapshot.GetText()))
+				SnapshotSpan tagSpan = GetLineSpanWithoutLeadingWhitespace(lineSnapshot);
+				if (tagSpan.IsEmpty)
 					continue;
 
 				DataReferenceCodeLensTag codeLensTag = new DataReferenceCodeLensTag();
 				codeLensTag.DataReferenceIdentifier = guidResultLine.GuidString;
-				SnapshotSpan tagSpan = new SnapshotSpan(lineSnapshot.Start, lineSnapshot.End);
 				codeLensTag.Descriptor = GetCodeLensDescriptorForSpan(tagSpan);
 
 				yield return new TagSpan<ICodeLensTag>(tagSpan, codeLensTag);
@@ -207,7 +225,7 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLensTagging
 			m_identifierDefinitionLines.Sort(resultLineComparer);
 
 			stopwatch.Stop();
-			GameCodersToolkitPackage.ExtensionOutput?.WriteLine($"Parsing Text Buffer {m_textBuffer.GetFileName()} took {stopwatch.ElapsedMilliseconds}ms");
+			GameCodersToolkitPackage.ExtensionOutput?.WriteLine($"Parsing Text Buffer took {stopwatch.ElapsedMilliseconds}ms");
 
 			m_currentSnapshot = newSnapshot;
 			// We changed atleast one line. Make sure to notify about it
@@ -217,7 +235,7 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLensTagging
 				ITextSnapshotLine lastSnapshotLine = newSnapshot.GetLineFromLineNumber(changeTracker.LastChangedLine);
 				TagsChanged?.Invoke(this,
 					new SnapshotSpanEventArgs(
-						new SnapshotSpan(newSnapshot, firstSnapshotLine.Start, lastSnapshotLine.End)));
+						new SnapshotSpan(firstSnapshotLine.Start, lastSnapshotLine.End)));
 			}
 		}
 
@@ -338,7 +356,9 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLensTagging
 			Span removedGuidLinesSpan = new Span();
 			if (!guidResultsToRemove.IsEmpty)
 			{
-				removedGuidLinesSpan = new Span(m_guidResultLines[guidResultsToRemove.Start].LineNumber, m_guidResultLines[guidResultsToRemove.End - 1].LineNumber);
+				int startLineToRemove = m_guidResultLines[guidResultsToRemove.Start].LineNumber;
+				int endLineToRemove = m_guidResultLines[guidResultsToRemove.End - 1].LineNumber;
+				removedGuidLinesSpan = new Span(startLineToRemove, endLineToRemove - startLineToRemove);
 				m_guidResultLines.RemoveRange(guidResultsToRemove.Start, guidResultsToRemove.Length);
 			}
 

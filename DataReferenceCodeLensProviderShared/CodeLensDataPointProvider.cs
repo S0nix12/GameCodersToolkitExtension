@@ -17,6 +17,12 @@ namespace DataReferenceCodeLensProviderShared
 	[Priority(200)]
 	public class CodeLensDataPointProvider : IAsyncCodeLensDataPointProvider
 	{
+		[ImportingConstructor]
+		public CodeLensDataPointProvider(Lazy<ICodeLensCallbackService> callbackService)
+		{
+			m_callbackService = callbackService;
+		}
+
 		public Task<bool> CanCreateDataPointAsync(CodeLensDescriptor descriptor, CodeLensDescriptorContext context, CancellationToken token)
 		{
 			System.Diagnostics.Debug.WriteLine($"Possible Code Lens Point. Kind {descriptor.Kind}, Desc: {descriptor.ElementDescription}");
@@ -25,10 +31,10 @@ namespace DataReferenceCodeLensProviderShared
 
 		public Task<IAsyncCodeLensDataPoint> CreateDataPointAsync(CodeLensDescriptor descriptor, CodeLensDescriptorContext descriptorContext, CancellationToken token)
 		{
-			return Task.FromResult<IAsyncCodeLensDataPoint>(new CodeLensDataPoint(descriptor));
+			return Task.FromResult<IAsyncCodeLensDataPoint>(new CodeLensDataPoint(descriptor, m_callbackService.Value));
 		}
 
-
+		private readonly Lazy<ICodeLensCallbackService> m_callbackService;
 		internal const string Id = "DataReferenceCodeLensProvider";
 	}
 }

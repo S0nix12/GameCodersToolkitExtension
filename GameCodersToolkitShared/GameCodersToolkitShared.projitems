@@ -9,7 +9,8 @@
     <Import_RootNamespace>GameCodersToolkitShared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLensTagging\CodeLensTagger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLens\CodeLensDataService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLens\CodeLensTagger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\ClearFindResultsCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\ClearReferenceDatabase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\FindGuidReferencesCommand.cs" />
