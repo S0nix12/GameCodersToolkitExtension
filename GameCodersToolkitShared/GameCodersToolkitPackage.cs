@@ -42,16 +42,13 @@ namespace GameCodersToolkit
 				ExtensionOutput = await VS.Windows.CreateOutputWindowPaneAsync("GameCodersToolkit");
 
 				DataLocationsConfig = new CDataLocationsConfiguration();
-				await DataLocationsConfig.InitAsync();
-
 				FileTemplateCreatorConfig = new CFileTemplateConfiguration();
-				await FileTemplateCreatorConfig.InitAsync();
-
 				DataParsingEngine = new DataParsingEngine();
-				DataParsingEngine.Init();
-
 				ReferenceDatabase = new Database();
 				DataEditorConnection = new DataEditorConnection();
+
+				await DataLocationsConfig.InitAsync();
+				await FileTemplateCreatorConfig.InitAsync();
 
 				IsLoaded = true;
 				PackageLoaded?.Invoke(this, new EventArgs());

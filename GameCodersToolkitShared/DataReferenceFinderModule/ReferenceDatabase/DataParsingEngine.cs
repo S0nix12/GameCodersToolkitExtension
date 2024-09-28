@@ -16,7 +16,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 	{
 		const int MaxConcurrentParseOperation = 8;
 
-		public void Init()
+		public DataParsingEngine()
 		{
 			GameCodersToolkitPackage.DataLocationsConfig.SolutionConfigLoaded += OnSolutionConfigLoaded;
 		}
