@@ -61,10 +61,13 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 						outDetails.Add(new CodeLensDataReferenceDetails
 						{
 							Name = entry.Name,
+							TypeName = entry.BaseType,
 							SubType = entry.SubType,
 							SourceFile = entry.SourceFile,
 							SourceLineNumber = entry.SourceLineNumber,
-							ParentPath = ReferenceDatabaseUtils.CreateDataEntryPathString(entry)
+							ParentPath = ReferenceDatabaseUtils.CreateDataEntryPathString(entry),
+							IdentifierString = entry.Identifier.ToString(),
+							ParentIdentifierString = entry.Parent != null ? entry.Parent.Identifier.ToString() : ""
 						});
 					}
 				}

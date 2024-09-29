@@ -292,14 +292,17 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 
 		public async Task OpenInDataEditorAsync(DataEntry dataEntry)
 		{
+			await OpenInDataEditorAsync(new OpenDataEntryMessage(dataEntry));
+		}
+		public async Task OpenInDataEditorAsync(OpenDataEntryMessage message)
+		{
 			if (m_clientSocket.SocketStatus != ESocketStatus.Open)
 				return;
 
-			OpenDataEntryMessage message = new OpenDataEntryMessage(dataEntry);
 			try
 			{
 				await m_clientSocket.SendMessageToDataEditorAsync(message);
-				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync("Send Open Command to Editor for: " + dataEntry.Identifier);
+				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync("Send Open Command to Editor for: " + message.IdentifierString);
 			}
 			catch (Exception ex)
 			{

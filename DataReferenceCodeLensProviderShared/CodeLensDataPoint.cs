@@ -70,6 +70,14 @@ namespace DataReferenceCodeLensProviderShared
 					token);
 			}
 
+			descriptor = GetCustomDataDescriptor(referenceDetailsList);
+
+			return descriptor;
+		}
+
+		private CodeLensDetailsDescriptor GetBasicDescriptor(List<CodeLensDataReferenceDetails> referenceDetailsList)
+		{
+			CodeLensDetailsDescriptor descriptor = new CodeLensDetailsDescriptor();
 			if (referenceDetailsList.Count > 0)
 			{
 				referenceDetailsList = referenceDetailsList.OrderBy(entry => entry.SourceFile).ThenBy(entry => entry.SourceLineNumber).ToList();
@@ -110,6 +118,22 @@ namespace DataReferenceCodeLensProviderShared
 				descriptor.Entries = detailEntries;
 				descriptor.SelectionMode = CodeLensDetailEntriesSelectionMode.Single;
 			}
+			return descriptor;
+		}
+
+		private CodeLensDetailsDescriptor GetCustomDataDescriptor(List<CodeLensDataReferenceDetails> referenceDetailsList)
+		{
+			CodeLensDetailsDescriptor descriptor = new CodeLensDetailsDescriptor();
+
+			descriptor.CustomData = new List<CodeLensDataReferenceCustomData>
+			{
+				new CodeLensDataReferenceCustomData
+				{
+					Details = referenceDetailsList
+				}
+			};
+			descriptor.Headers = new List<CodeLensDetailHeaderDescriptor>();
+			descriptor.Entries = new List<CodeLensDetailEntryDescriptor>();
 
 			return descriptor;
 		}

@@ -167,7 +167,6 @@
 		<Setter Property="Padding" Value="1,0,0,0"/>
 		<Setter Property="Foreground" Value="{DynamicResource {x:Static platformUI:TreeViewColors.BackgroundTextBrushKey}}"/>
 		<Setter Property="FocusVisualStyle" Value="{StaticResource TreeViewItemFocusVisual}"/>
-		<Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type TreeViewItem}">

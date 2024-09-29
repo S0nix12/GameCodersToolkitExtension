@@ -9,8 +9,13 @@
     <Import_RootNamespace>GameCodersToolkitShared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLens\CodeLensCustomDataView.xaml.cs">
+      <DependentUpon>CodeLensCustomDataView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLens\CodeLensDataReferenceCustomViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLens\CodeLensDataService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLens\CodeLensTagger.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLens\CodeLensViewElementFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\ClearFindResultsCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\ClearReferenceDatabase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\Commands\FindGuidReferencesCommand.cs" />
@@ -75,6 +80,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utils\SearchEntryUtils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLens\CodeLensCustomDataView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ToolWindows\DataExplorerWindowControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
