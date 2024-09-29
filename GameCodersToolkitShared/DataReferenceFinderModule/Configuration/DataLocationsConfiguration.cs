@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.Utils;
+using Microsoft.VisualStudio.Threading;
 
 namespace GameCodersToolkit.Configuration
 {
@@ -61,7 +62,7 @@ namespace GameCodersToolkit.Configuration
 			return DataLocationsConfig.DataEditorServerUri;
 		}
 
-		private void HandleOpenSolution(Solution? solution = null)
+		private void HandleOpenSolution(Solution solution = null)
 		{
 			if (solution != null)
 			{
@@ -139,7 +140,7 @@ namespace GameCodersToolkit.Configuration
 					"Exception while loading Data Reference Finder Config File",
 					ex);
 			}
-			ConfigLoaded?.Invoke(this, new EventArgs());
+			await ConfigLoaded?.InvokeAsync(this, new EventArgs());
 		}
 
 		public async Task SaveConfigAsync()
@@ -177,7 +178,7 @@ namespace GameCodersToolkit.Configuration
 			await JsonSerializer.SerializeAsync(fileStream, DataLocationsConfig, options);
 		}
 
-		public EventHandler ConfigLoaded { get; set; }
+		public AsyncEventHandler ConfigLoaded { get; set; }
 		public EventHandler SolutionConfigLoaded { get; set; }
 		private CDataLocationsConfig DataLocationsConfig { get; set; } = new CDataLocationsConfig();
 		private FileSystemWatcher ConfigFileWatcher { get; set; }

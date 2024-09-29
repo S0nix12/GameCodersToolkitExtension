@@ -22,15 +22,18 @@ namespace GameCodersToolkit.ReferenceFinder.ToolWindows
 		private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
 		{
 
-        }
+		}
 
-		private async void Border_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		private void Border_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
 			if (e.ClickCount == 2)
 			{
 				Border borderControl = sender as Border;
 				DataEntryResultViewModel lineResult = borderControl?.DataContext as DataEntryResultViewModel;
-				await lineResult?.OpenInVisualStudioAsync();
+				if (lineResult != null && GameCodersToolkitPackage.Package != null)
+				{
+					GameCodersToolkitPackage.Package.JoinableTaskFactory.RunAsync(lineResult.OpenInVisualStudioAsync).FireAndForget();
+				}
 			}
 		}
 

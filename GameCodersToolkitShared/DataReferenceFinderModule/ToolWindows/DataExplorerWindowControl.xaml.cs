@@ -25,15 +25,15 @@ namespace GameCodersToolkit.DataReferenceFinderModule
 			}
 		}
 
-		private async void DataEntryVM_Border_LeftMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		private void DataEntryVM_Border_LeftMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
 			if (e.ClickCount == 2)
 			{
 				Border borderControl = sender as Border;
 				DataEntryViewModel dataEntryVM = borderControl?.DataContext as DataEntryViewModel;
-				if (dataEntryVM != null)
+				if (dataEntryVM != null && GameCodersToolkitPackage.Package != null)
 				{
-					await dataEntryVM.OpenInVisualStudioAsync();
+					GameCodersToolkitPackage.Package.JoinableTaskFactory.RunAsync(dataEntryVM.OpenInVisualStudioAsync).FireAndForget();
 				}
 			}
 		}

@@ -107,9 +107,15 @@
     <PackageReference Include="FolderBrowserEx">
       <Version>1.0.1</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.IO.Redist">
+      <Version>6.0.1</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="17.0.5232" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf">
       <Version>1.1.135</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.1</Version>
     </PackageReference>
     <PackageReference Include="p4api.net">
       <Version>2024.1.261.8274</Version>

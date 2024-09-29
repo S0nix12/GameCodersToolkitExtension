@@ -30,7 +30,7 @@ namespace GameCodersToolkit.ReferenceFinder.ToolWindows
 		public event EventHandler<EReferenceResultsWindowToolbarAction> MessageReceived;
 		public event EventHandler<string> FilterUpdated;
 		public SelectedFilterProvider FilterProvider { get; set; }
-		
+
 	}
 
 	[Command(PackageGuids.ReferenceResultsToolbarCommandSet_GuidString, PackageIds.CollapseAllResults)]
@@ -39,13 +39,8 @@ namespace GameCodersToolkit.ReferenceFinder.ToolWindows
 		protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
 		{
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-			ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
-			{
-				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-				ReferenceResultsWindowMessenger messenger = await Package.GetServiceAsync<ReferenceResultsWindowMessenger, ReferenceResultsWindowMessenger>();
-				messenger.Send(EReferenceResultsWindowToolbarAction.CollapseAll);
-			}).FireAndForget();
-
+			ReferenceResultsWindowMessenger messenger = await Package.GetServiceAsync<ReferenceResultsWindowMessenger, ReferenceResultsWindowMessenger>();
+			messenger.Send(EReferenceResultsWindowToolbarAction.CollapseAll);
 		}
 	}
 
@@ -55,13 +50,8 @@ namespace GameCodersToolkit.ReferenceFinder.ToolWindows
 		protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
 		{
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-			ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
-			{
-				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-				ReferenceResultsWindowMessenger messenger = await Package.GetServiceAsync<ReferenceResultsWindowMessenger, ReferenceResultsWindowMessenger>();
-				messenger.Send(EReferenceResultsWindowToolbarAction.ExpandAll);
-			}).FireAndForget();
-
+			ReferenceResultsWindowMessenger messenger = await Package.GetServiceAsync<ReferenceResultsWindowMessenger, ReferenceResultsWindowMessenger>();
+			messenger.Send(EReferenceResultsWindowToolbarAction.ExpandAll);
 		}
 	}
 

@@ -72,7 +72,7 @@ namespace GameCodersToolkit.Configuration
 			VS.Events.SolutionEvents.OnAfterOpenSolution += HandleOpenSolution;
 		}
 
-		private void HandleOpenSolution(Solution? solution = null)
+		private void HandleOpenSolution(Solution solution = null)
 		{
 			if (solution != null)
 			{

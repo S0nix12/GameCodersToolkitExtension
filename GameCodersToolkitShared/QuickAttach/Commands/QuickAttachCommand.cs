@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.VisualStudio.Shell;
 
 namespace GameCodersToolkit.QuickAttach
 {
@@ -13,6 +14,7 @@ namespace GameCodersToolkit.QuickAttach
 			Process2 selectedProcess = await GetSelectedDebugProcessAsync();
 			if (selectedProcess != null)
 			{
+				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 				selectedProcess.Attach();
 			}
 		}
@@ -28,20 +30,24 @@ namespace GameCodersToolkit.QuickAttach
 				return;
 			}
 
-			var dte = Package.GetService<EnvDTE.DTE, DTE2>();
-			var debugger = dte.Debugger as Debugger2;
-			var debuggedProcesses = debugger.DebuggedProcesses;
-
-			foreach (Process2 process in debuggedProcesses)
+			ThreadHelper.JoinableTaskFactory.Run(async delegate
 			{
-				if (process.ProcessID == selectedProcessId)
-				{
-					Command.Enabled = false;
-					return;
-				}
-			}
+				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+				var dte = Package.GetService<EnvDTE.DTE, DTE2>();
+				var debugger = dte.Debugger as Debugger2;
+				var debuggedProcesses = debugger.DebuggedProcesses;
 
-			Command.Enabled = true;
+				foreach (Process2 process in debuggedProcesses)
+				{
+					if (process.ProcessID == selectedProcessId)
+					{
+						Command.Enabled = false;
+						return;
+					}
+				}
+
+				Command.Enabled = true;
+			});
 		}
 
 		private async Task<Process2> GetSelectedDebugProcessAsync()

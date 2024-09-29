@@ -285,7 +285,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 	{
 		public DataEditorConnection()
 		{
-			GameCodersToolkitPackage.DataLocationsConfig.ConfigLoaded += OnConfigLoaded;
+			GameCodersToolkitPackage.DataLocationsConfig.ConfigLoaded += OnConfigLoadedAsync;
 			m_clientSocket = new DataEditorClientSocket();
 			m_clientSocket.SocketConnectionStatusChanged += OnConnectionStatusChanged;
 		}
@@ -312,7 +312,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 			}
 		}
 
-		async void OnConfigLoaded(object sender, EventArgs e)
+		async Task OnConfigLoadedAsync(object sender, EventArgs e)
 		{
 			try
 			{
@@ -326,7 +326,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 				{
 					if (serverUri != m_clientSocket.RequestedAddress)
 					{
-						m_socketRestartTask = ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+						m_socketRestartTask = GameCodersToolkitPackage.Package.JoinableTaskFactory.RunAsync(async () =>
 						{
 							await m_clientSocket.StopAsync();
 							if (DataReferenceFinderOptions.Instance.DataEditorSocketAutoConnect)
@@ -351,11 +351,11 @@ namespace GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication
 
 		void OnConnectionStatusChanged(object sender, ConnectionStatusChangedEventArgs args)
 		{
-			ThreadHelper.JoinableTaskFactory.RunAsync(async delegate
+			GameCodersToolkitPackage.Package.JoinableTaskFactory.RunAsync(async delegate
 			{
 				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 				DataEditorConnectionStatusChanged?.Invoke(this, args);
-			}).FileAndForget("GameCodersToolkit.DataEditorConnection.ConnectionStatusChanged");
+			}).FireAndForget();
 		}
 
 		public EventHandler<ConnectionStatusChangedEventArgs> DataEditorConnectionStatusChanged { get; set; }

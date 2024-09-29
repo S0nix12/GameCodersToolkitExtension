@@ -158,7 +158,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		public DataExplorerWindowViewModel()
 		{
 			PopulateEntries();
-			GameCodersToolkitPackage.DataLocationsConfig.ConfigLoaded += OnReferenceFinderConfigLoaded;
+			GameCodersToolkitPackage.DataLocationsConfig.ConfigLoaded += OnReferenceFinderConfigLoadedAsync;
 			m_fileEntriesView = new ListCollectionView(FileEntries);
 			FileEntriesView.Filter = (object entry) =>
 			{
@@ -216,7 +216,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			FileEntriesView.Refresh();
 		}
 
-		async void OnReferenceFinderConfigLoaded(object sender, EventArgs e)
+		async Task OnReferenceFinderConfigLoadedAsync(object sender, EventArgs e)
 		{
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			UpdatePossibleDataTypes();
@@ -250,7 +250,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 			if (needsNewWorker)
 			{
-				ThreadHelper.JoinableTaskFactory.RunAsync(async delegate
+				GameCodersToolkitPackage.Package.JoinableTaskFactory.RunAsync(async delegate
 				{
 					await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 					while (true)

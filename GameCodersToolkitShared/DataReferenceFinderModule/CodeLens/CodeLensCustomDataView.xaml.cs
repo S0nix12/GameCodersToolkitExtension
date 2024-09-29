@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GameCodersToolkit;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,15 +25,15 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 		{
 			InitializeComponent();
 		}
-		private async void DataReferenceDetails_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+		private void DataReferenceDetails_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
 		{
 			if (e.ClickCount == 2)
 			{
 				Grid gridControl = sender as Grid;
 				CodeLensDataReferenceDetailsViewModel referenceDetails = gridControl?.DataContext as CodeLensDataReferenceDetailsViewModel;
-				if (referenceDetails != null)
+				if (referenceDetails != null && GameCodersToolkitPackage.Package != null)
 				{
-					await referenceDetails.OpenInVisualStudioAsync();
+					GameCodersToolkitPackage.Package.JoinableTaskFactory.RunAsync(referenceDetails.OpenInVisualStudioAsync).FireAndForget();
 				}
 			}
 		}

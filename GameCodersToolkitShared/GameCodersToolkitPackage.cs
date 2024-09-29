@@ -29,10 +29,13 @@ namespace GameCodersToolkit
 	[ProvideOptionPage(typeof(DataReferenceFinderModule.OptionsProvider.DataReferenceFinderOptionsOptions), "Game Coders Toolkit", "Data Reference Finder", 0, 0, true, SupportsProfiles = true)]
 	public sealed class GameCodersToolkitPackage : ToolkitPackage
 	{
+#pragma warning disable CVST005
 		protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
 		{
 			try
 			{
+				Package = this;
+
 				AddService(typeof(ReferenceResultsWindowMessenger), (_, _, _) => Task.FromResult<object>(new ReferenceResultsWindowMessenger()));
 				AddService(typeof(QuickAttachService), (_, _, _) => Task.FromResult<object>(new QuickAttachService()));
 
@@ -64,6 +67,7 @@ namespace GameCodersToolkit
 				throw ex;
 			}
 		}
+#pragma warning restore CVST005
 
 		public static OutputWindowPane ExtensionOutput { get; set; }
 
@@ -74,6 +78,7 @@ namespace GameCodersToolkit
 		public static DataReferenceFinderModule.ReferenceDatabase.Database ReferenceDatabase { get; private set; }
 		public static DataEditorConnection DataEditorConnection { get; private set; }
 		public static EventHandler PackageLoaded { get; set; }
+		public static GameCodersToolkitPackage Package { get; private set; }
 		public static bool IsLoaded { get; private set; }
 	}
 }

@@ -138,6 +138,11 @@ namespace DataReferenceCodeLensProviderShared
 			return descriptor;
 		}
 
+		public async Task InvalidateDataPointAsync()
+		{
+			await InvalidatedAsync?.InvokeAsync(this, new System.EventArgs());
+		}
+
 		public CodeLensDescriptor Descriptor { get; }
 		public event AsyncEventHandler InvalidatedAsync;
 

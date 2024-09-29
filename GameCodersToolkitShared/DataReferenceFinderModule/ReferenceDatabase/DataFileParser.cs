@@ -273,7 +273,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			return outEntry;
 		}
 
-		private GenericDataIdentifier? ParseIdentifierObject(XElement element, string expression, DataParsingErrorList? errorOutput)
+		private GenericDataIdentifier ParseIdentifierObject(XElement element, string expression, DataParsingErrorList errorOutput)
 		{
 			IXmlLineInfo lineInfo = element;
 

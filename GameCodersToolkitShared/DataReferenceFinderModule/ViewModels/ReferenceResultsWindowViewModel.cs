@@ -137,7 +137,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		{
 			foreach (var fileEntry in model.ResultsPerFile)
 			{
-				FileResultsViewModel? fileResultsViewModel = null;
+				FileResultsViewModel fileResultsViewModel = null;
 				foreach (var fileResultVM in FileResults)
 				{
 					if (string.Compare(fileResultVM.FilePath, fileEntry.Key, StringComparison.OrdinalIgnoreCase) == 0)

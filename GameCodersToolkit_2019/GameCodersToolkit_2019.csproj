@@ -109,6 +109,9 @@
     <PackageReference Include="FolderBrowserEx">
       <Version>1.0.1</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Validation">
+      <Version>16.10.34</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="16.11.69">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>

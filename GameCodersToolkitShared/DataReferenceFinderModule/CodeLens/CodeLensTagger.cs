@@ -65,6 +65,11 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLensTagging
 			Properties = new CodeLensTagProperties(true);
 		}
 
+		public void DisconnectCodeLensTag()
+		{
+			Disconnected?.Invoke(this, new EventArgs());
+		}
+
 		public ICodeLensDescriptor Descriptor { get; set; }
 
 		public CodeLensTagProperties Properties { get; set; }
@@ -225,7 +230,9 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLensTagging
 			m_identifierDefinitionLines.Sort(resultLineComparer);
 
 			stopwatch.Stop();
+#if DEBUG
 			GameCodersToolkitPackage.ExtensionOutput?.WriteLine($"Parsing Text Buffer took {stopwatch.ElapsedMilliseconds}ms");
+#endif
 
 			m_currentSnapshot = newSnapshot;
 			// We changed atleast one line. Make sure to notify about it
