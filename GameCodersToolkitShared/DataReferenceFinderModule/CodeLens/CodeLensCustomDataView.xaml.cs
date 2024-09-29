@@ -28,9 +28,12 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 		{
 			if (e.ClickCount == 2)
 			{
-				StackPanel stackPanelControl = sender as StackPanel;
-				CodeLensDataReferenceDetailsViewModel referenceDetails = stackPanelControl?.DataContext as CodeLensDataReferenceDetailsViewModel;
-				await referenceDetails?.OpenInVisualStudioAsync();
+				Grid gridControl = sender as Grid;
+				CodeLensDataReferenceDetailsViewModel referenceDetails = gridControl?.DataContext as CodeLensDataReferenceDetailsViewModel;
+				if (referenceDetails != null)
+				{
+					await referenceDetails.OpenInVisualStudioAsync();
+				}
 			}
 		}
 	}
