@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
-    <Metadata>
-        <Identity Id="GameCodersToolkit_2019.02cbee57-bbf7-4114-8359-50f1d8833ad8" Version="1.0" Language="en-US" Publisher="Henning Ax" />
-        <DisplayName>GameCodersToolkit_2019</DisplayName>
-        <Description xml:space="preserve">Find references of your code in data files.</Description>
-        <Icon>Resources\Icon.png</Icon>
-        <PreviewImage>Resources\Icon.png</PreviewImage>
-    </Metadata>
-    <Installation>
-        <InstallationTarget Version="[16.0,17.0)" Id="Microsoft.VisualStudio.Community" />
-    </Installation>
-    <Prerequisites>
-        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,)" DisplayName="Visual Studio core editor" />
-    </Prerequisites>
-    <Assets>
-        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-        <Asset d:Source="Project" d:ProjectName="DataReferenceCodeLensProvider_2019" Type="Microsoft.VisualStudio.CodeLensComponent" Path="|DataReferenceCodeLensProvider_2019|" />
-        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
-    </Assets>
+  <Metadata>
+    <Identity Id="GameCodersToolkit_2019.02cbee57-bbf7-4114-8359-50f1d8833ad8" Version="0.2.0" Language="en-US" Publisher="Henning Ax" />
+    <DisplayName>GameCodersToolkit_2019</DisplayName>
+    <Description xml:space="preserve">Find references of your code in data files.</Description>
+    <Icon>Resources\Icon.png</Icon>
+    <PreviewImage>Resources\Icon.png</PreviewImage>
+    <Preview>true</Preview>
+  </Metadata>
+  <Installation>
+    <InstallationTarget Version="[16.0,17.0)" Id="Microsoft.VisualStudio.Community" />
+  </Installation>
+  <Prerequisites>
+    <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,)" DisplayName="Visual Studio core editor" />
+  </Prerequisites>
+  <Assets>
+    <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+    <Asset d:Source="Project" d:ProjectName="DataReferenceCodeLensProvider_2019" Type="Microsoft.VisualStudio.CodeLensComponent" Path="|DataReferenceCodeLensProvider_2019|" />
+    <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
+  </Assets>
 </PackageManifest>

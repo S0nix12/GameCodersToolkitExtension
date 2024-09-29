@@ -11,7 +11,7 @@ namespace GameCodersToolkit
         public const string Name = "GameCodersToolkit_2022";
         public const string Description = @"Find references of your code in data files.";
         public const string Language = "en-US";
-        public const string Version = "0.1.1";
+        public const string Version = "0.2.0";
         public const string Author = "Henning Ax";
         public const string Tags = "";
     }
