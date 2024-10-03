@@ -214,15 +214,18 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLensTagging
 			List<string> identifierToReparse = RemoveChangedLineEntries(oldSnapshot, oldSpan, changeTracker);
 
 			int guidResultCountBefore = m_guidResultLines.Count;
+			int identifierResultCountBefore = m_identifierDefinitionLines.Count;
 
 			SnapshotSpan newSnapshotSpan = new SnapshotSpan(newSnapshot, newSpan);
 			ParseLinesInSnapshotSpan(newSnapshotSpan, changeTracker, out Dictionary<string, List<int>> identifiersToResolve);
+
+			// Offset all lines we did not change but come after the new text span by the line delta of the change so our results stay attached to the correct line
+			ApplyLineChangeDelta(lineDelta, newSnapshotSpan.Start.GetContainingLine().LineNumber, m_guidResultLines, guidResultCountBefore, changeTracker);
+			ApplyLineChangeDelta(lineDelta, newSnapshotSpan.Start.GetContainingLine().LineNumber, m_identifierDefinitionLines, identifierResultCountBefore, changeTracker);
+
 			ReparseChangedIdentifier(identifierToReparse, guidResultCountBefore, identifiersToResolve, changeTracker);
 
 			// TODO resolve remaining guid identifiers with corresponding file
-
-			// Offset all lines we did not reparse but come after the new text span by the line delta of the change so our results stay attached to the correct line
-			ApplyLineChangeDelta(lineDelta, newSnapshotSpan.Start.GetContainingLine().LineNumber, guidResultCountBefore, changeTracker);
 
 			// Sort all results by their line number again.
 			ParseResultLineComparer resultLineComparer = new ParseResultLineComparer();
@@ -247,19 +250,19 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLensTagging
 		}
 
 		// Apply the line delta of a change to current results
-		private void ApplyLineChangeDelta(int lineDelta, int changeStartLine, int guidResultCountBefore, ChangedLineTracker changeTracker)
+		private void ApplyLineChangeDelta(int lineDelta, int changeStartLine, List<ParseResultLine> lineResults, int resultCountBefore, ChangedLineTracker changeTracker)
 		{
 			if (lineDelta != 0)
 			{
-				for (int i = 0; i < guidResultCountBefore; ++i)
+				for (int i = 0; i < resultCountBefore; ++i)
 				{
-					if (m_guidResultLines[i].LineNumber >= changeStartLine)
+					if (lineResults[i].LineNumber >= changeStartLine)
 					{
-						ParseResultLine parseResultLine = m_guidResultLines[i];
+						ParseResultLine parseResultLine = lineResults[i];
 						changeTracker.UpdateLine(parseResultLine.LineNumber);
 
 						parseResultLine.LineNumber += lineDelta;
-						m_guidResultLines[i] = parseResultLine;
+						lineResults[i] = parseResultLine;
 
 						changeTracker.UpdateLine(parseResultLine.LineNumber);
 					}

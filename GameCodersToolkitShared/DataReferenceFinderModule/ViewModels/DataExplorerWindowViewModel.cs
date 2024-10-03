@@ -92,7 +92,9 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 	{
 		public DataExplorerFileViewModel(string filePath)
 		{
-			FilePath = Path.GetFileName(filePath);
+			string dataProjectPath = GameCodersToolkitPackage.DataLocationsConfig.GetDataProjectBasePath();
+			FilePath = filePath.TrimPrefix(dataProjectPath);
+			FullFilePath = filePath;
 			if (GameCodersToolkitPackage.ReferenceDatabase.EntriesPerFile.TryGetValue(filePath, out var dataEntries))
 			{
 				foreach (var dataEntry in dataEntries)
@@ -109,6 +111,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 			m_entriesView = new ListCollectionView(Entries);
 			EntriesView.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
+			OnPropertyChanged(nameof(DataEntryCount));
 		}
 
 		public void SetSelectedTypeFilter(string typeFilter)
@@ -136,10 +139,12 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		private bool m_isExpanded;
 		public bool IsExpanded { get => m_isExpanded; set => SetProperty(ref m_isExpanded, value); }
 		public string FilePath { get; private set; }
+		public string FullFilePath { get; private set; }
 		public ObservableCollection<DataExplorerSubTypeViewModel> Entries { get; private set; } = new ObservableCollection<DataExplorerSubTypeViewModel>();
 
 		private ListCollectionView m_entriesView;
 		public ICollectionView EntriesView { get => m_entriesView; }
+		public int DataEntryCount { get => Entries.Sum(e => e.DataEntries.Count); }
 
 		private string m_selectedTypeFilter = "";
 		public bool HasAnyChildsMatchType { get; private set; } = true;

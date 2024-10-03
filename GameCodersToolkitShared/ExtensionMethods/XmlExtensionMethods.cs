@@ -42,11 +42,14 @@ namespace GameCodersToolkit.ExtensionMethods
 				return (string)xpathResult;
 
 			IEnumerable xPathEnumerator = xpathResult as IEnumerable;
-			if (xPathEnumerator.Cast<XAttribute>().FirstOrDefault() is XAttribute attribute)
-				return attribute.Value;
+			foreach (XObject xObject in xPathEnumerator)
+			{
+				if (xObject is XAttribute attribute)
+					return attribute.Value;
 
-			if (xPathEnumerator.Cast<XElement>().FirstOrDefault() is XElement element)
-				return element.Value;
+				if (xObject is XElement element)
+					return element.Value;
+			}
 
 			return null;
 		}

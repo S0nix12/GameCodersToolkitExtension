@@ -129,8 +129,12 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 		void HandleResultsUpdate(object operation, EventArgs eventArgs)
 		{
-			FindReferenceOperationResults model = (FindReferenceOperationResults)operation;
-			UpdateResultsFromModel(model);
+			GameCodersToolkitPackage.Package.JoinableTaskFactory.RunAsync(async () =>
+			{
+				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+				FindReferenceOperationResults model = (FindReferenceOperationResults)operation;
+				UpdateResultsFromModel(model);
+			}).FireAndForget();
 		}
 
 		void UpdateResultsFromModel(FindReferenceOperationResults model)

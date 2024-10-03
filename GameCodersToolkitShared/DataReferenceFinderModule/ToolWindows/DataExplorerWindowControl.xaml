@@ -56,7 +56,7 @@
 						<DockPanel>
 							<TextBlock Text="{Binding FilePath}" Margin="1,1,1,1"/>
 							<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
-							<TextBlock Text="{Binding Entries.Count, StringFormat=Entries: {0}}"/>
+							<TextBlock Text="{Binding DataEntryCount, StringFormat=Entries: {0}}"/>
 						</DockPanel>
 					</HierarchicalDataTemplate>
 					<HierarchicalDataTemplate DataType="{x:Type vm:DataExplorerSubTypeViewModel}" ItemsSource="{Binding DataEntriesView}">

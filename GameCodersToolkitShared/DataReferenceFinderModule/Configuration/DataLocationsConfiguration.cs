@@ -18,6 +18,7 @@ namespace GameCodersToolkit.Configuration
 
 	public class CDataLocationsConfig
 	{
+		public string DataProjectBasePath { get; set; }
 		public List<CDataLocationEntry> DataLocationEntries { get; set; } = new List<CDataLocationEntry>();
 		public List<DataParsingDescription> DataParsingDescriptions { get; set; } = new List<DataParsingDescription>();
 		public List<string> GuidFieldIdentifiers { get; set; } = new List<string>();
@@ -60,6 +61,11 @@ namespace GameCodersToolkit.Configuration
 		public string GetDataEditorServerUri()
 		{
 			return DataLocationsConfig.DataEditorServerUri;
+		}
+
+		public string GetDataProjectBasePath()
+		{
+			return DataLocationsConfig.DataProjectBasePath;
 		}
 
 		private void HandleOpenSolution(Solution solution = null)
@@ -116,13 +122,32 @@ namespace GameCodersToolkit.Configuration
 
 					DataLocationsConfig = await JsonSerializer.DeserializeAsync<CDataLocationsConfig>(fileStream);
 					List<CDataLocationEntry> entries = DataLocationsConfig.DataLocationEntries;
+					if (!string.IsNullOrEmpty(DataLocationsConfig.DataProjectBasePath))
+					{
+						if (!Path.IsPathRooted(DataLocationsConfig.DataProjectBasePath))
+						{
+							lock (SolutionFolder)
+							{
+								DataLocationsConfig.DataProjectBasePath = Path.Combine(SolutionFolder, DataLocationsConfig.DataProjectBasePath);
+							}
+						}
+						DataLocationsConfig.DataProjectBasePath = Path.GetFullPath(DataLocationsConfig.DataProjectBasePath);
+					}
+
 					foreach (CDataLocationEntry entry in entries)
 					{
 						if (!Path.IsPathRooted(entry.Path))
 						{
-							lock (SolutionFolder)
+							if (Directory.Exists(DataLocationsConfig.DataProjectBasePath))
 							{
-								entry.Path = Path.Combine(SolutionFolder, entry.Path);
+								entry.Path = Path.Combine(DataLocationsConfig.DataProjectBasePath, entry.Path);
+							}
+							else
+							{
+								lock (SolutionFolder)
+								{
+									entry.Path = Path.Combine(SolutionFolder, entry.Path);
+								}
 							}
 						}
 						entry.Path = Path.GetFullPath(entry.Path);

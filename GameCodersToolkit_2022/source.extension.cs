@@ -7,7 +7,7 @@ namespace GameCodersToolkit
 {
     internal sealed partial class Vsix
     {
-        public const string Id = "GameCodersToolkit.49757eef-0bb3-49a6-a9df-633cdee57064";
+        public const string Id = "GameCodersToolkit_2022.49757eef-0bb3-49a6-a9df-633cdee57064";
         public const string Name = "GameCodersToolkit_2022";
         public const string Description = @"Find references of your code in data files.";
         public const string Language = "en-US";
