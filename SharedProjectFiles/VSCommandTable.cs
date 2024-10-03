@@ -36,7 +36,9 @@ namespace GameCodersToolkit
         public const int FindDataReferencesMenuGroupAll = 0x0004;
         public const int FindDataReferencesMenuGroupSpecific = 0x0005;
         public const int FindDataReferencesExtensionsMenu = 0x0006;
-        public const int FindDataReferencesExtensionsMenuGroup = 0x0007;
+        public const int FindDataReferencesExtensionsMenuGroup0 = 0x0007;
+        public const int FindDataReferencesExtensionsMenuGroup1 = 0x0008;
+        public const int FindDataReferencesExtensionsMenuGroup2 = 0x0009;
         public const int FindGuidReferences_AllLocations = 0x0010;
         public const int FindGuidReferences_Location1 = 0x0020;
         public const int FindGuidReferences_Location2 = 0x0030;
