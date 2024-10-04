@@ -29,13 +29,33 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 		{
 			if (e.ClickCount == 2)
 			{
-				Grid gridControl = sender as Grid;
-				CodeLensDataReferenceDetailsViewModel referenceDetails = gridControl?.DataContext as CodeLensDataReferenceDetailsViewModel;
+				FrameworkElement frameworkElement = sender as FrameworkElement;
+				CodeLensDataReferenceDetailsViewModel referenceDetails = frameworkElement?.DataContext as CodeLensDataReferenceDetailsViewModel;
 				if (referenceDetails != null && GameCodersToolkitPackage.Package != null)
 				{
 					GameCodersToolkitPackage.Package.JoinableTaskFactory.RunAsync(referenceDetails.OpenInVisualStudioAsync).FireAndForget();
 				}
 			}
+		}
+
+		private void DataReferenceDetails_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			TreeViewItem treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+
+			if (treeViewItem != null)
+			{
+				treeViewItem.Focus();
+				treeViewItem.IsSelected = true;
+				e.Handled = true;
+			}
+		}
+
+		static TreeViewItem VisualUpwardSearch(DependencyObject source)
+		{
+			while (source != null && !(source is TreeViewItem))
+				source = VisualTreeHelper.GetParent(source);
+
+			return source as TreeViewItem;
 		}
 	}
 }

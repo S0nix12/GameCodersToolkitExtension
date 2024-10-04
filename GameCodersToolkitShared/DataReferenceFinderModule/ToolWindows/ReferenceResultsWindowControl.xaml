@@ -26,13 +26,13 @@
 		<TreeView x:Name="ResultsTree" Focusable="False" ItemsSource="{Binding OperationResults}" SelectedItemChanged="TreeView_SelectedItemChanged" VirtualizingPanel.VirtualizationMode="Recycling" VirtualizingPanel.IsVirtualizing="True" ItemContainerStyle="{StaticResource VSTreeViewItemBoundExpanded}">
 			<TreeView.Resources>
 				<DataTemplate DataType="{x:Type vm:DataEntryResultViewModel}">
-					<Border Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseDown="Border_MouseDown">
+					<Border Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseLeftButtonDown="Border_MouseDown" PreviewMouseRightButtonDown="Border_PreviewRightMouseDown">
+						<Border.ContextMenu>
+							<ContextMenu>
+								<MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
+							</ContextMenu>
+						</Border.ContextMenu>
 						<StackPanel Orientation="Horizontal">
-							<StackPanel.ContextMenu>
-								<ContextMenu>
-									<MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
-								</ContextMenu>
-							</StackPanel.ContextMenu>
 							<TextBlock Text="{Binding LineNumber, StringFormat=Line: {0}}" />
 							<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
 							<TextBlock Text="{Binding Name, StringFormat=Found: {0}}" />

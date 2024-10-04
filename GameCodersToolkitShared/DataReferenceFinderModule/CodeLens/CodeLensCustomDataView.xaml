@@ -60,29 +60,30 @@
 				</Grid>
 			</HierarchicalDataTemplate>
 			<DataTemplate DataType="{x:Type cl:CodeLensDataReferenceDetailsViewModel}">
-				<Grid x:Name="DataReferenceDetailsPanel"
-							ToolTip="{Binding DataPath}" 
-							MouseDown="DataReferenceDetails_MouseDown">
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="Auto"/>
-						<ColumnDefinition Width="Auto"/>
-						<ColumnDefinition Width="Auto"/>
-						<ColumnDefinition Width="*"/>
-						<ColumnDefinition Width="Auto"/>
-						<ColumnDefinition Width="Auto"/>
-					</Grid.ColumnDefinitions>
-					<Grid.ContextMenu>
+				<Border MouseLeftButtonDown="DataReferenceDetails_MouseDown" PreviewMouseRightButtonDown="DataReferenceDetails_PreviewMouseRightButtonDown" Background="Transparent">
+					<Border.ContextMenu>
 						<ContextMenu>
 							<MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
 						</ContextMenu>
-					</Grid.ContextMenu>
-					<imaging:CrispImage Grid.Column="0" Width="15" Height="15" Moniker="{x:Static catalog:KnownMonikers.Method}" Margin="0,0,2,0" VerticalAlignment="Center"/>
-					<TextBlock Grid.Column="1" Text="{Binding SubType}" VerticalAlignment="Center"/>
-					<Separator Grid.Column="2" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="4,2,4,2"/>
-					<TextBlock Grid.Column="3" Text="{Binding DataPath}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-					<Separator Grid.Column="4" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="4,2,4,2"/>
-					<TextBlock Grid.Column="5" Text="{Binding LineNumber, StringFormat=L: {0}}" VerticalAlignment="Center"/>
-				</Grid>
+					</Border.ContextMenu>
+					<Grid x:Name="DataReferenceDetailsPanel"
+							ToolTip="{Binding DataPath}" >
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="Auto"/>
+							<ColumnDefinition Width="Auto"/>
+						</Grid.ColumnDefinitions>
+						<imaging:CrispImage Grid.Column="0" Width="15" Height="15" Moniker="{x:Static catalog:KnownMonikers.Method}" Margin="0,0,2,0" VerticalAlignment="Center"/>
+						<TextBlock Grid.Column="1" Text="{Binding SubType}" VerticalAlignment="Center"/>
+						<Separator Grid.Column="2" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="4,2,4,2"/>
+						<TextBlock Grid.Column="3" Text="{Binding DataPath}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+						<Separator Grid.Column="4" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="4,2,4,2"/>
+						<TextBlock Grid.Column="5" Text="{Binding LineNumber, StringFormat=L: {0}}" VerticalAlignment="Center"/>
+					</Grid>
+				</Border>
 			</DataTemplate>
 		</TreeView.Resources>
 	</TreeView>

@@ -3,6 +3,8 @@ using Microsoft.VisualStudio.Package;
 using System.Runtime.InteropServices.Expando;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace GameCodersToolkit.ReferenceFinder.ToolWindows
 {
@@ -35,6 +37,25 @@ namespace GameCodersToolkit.ReferenceFinder.ToolWindows
 					GameCodersToolkitPackage.Package.JoinableTaskFactory.RunAsync(lineResult.OpenInVisualStudioAsync).FireAndForget();
 				}
 			}
+		}
+		private void Border_PreviewRightMouseDown(object sender, MouseButtonEventArgs e)
+		{
+			TreeViewItem treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+
+			if (treeViewItem != null)
+			{
+				treeViewItem.Focus();
+				treeViewItem.IsSelected = true;
+				e.Handled = true;
+			}
+		}
+
+		static TreeViewItem VisualUpwardSearch(DependencyObject source)
+		{
+			while (source != null && !(source is TreeViewItem))
+				source = VisualTreeHelper.GetParent(source);
+
+			return source as TreeViewItem;
 		}
 
 		private void OnToolbarMessageReceived(object sender, EReferenceResultsWindowToolbarAction action)
