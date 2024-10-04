@@ -38,7 +38,14 @@
 			<TreeView DockPanel.Dock="Bottom" x:Name="DataList" Focusable="False" ItemsSource="{Binding FileEntriesView}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" ItemContainerStyle="{StaticResource VSTreeViewItemBoundExpanded}">
 				<TreeView.Resources>
 					<DataTemplate DataType="{x:Type vm:DataEntryViewModel}">
-						<Border Name="DataEntryVM_Border" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" PreviewMouseRightButtonDown="DataEntryVM_Border_PreviewMouseRightButtonDown" MouseLeftButtonDown="DataEntryVM_Border_LeftMouseDown">
+						<Border 
+							Name="DataEntryVM_Border" 
+							Background="Transparent" 
+							HorizontalAlignment="Stretch" 
+							VerticalAlignment="Stretch" 
+							PreviewMouseRightButtonDown="DataEntryVM_Border_PreviewMouseRightButtonDown" 
+							MouseLeftButtonDown="DataEntryVM_Border_LeftMouseDown"
+							ToolTip="{Binding DataPath}">
 							<Border.ContextMenu>
 								<ContextMenu>
 									<MenuItem Header="Find References" Command="{Binding FindReferencesCommand}"/>
@@ -53,7 +60,7 @@
 						</Border>
 					</DataTemplate>
 					<HierarchicalDataTemplate DataType="{x:Type vm:DataExplorerFileViewModel}" ItemsSource="{Binding EntriesView}">
-						<DockPanel>
+						<DockPanel ToolTip="{Binding FullFilePath}">
 							<TextBlock Text="{Binding FilePath}" Margin="1,1,1,1"/>
 							<Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5,2,5,2"/>
 							<TextBlock Text="{Binding DataEntryCount, StringFormat=Entries: {0}}"/>

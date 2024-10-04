@@ -20,6 +20,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			SourceEntry = sourceEntry;
 			LineNumber = SourceEntry.SourceLineNumber;
 			Name = SourceEntry.Name;
+			DataPath = ReferenceDatabaseUtils.CreateDataEntryPathString(sourceEntry);
 			Init();
 		}
 
@@ -93,12 +94,17 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		private bool m_isExpanded;
 		public bool IsExpanded { get => m_isExpanded; set => SetProperty(ref m_isExpanded, value); }
 
-		public DataEntry SourceEntry { get; set; }
+		private DataEntry m_sourceEntry;
+		public DataEntry SourceEntry { get => m_sourceEntry; set { m_sourceEntry = value; DataPath = ReferenceDatabaseUtils.CreateDataEntryPathString(m_sourceEntry); } }
 
 		private string m_name;
 		public string Name { get => m_name; set => m_name = value; }
 
+		private string m_dataPath;
+		public string DataPath { get => m_dataPath; set => SetProperty(ref m_dataPath, value); }
+
 		private int m_lineNumber;
+
 		public int LineNumber { get => m_lineNumber; set => m_lineNumber = value; }
 	}
 }
