@@ -140,13 +140,9 @@ namespace GameCodersToolkit.ReferenceFinder
 			if (string.IsNullOrEmpty(identifierWord))
 				return string.Empty;
 
-			// Find the first line in the document that contains this identifier
+			// Find lines which contain the same word and check if they contain a guid
 			foreach (var lineSnapshot in caretLineSnapshot.Snapshot.Lines)
 			{
-				// We reached the line under the caret no identifier can come before this and we already checked this line
-				if (lineSnapshot.LineNumber == caretLineSnapshot.LineNumber)
-					break;
-
 				string lineText = lineSnapshot.GetText();
 				if (lineText.Contains(identifierWord))
 				{
@@ -155,7 +151,6 @@ namespace GameCodersToolkit.ReferenceFinder
 					{
 						return lineMatch.Value;
 					}
-					break;
 				}
 			}
 
