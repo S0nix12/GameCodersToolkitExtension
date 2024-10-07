@@ -54,16 +54,17 @@ jobs:
         Compress-Archive -Path GameCodersToolkit_2022\bin\Release\x64\p4bridge.dll -Update -DestinationPath GameCodersToolkit_2022\bin\Release\GameCodersToolkit.vsix
         Compress-Archive -Path GameCodersToolkit_2019\bin\Release\x86\p4bridge.dll -Update -DestinationPath GameCodersToolkit_2019\bin\Release\GameCodersToolkit.vsix
 
-    - name: Rename VSIX with version
+    - name: Rename VSIX with version and move to output dir
       shell: pwsh
       run: |
         Rename-Item -Path "GameCodersToolkit_2022\bin\Release\GameCodersToolkit.vsix" -NewName "GameCodersToolkit_2022.vsix"
         Rename-Item -Path "GameCodersToolkit_2019\bin\Release\GameCodersToolkit.vsix" -NewName "GameCodersToolkit_2019.vsix"
+        New-Item -Path "VSIXOutput -ItemType "Directory"
+        Move-Item -Path "GameCodersToolkit_2022\bin\Release\GameCodersToolkit_2022.vsix" -Destination "VSIXOutput"
+        Move-Item -Path "GameCodersToolkit_2019\bin\Release\GameCodersToolkit_2019.vsix" -Destination "VSIXOutput"        
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: GameCodersToolkit_Output
-        path: |
-          GameCodersToolkit_2019\bin\Release\*.vsix
-          GameCodersToolkit_2022\bin\Release\*.vsix      
+        path: VSIXOutput/*.vsix
