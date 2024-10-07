@@ -139,6 +139,28 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 				}
 			}
 
+			// Detect, report and break circular parent relationships
+			errorOutput.PushContext("Parent");
+			HashSet<DataEntry> parentEntries = new HashSet<DataEntry>();
+			foreach (var dataEntry in outEntries.Where(entry => entry.Parent != null))
+			{
+				parentEntries.Clear();
+				DataEntry parentEntry = dataEntry;
+				while (parentEntry != null)
+				{
+					var nextParent = parentEntry.Parent;
+					if (parentEntries.Contains(nextParent))
+					{
+						errorOutput.Error(dataEntry.SourceLineNumber, $"Circular Reference detected. Entry: {dataEntry.Name} ID: {dataEntry.Identifier}. Circular Parent: {nextParent.Name} ID: {nextParent.Identifier}");
+						parentEntry.Parent = null;
+						break;
+					}
+					parentEntry = nextParent;
+					parentEntries.Add(parentEntry);
+				}
+			}
+			errorOutput.PopContext();
+
 			return outEntries;
 		}
 

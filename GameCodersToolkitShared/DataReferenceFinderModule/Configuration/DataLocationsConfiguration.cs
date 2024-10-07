@@ -18,7 +18,7 @@ namespace GameCodersToolkit.Configuration
 
 	public class CDataLocationsConfig
 	{
-		public string DataProjectBasePath { get; set; }
+		public string DataProjectBasePath { get; set; } = "";
 		public List<CDataLocationEntry> DataLocationEntries { get; set; } = new List<CDataLocationEntry>();
 		public List<DataParsingDescription> DataParsingDescriptions { get; set; } = new List<DataParsingDescription>();
 		public List<string> GuidFieldIdentifiers { get; set; } = new List<string>();
