@@ -51,8 +51,8 @@ jobs:
     - name: Add P4Bridge
       shell: pwsh
       run: |
-        Compress-Archive -Path GameCodersToolkit_2022\bin\Release\x64\p4bridge.dll -DestinationPath GameCodersToolkit_2022\bin\Release\GameCodersToolkit.vsix
-        Compress-Archive -Path GameCodersToolkit_2019\bin\Release\x86\p4bridge.dll -DestinationPath GameCodersToolkit_2019\bin\Release\GameCodersToolkit.vsix
+        Compress-Archive -Path GameCodersToolkit_2022\bin\Release\x64\p4bridge.dll -Update -DestinationPath GameCodersToolkit_2022\bin\Release\GameCodersToolkit.vsix
+        Compress-Archive -Path GameCodersToolkit_2019\bin\Release\x86\p4bridge.dll -Update -DestinationPath GameCodersToolkit_2019\bin\Release\GameCodersToolkit.vsix
 
     - name: Rename VSIX with version
       shell: pwsh
