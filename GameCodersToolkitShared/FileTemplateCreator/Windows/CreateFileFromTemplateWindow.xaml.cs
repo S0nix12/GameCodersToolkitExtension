@@ -30,7 +30,6 @@ namespace GameCodersToolkit.FileTemplateCreator.Windows
 		public CreateFileFromTemplateWindow()
 		{
 			InitializeComponent();
-
 		}
 	}
 }

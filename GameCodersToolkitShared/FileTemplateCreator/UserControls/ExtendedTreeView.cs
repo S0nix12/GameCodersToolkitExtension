@@ -1,4 +1,5 @@
 ﻿using EnvDTE;
+using Newtonsoft.Json.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -23,7 +24,10 @@ namespace GameCodersToolkit.FileTemplateCreator.UserControls
 		public object SelectedItem_
 		{
 			get { return (object)GetValue(SelectedItem_Property); }
-			set { SetValue(SelectedItem_Property, value); }
+			set 
+			{ 
+				SetValue(SelectedItem_Property, value);
+			}
 		}
 		public static readonly DependencyProperty SelectedItem_Property = DependencyProperty.Register("SelectedItem_", typeof(object), typeof(ExtendedTreeView), new UIPropertyMetadata(null));
 	}

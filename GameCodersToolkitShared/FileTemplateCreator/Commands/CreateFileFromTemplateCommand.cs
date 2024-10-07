@@ -15,6 +15,7 @@ namespace GameCodersToolkit
 			window.DataContext = viewModel;
 
 			viewModel.OnRequestClose += (s, e) => window.Close();
+			viewModel.OnSaveFileDialogCreated += (s, dialog) => { return dialog.ShowDialog(window); };
 			await window.ShowDialogAsync();
 		}
 	}

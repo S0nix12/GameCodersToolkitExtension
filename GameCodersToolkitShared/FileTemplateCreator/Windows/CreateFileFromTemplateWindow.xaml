@@ -16,8 +16,9 @@
         d:DataContext="{d:DesignInstance Type=vm:CFileTemplateDialogViewModel}"
         mc:Ignorable="d" 
         Height="600"
-        Width="600"
-		toolkit:Themes.UseVsTheme="True">
+        Width="900"
+		toolkit:Themes.UseVsTheme="True"
+        Title="{Binding WindowTitle}">
 
     <Window.Resources>
         <GridLength x:Key="WindowContentMargin">15</GridLength>
@@ -34,6 +35,8 @@
             <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="{StaticResource WindowContentMargin}" />
@@ -41,57 +44,91 @@
             <RowDefinition Height="{StaticResource WindowContentMargin}" />
         </Grid.RowDefinitions>
 
-        <usercontrols:ExtendedTreeView x:Name="TemplateTree" Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Templates}" SelectedItem_="{Binding SelectedTemplate, Mode=TwoWay}" toolkit:Themes.UseVsTheme="True">
-            <TreeView.Resources>
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1">
+            <usercontrols:ExtendedTreeView x:Name="TemplateTree" ItemsSource="{Binding Templates}" SelectedItem_="{Binding SelectedTemplate, Mode=TwoWay}" toolkit:Themes.UseVsTheme="True">
+                <TreeView.Resources>
 
-                <Style TargetType="{x:Type TreeViewItem}">
-                    <Setter Property="Focusable" Value="{Binding IsFocusable, Mode=TwoWay}"/>
-                </Style>
+                    <Style TargetType="{x:Type TreeViewItem}">
+                        <Setter Property="Focusable" Value="{Binding IsFocusable, Mode=TwoWay}"/>
 
-                <HierarchicalDataTemplate DataType="{x:Type vm:CFileTemplateCategoryViewModel}" ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-                <DataTemplate DataType="{x:Type vm:CFileTemplateViewModel}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
-                    </StackPanel>
-                </DataTemplate>
-            </TreeView.Resources>
-        </usercontrols:ExtendedTreeView>
+                        <Style.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>
+                        </Style.Resources>
+                    </Style>
 
-        <TreeView x:Name="MakeFileTree" Grid.Row="1" Grid.Column="3" ItemsSource="{Binding MakeFileContent}" toolkit:Themes.UseVsTheme="True">
-            <TreeView.Resources>
-
-                <Style TargetType="{x:Type TreeViewItem}">
-                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-                    <Setter Property="Focusable" Value="{Binding IsFocusable, Mode=TwoWay}"/>
-                </Style>
-
-                <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileUberFileViewModel}" ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-                <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileGroupViewModel}" ItemsSource="{Binding Children}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
-                    </StackPanel>
-                </HierarchicalDataTemplate>
-                <DataTemplate DataType="{x:Type vm:CSelectableEntryViewModel}">
-                    <StackPanel Orientation="Horizontal">
-                        <Button Command="{Binding SelectCommand}">
+                    <HierarchicalDataTemplate DataType="{x:Type vm:CFileTemplateCategoryViewModel}" ItemsSource="{Binding Children}">
+                        <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
-                        </Button>
-                    </StackPanel>
-                </DataTemplate>
-                <DataTemplate DataType="{x:Type vm:CMakeFileFileViewModel}">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
-                    </StackPanel>
-                </DataTemplate>
-            </TreeView.Resources>
-        </TreeView>
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                    <DataTemplate DataType="{x:Type vm:CFileTemplateViewModel}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </TreeView.Resources>
+            </usercontrols:ExtendedTreeView>
+        </ScrollViewer>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="3" >
+            <usercontrols:ExtendedTreeView x:Name="MakeFilesTree" ItemsSource="{Binding MakeFiles}" SelectedItem_="{Binding SelectedMakeFile, Mode=TwoWay}" toolkit:Themes.UseVsTheme="True">
+                <TreeView.Resources>
+
+                    <Style TargetType="{x:Type TreeViewItem}">
+                        <Setter Property="Focusable" Value="{Binding IsFocusable, Mode=TwoWay}"/>
+                        <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+
+                        <Style.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>
+                        </Style.Resources>
+                    </Style>
+
+                    <DataTemplate DataType="{x:Type vm:CMakeFileViewModel}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding ID}" Style="{StaticResource VSTextBlockStyle}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </TreeView.Resources>
+            </usercontrols:ExtendedTreeView>
+        </ScrollViewer>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="5" >
+            <TreeView x:Name="MakeFileTree" ItemsSource="{Binding MakeFileContent}" toolkit:Themes.UseVsTheme="True">
+                <TreeView.Resources>
+
+                    <Style TargetType="{x:Type TreeViewItem}">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                        <Setter Property="Focusable" Value="{Binding IsFocusable, Mode=TwoWay}"/>
+
+                        <Style.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>
+                        </Style.Resources>
+                    </Style>
+
+                    <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileUberFileViewModel}" ItemsSource="{Binding Children}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding DisplayName}" Style="{StaticResource VSTextBlockStyle}" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                    <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileGroupViewModel}" ItemsSource="{Binding Children}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding DisplayName}" Style="{StaticResource VSTextBlockStyle}" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                    <DataTemplate DataType="{x:Type vm:CSelectableEntryViewModel}">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Command="{Binding SelectCommand}">
+                                <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
+                            </Button>
+                        </StackPanel>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type vm:CMakeFileFileViewModel}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </TreeView.Resources>
+            </TreeView>
+        </ScrollViewer>
     </Grid>
 </Window>

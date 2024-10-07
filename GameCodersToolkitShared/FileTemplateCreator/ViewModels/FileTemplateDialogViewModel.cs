@@ -49,12 +49,46 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 		}
 	}
 
+	public partial class CMakeFileViewModel : ObservableObject
+	{
+		public string Name { get; set; }
+		public string ID { get; set; }
+
+
+		private bool m_isFocusable = true;
+		public bool IsFocusable { get => m_isFocusable; set => SetProperty(ref m_isFocusable, value); }
+
+		private bool m_isSelected = false;
+		public bool IsSelected
+		{
+			get => m_isSelected;
+			set
+			{
+				SetProperty(ref m_isSelected, value);
+				if (value)
+				{
+					Select();
+				}
+			}
+		}
+
+
+		public event Action<CMakeFileViewModel> OnSelect;
+
+		[RelayCommand]
+		private void Select()
+		{
+			OnSelect?.Invoke(this);
+		}
+	}
+
 	public partial class CMakeFileUberFileViewModel : ObservableObject
 	{
+		public string DisplayName { get; set; }
 		public string Name { get; set; }
 		public ObservableCollection<object> Children { get; set; } = new ObservableCollection<object>();
 
-		private bool m_isExpanded;
+		private bool m_isExpanded = true;
 		public bool IsExpanded { get => m_isExpanded; set => SetProperty(ref m_isExpanded, value); }
 
 		private bool m_isFocusable = false;
@@ -63,6 +97,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 	public partial class CMakeFileGroupViewModel : ObservableObject
 	{
+		public string DisplayName { get; set; }
 		public string Name { get; set; }
 		public ObservableCollection<object> Children { get; set; } = new ObservableCollection<object>();
 
@@ -147,6 +182,8 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 					Templates.Add(vm);
 				}
 			}
+
+			SetWindowTitleIndex(0);
 		}
 
 		private void OnTemplateSelected()
@@ -156,16 +193,65 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 			if (SelectedTemplate is CFileTemplateViewModel vm)
 			{
-				string makeFilePath = GameCodersToolkitPackage.FileTemplateCreatorConfig.GetMakeFilePathByID(vm.MakeFileID);
-				if (System.IO.File.Exists(makeFilePath))
+				CreateMakeFiles(vm.MakeFileID);
+			}
+		}
+
+		private void CreateMakeFiles(string defaultSelectedFileId)
+		{
+			CMakeFileViewModel selectedViewModel = null;
+
+			foreach (var fileEntry in GameCodersToolkitPackage.FileTemplateCreatorConfig.CreatorConfig.CMakeFileEntries)
+			{
+				CMakeFileViewModel makeFileViewModel = new CMakeFileViewModel();
+				makeFileViewModel.ID = fileEntry.ID;
+				makeFileViewModel.OnSelect += vm =>
 				{
-					CurrentTemplate = GameCodersToolkitPackage.FileTemplateCreatorConfig.GetTemplateByName(vm.FullName);
-					if (CurrentTemplate != null)
+					foreach (var makeFileVm in MakeFiles)
 					{
-						IMakeFileParser parser = GameCodersToolkitPackage.FileTemplateCreatorConfig.CreateParser();
-						if (parser != null)
+						if (makeFileVm != vm)
 						{
-							CurrentMakeFile = parser.Parse(makeFilePath);
+							makeFileVm.IsSelected = false;
+						}
+					}
+
+					SelectedMakeFile = vm;
+				};
+				MakeFiles.Add(makeFileViewModel);
+
+				if (defaultSelectedFileId == fileEntry.ID)
+				{
+					selectedViewModel = makeFileViewModel;
+				}
+			}
+
+			if (selectedViewModel != null)
+			{
+				selectedViewModel.IsSelected = true;
+			}
+
+			SetWindowTitleIndex(1);
+		}
+
+		System.Windows.Threading.DispatcherTimer timer;
+
+		private void OnMakeFileSelected()
+		{
+			if (SelectedMakeFile is CMakeFileViewModel makeFileVm)
+			{
+				if (SelectedTemplate is CFileTemplateViewModel templateVm)
+				{
+					string makeFilePath = GameCodersToolkitPackage.FileTemplateCreatorConfig.GetMakeFilePathByID(makeFileVm.ID);
+					if (File.Exists(makeFilePath))
+					{
+						CurrentTemplate = GameCodersToolkitPackage.FileTemplateCreatorConfig.GetTemplateByName(templateVm.FullName);
+						if (CurrentTemplate != null)
+						{
+							IMakeFileParser parser = GameCodersToolkitPackage.FileTemplateCreatorConfig.CreateParser();
+							if (parser != null)
+							{
+								CurrentMakeFile = parser.Parse(makeFilePath);
+							}
 						}
 					}
 				}
@@ -183,11 +269,13 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 			{
 				CMakeFileUberFileViewModel uberFileVm = new CMakeFileUberFileViewModel();
 				uberFileVm.Name = uberFile.GetName();
+				uberFileVm.DisplayName = uberFileVm.Name + $" ({uberFile.GetGroups().Count()} Groups)";
 
 				foreach (IGroupNode sourceGroup in uberFile.GetGroups())
 				{
 					CMakeFileGroupViewModel sourceGroupVm = new CMakeFileGroupViewModel();
 					sourceGroupVm.Name = sourceGroup.GetName();
+					sourceGroupVm.DisplayName = sourceGroup.GetName() + $" ({sourceGroup.GetFiles().Count()} Files)";
 
 					foreach (IFileNode regularFileEntry in sourceGroup.GetFiles())
 					{
@@ -220,6 +308,8 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 			selectableUberFileVm.Name = "Add Uber File";
 			selectableUberFileVm.OnSelect += (vm) => AddUberFileAsync(lastUberFileViewModel);
 			MakeFileContent.Add(selectableUberFileVm);
+
+			SetWindowTitleIndex(2);
 		}
 
 		private async Task AddUberFileAsync(CMakeFileUberFileViewModel previousVm)
@@ -296,7 +386,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 					}
 				};
 
-				bool? result = saveDialog.ShowDialog();
+				bool? result = OnSaveFileDialogCreated?.Invoke(this, saveDialog);
 
 				if (result.HasValue && result.Value)
 				{
@@ -426,6 +516,11 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 			}
 		}
 
+		private void SetWindowTitleIndex(int index)
+		{
+			WindowTitle = $"({index + 1}/{WindowTitles.Length}) {WindowTitles[index]}";
+		}
+
 		private IMakeFile m_currentMakeFile = null;
 		private IMakeFile CurrentMakeFile
 		{
@@ -439,8 +534,15 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 			}
 		}
 
+		private string[] WindowTitles { get; set; } = ["Select a template...", "Select make file...", "Select uber file and group to store new file(s)"];
+
+
+		private string m_windowTitle = string.Empty;
+		public string WindowTitle { get => m_windowTitle; set => SetProperty(ref m_windowTitle, value); }
+
+
 		private CTemplateEntry m_currentTemplate = null;
-		public CTemplateEntry CurrentTemplate { get => m_currentTemplate; set => m_currentTemplate = value; }
+		public CTemplateEntry CurrentTemplate { get => m_currentTemplate; set => SetProperty(ref m_currentTemplate, value); }
 
 
 		private object m_selectedTemplate = null;
@@ -451,9 +553,18 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 		public ObservableCollection<object> Templates { get => m_templates; set => SetProperty(ref m_templates, value); }
 
 
+		private CMakeFileViewModel m_selectedMakeFile = null;
+		public CMakeFileViewModel SelectedMakeFile { get => m_selectedMakeFile; set { SetProperty(ref m_selectedMakeFile, value); OnMakeFileSelected(); } }
+
+
+		private ObservableCollection<CMakeFileViewModel> m_makeFiles = new ObservableCollection<CMakeFileViewModel>();
+		public ObservableCollection<CMakeFileViewModel> MakeFiles { get => m_makeFiles; set => SetProperty(ref m_makeFiles, value); }
+
+
 		private ObservableCollection<object> m_makeFileContent = new ObservableCollection<object>();
 		public ObservableCollection<object> MakeFileContent { get => m_makeFileContent; set => SetProperty(ref m_makeFileContent, value); }
 
 		public event EventHandler OnRequestClose;
+		public event Func<object, SaveFileDialog, bool?> OnSaveFileDialogCreated;
 	}
 }
