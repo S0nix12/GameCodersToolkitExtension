@@ -111,6 +111,11 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 			if (previousUberFileEntry != null)
 			{
 				newUberFileLine = previousUberFileEntry.EndLineNumber + 1;
+
+				while (Lines.Count > newUberFileLine && !string.IsNullOrWhiteSpace(Lines[newUberFileLine]))
+				{
+					newUberFileLine++;
+				}
 			}
 
 			string newUberFileString = Config.NewUberFileString;
@@ -172,7 +177,7 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 			int lineToInsert = groupEntry.LineNumber + 1;
 			if (!string.IsNullOrWhiteSpace(previousFileName))
 			{
-				SimpleFileNode regularFileEntry = groupEntry.Files.Where(Entry => Entry.Name == previousFileName).First();
+				SimpleFileNode regularFileEntry = groupEntry.Files.Where(Entry => Entry.Name == previousFileName).FirstOrDefault();
 				if (regularFileEntry != null)
 				{
 					lineToInsert = regularFileEntry.LineNumber + 1;
@@ -236,7 +241,11 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 							if (uberFileEndMatch.Success)
 							{
 								currentUberFile.EndLineNumber = i;
-								makeFile.UberFileEntries.Add(currentUberFile);
+
+								if (!makeFile.UberFileEntries.Contains(currentUberFile))
+								{
+									makeFile.UberFileEntries.Add(currentUberFile);
+								}
 
 								currentUberFile = null;
 								currentSourceGroup = null;
@@ -252,9 +261,14 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 							}
 
 							string uberFileName = uberFileMatch.Groups[1].Value;
-							currentUberFile = new CSimpleUberFileNode();
-							currentUberFile.Name = uberFileName;
-							currentUberFile.StartLineNumber = i;
+
+                            currentUberFile = makeFile.UberFileEntries.Find(entry => entry.Name == uberFileName);
+                            if (currentUberFile == null)
+							{
+								currentUberFile = new CSimpleUberFileNode();
+								currentUberFile.Name = uberFileName;
+								currentUberFile.StartLineNumber = i;
+							}
 
 							continue;
 						}

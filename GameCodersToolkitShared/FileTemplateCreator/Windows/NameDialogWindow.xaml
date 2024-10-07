@@ -7,7 +7,7 @@
 		     xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
              mc:Ignorable="d" 
              Height="150"
-             Width="250"
+             Width="550"
              toolkit:Themes.UseVsTheme="True"
              KeyDown="Window_KeyDown"
              WindowStartupLocation="CenterOwner"

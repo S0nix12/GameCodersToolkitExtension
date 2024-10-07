@@ -9,6 +9,7 @@ using System.Text.Json.Serialization;
 using GameCodersToolkit.SourceControl;
 using System.IO.Pipes;
 using GameCodersToolkit.Utils;
+using System.Diagnostics;
 
 namespace GameCodersToolkit.Configuration
 {
@@ -52,7 +53,9 @@ namespace GameCodersToolkit.Configuration
 		public string P4UserName { get; set; }
 		[Editable(allowEdit: true)]
 		public string P4Workspace { get; set; }
-	}
+        [Editable(allowEdit: true)]
+        public string AuthorName { get; set; }
+    }
 
 	public class CFileTemplateConfiguration
 	{
@@ -66,7 +69,7 @@ namespace GameCodersToolkit.Configuration
 
 			if (isSolutionOpen)
 			{
-				HandleOpenSolution();
+				HandleOpenSolution(await VS.Solutions.GetCurrentSolutionAsync());
 			}
 
 			VS.Events.SolutionEvents.OnAfterOpenSolution += HandleOpenSolution;
@@ -87,15 +90,7 @@ namespace GameCodersToolkit.Configuration
 		public async Task LoadSolutionConfigAsync()
 		{
 			string configFilePath = GetConfigFilePath();
-			await LoadConfigAsync(configFilePath);
-
-			//ConfigFileWatcher?.Dispose();
-			//ConfigFileWatcher = new FileSystemWatcher(Path.GetDirectoryName(configFilePath));
-			//ConfigFileWatcher.EnableRaisingEvents = true;
-			//ConfigFileWatcher.Changed += OnConfigFileChanged;
-			//ConfigFileWatcher.IncludeSubdirectories = false;
-			//ConfigFileWatcher.Filter = "*.json";
-			//ConfigFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastAccess;
+            await LoadConfigAsync(configFilePath);
 		}
 
 		private void OnConfigFileChanged(object sender, FileSystemEventArgs eventArgs)
@@ -136,6 +131,14 @@ namespace GameCodersToolkit.Configuration
 		public Type GetParserConfigAs<Type>()
 		{
 			return JsonSerializer.Deserialize<Type>(CreatorConfig.ParserConfigString);
+		}
+
+		public void ExecutePostBuildScript()
+		{
+			if (File.Exists(CreatorConfig.PostChangeScriptAbsolutePath))
+			{
+                Process.Start(CreatorConfig.PostChangeScriptAbsolutePath);
+            }
 		}
 
 		private async Task LoadConfigAsync(string filePath)
@@ -183,7 +186,7 @@ namespace GameCodersToolkit.Configuration
 
 						foreach (CMakeFileEntry cmakeFileEntry in entries)
 						{
-							if (!string.IsNullOrWhiteSpace(CreatorConfig.PostChangeScriptPath) && !Path.IsPathRooted(cmakeFileEntry.Path))
+							if (!Path.IsPathRooted(cmakeFileEntry.Path))
 							{
 								lock (SolutionFolder)
 								{
@@ -203,7 +206,7 @@ namespace GameCodersToolkit.Configuration
 							entry.AbsolutePaths = Enumerable.Repeat(string.Empty, entry.Paths.Count).ToList();
 							for (int i = entry.Paths.Count - 1; i >= 0; i--)
 							{
-								if (!string.IsNullOrWhiteSpace(CreatorConfig.PostChangeScriptPath) && !Path.IsPathRooted(entry.Paths[i]))
+								if (!Path.IsPathRooted(entry.Paths[i]))
 								{
 									lock (SolutionFolder)
 									{
@@ -234,39 +237,6 @@ namespace GameCodersToolkit.Configuration
 					"Exception while loading File Template Creator Config File", 
 					ex);
 			}
-		}
-
-		public void SaveExampleConfig()
-		{
-			// Add mock data
-			CreatorConfig.CMakeFileEntries.Clear();
-			CreatorConfig.FileTemplateEntries.Clear();
-
-			CMakeFileEntry sampleConfigEntry = new CMakeFileEntry();
-			sampleConfigEntry.Path = "FileTemplateCreator\\ExampleList.cmake";
-			sampleConfigEntry.ID = "Default";
-
-			CreatorConfig.CMakeFileEntries.Add(sampleConfigEntry);
-
-			CTemplateEntry sampleTemplateEntry = new CTemplateEntry();
-			sampleTemplateEntry.Name = "Schematyc Component - Entity";
-			sampleTemplateEntry.MakeFileID = "Default";
-			sampleTemplateEntry.Paths.Add("FileTemplateCreator\\Templates\\SchematycEntityComponent.h");
-			sampleTemplateEntry.Paths.Add("FileTemplateCreator\\Templates\\SchematycEntityComponent.cpp");
-
-			CreatorConfig.FileTemplateEntries.Add(sampleTemplateEntry);
-
-			CreatorConfig.ParserName = "GameCodersToolkit.FileTemplateCreator.MakeFileParser.CryGameParser";
-
-			CreatorConfig.P4UserName = "schadek";
-			CreatorConfig.P4Server = "perforce:1666";
-			CreatorConfig.P4Workspace = "Main";
-
-			var options = new JsonSerializerOptions { WriteIndented = true };
-			string configFilePath = GetConfigFilePath();
-
-			using FileStream fileStream = File.Create(configFilePath);
-			JsonSerializer.Serialize(fileStream, CreatorConfig, options);
 		}
 
 		public async Task<bool> SaveConfigAsync()

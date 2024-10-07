@@ -27,19 +27,37 @@ namespace GameCodersToolkit.FileTemplateCreator.Windows
 		
 			Owner = Application.Current.Windows.OfType<Window>().SingleOrDefault(x => x.IsActive);
 			TextBox.Focus();
+
+			Closing += (s, e) =>
+			{
+				if (!TestEnteredText.HasValue)
+					TestEnteredText = false;
+
+				if (TestEnteredText.Value && Predicate != null && !Predicate(TextBox.Text))
+				{
+					ErrorAction?.Invoke(TextBox.Text);
+					e.Cancel = true;
+				}
+				else
+				{
+					DialogResult = TestEnteredText;
+				}
+
+				TestEnteredText = null;
+            };
 		}
 
-		public static bool ShowFileNameDialog(string title, out string fileName)
-		{
-			return ShowNameDialog(title, out fileName, (result) => result.IsValidFileName());
-		}
-
-		public static bool ShowNameDialog(string title, out string result, Predicate<string> predicate = null)
+		public static bool ShowNameDialog(string title, out string result, Predicate<string> predicate, Action<string> errorAction, string content = "")
 		{
 			NameDialogWindow nameDialogWindow = new()
 			{
-				Title = title
+				Title = title,
+				ErrorAction = errorAction,
+				Predicate = predicate
 			};
+
+			nameDialogWindow.TextBox.Text = content != null ? content : "";
+			nameDialogWindow.TextBox.CaretIndex = int.MaxValue;
 
 			bool? dialogResult = nameDialogWindow.ShowDialog();
 			if (dialogResult.HasValue && dialogResult.Value)
@@ -64,31 +82,35 @@ namespace GameCodersToolkit.FileTemplateCreator.Windows
 		private void TextBox_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.Enter)
-			{
-				DialogResult = true;
-				Close();
+            {
+                TestEnteredText = true;
+                Close();
 			}
-		}
+        }
 
-		private void Window_KeyDown(object sender, KeyEventArgs e)
+        private void ConfirmButton_Click(object sender, RoutedEventArgs e)
+        {
+            TestEnteredText = true;
+            Close();
+        }
+
+        private void Window_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.Escape)
-			{
-				DialogResult = false;
-				Close();
+            {
+                TestEnteredText = false;
+                Close();
 			}
 		}
 
 		private void CancelButton_Click(object sender, RoutedEventArgs e)
-		{
-			DialogResult = false;
-			Close();
+        {
+            TestEnteredText = false;
+            Close();
 		}
 
-		private void ConfirmButton_Click(object sender, RoutedEventArgs e)
-		{
-			DialogResult = true;
-			Close();
-		}
+		bool? TestEnteredText {  get; set; }
+		Action<string> ErrorAction { get; set; } = null;
+		Predicate<string> Predicate { get; set; } = null;
 	}
 }

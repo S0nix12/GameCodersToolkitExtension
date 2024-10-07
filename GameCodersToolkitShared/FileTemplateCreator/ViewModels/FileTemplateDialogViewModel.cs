@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Windows;
+using System.Windows.Forms;
 
 namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 {
@@ -134,72 +135,128 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 	{
 		public CFileTemplateDialogViewModel()
 		{
-			foreach (CTemplateEntry template in GameCodersToolkitPackage.FileTemplateCreatorConfig.CreatorConfig.FileTemplateEntries)
-			{
-				if (template.Paths.Count == 0)
-				{ continue; }
+			CreateTemplateList();
+		}
 
-				List<string> categories = template.Name.Split('/').ToList();
-				CFileTemplateCategoryViewModel rootModel = null;
-				CFileTemplateCategoryViewModel currentModel = null;
+        private void CreateTemplateList()
+        {
+            foreach (CTemplateEntry template in GameCodersToolkitPackage.FileTemplateCreatorConfig.CreatorConfig.FileTemplateEntries)
+            {
+                if (template.Paths.Count == 0)
+                { 
+					continue; 
+				}
 
-				while (categories.Count != 1)
-				{
-					CFileTemplateCategoryViewModel newVm = new CFileTemplateCategoryViewModel();
-					newVm.Name = categories.First();
+                List<string> categories = template.Name.Split('/').ToList();
+                CFileTemplateCategoryViewModel rootModel = null;
+                CFileTemplateCategoryViewModel currentModel = null;
+
+                while (categories.Count != 1)
+                {
+					string categoryName = categories[0];
+					if (currentModel != null)
+					{
+						CFileTemplateCategoryViewModel existingCategory = FindChildCategoryInCollection(currentModel.Children, categoryName);
+						if (existingCategory != null)
+						{
+							currentModel = existingCategory;
+							categories.RemoveAt(0);
+							continue;
+						}
+					}
 
 					if (rootModel == null)
 					{
-						rootModel = currentModel;
+						CFileTemplateCategoryViewModel existingVm = FindChildCategoryInCollection(Templates, categoryName);
+						if (existingVm != null)
+						{
+							rootModel = existingVm;
+							currentModel = existingVm;
+							categories.RemoveAt(0);
+							continue;
+						}
 					}
 
-					if (currentModel != null)
+                    CFileTemplateCategoryViewModel newVm = new CFileTemplateCategoryViewModel();
+                    newVm.Name = categories.First();
+
+                    if (rootModel == null)
+                    {
+                        rootModel = newVm;
+                    }
+
+                    if (currentModel != null)
+                    {
+                        currentModel.Children.Add(newVm);
+                    }
+
+                    currentModel = newVm;
+                    categories.RemoveAt(0);
+                }
+
+                CFileTemplateViewModel vm = new CFileTemplateViewModel();
+                vm.FullName = template.Name;
+                vm.Name = categories.First();
+                vm.MakeFileID = template.MakeFileID;
+
+                foreach (string path in template.Paths)
+                {
+                    vm.Contents.Add(System.IO.File.ReadAllText(path));
+                }
+
+                if (currentModel != null)
+                {
+                    currentModel.Children.Add(vm);
+
+					if (!Templates.Contains(rootModel))
 					{
-						currentModel.Children.Add(newVm);
+						Templates.Add(rootModel);
 					}
+                }
+                else
+                {
+                    Templates.Add(vm);
+                }
+            }
 
-					currentModel = newVm;
-					categories.RemoveAt(0);
-				}
+            UpdateWindowTitleIndex();
+        }
 
-				CFileTemplateViewModel vm = new CFileTemplateViewModel();
-				vm.FullName = template.Name;
-				vm.Name = categories.First();
-				vm.MakeFileID = template.MakeFileID;
+		CFileTemplateCategoryViewModel FindChildCategoryInCollection(IList<object> objects, string categoryName)
+        {
+            foreach (object obj in objects)
+            {
+                if (obj is CFileTemplateCategoryViewModel existingVm)
+                {
+                    if (existingVm.Name == categoryName)
+                    {
+						return existingVm;
+                    }
+                }
+            }
 
-				foreach (string path in template.Paths)
-				{
-					vm.Contents.Add(System.IO.File.ReadAllText(path));
-				}
+			return null;
+        }
 
-				if (currentModel != null)
-				{
-					currentModel.Children.Add(vm);
-					Templates.Add(rootModel);
-				}
-				else
-				{
-					Templates.Add(vm);
-				}
-			}
-
-			SetWindowTitleIndex(0);
-		}
-
-		private void OnTemplateSelected()
+        private void OnTemplateSelected()
 		{
 			CurrentMakeFile = null;
+			SelectedMakeFile = null;
 			MakeFileContent.Clear();
 
 			if (SelectedTemplate is CFileTemplateViewModel vm)
 			{
 				CreateMakeFiles(vm.MakeFileID);
-			}
-		}
+            }
+
+            UpdateWindowTitleIndex();
+        }
 
 		private void CreateMakeFiles(string defaultSelectedFileId)
 		{
 			CMakeFileViewModel selectedViewModel = null;
+
+			MakeFiles.Clear();
 
 			foreach (var fileEntry in GameCodersToolkitPackage.FileTemplateCreatorConfig.CreatorConfig.CMakeFileEntries)
 			{
@@ -230,10 +287,8 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 				selectedViewModel.IsSelected = true;
 			}
 
-			SetWindowTitleIndex(1);
+            UpdateWindowTitleIndex();
 		}
-
-		System.Windows.Threading.DispatcherTimer timer;
 
 		private void OnMakeFileSelected()
 		{
@@ -255,8 +310,10 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 						}
 					}
 				}
-			}
-		}
+            }
+
+            UpdateWindowTitleIndex();
+        }
 
 		private void CreateMakeFileContent()
 		{
@@ -309,20 +366,42 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 			selectableUberFileVm.OnSelect += (vm) => AddUberFileAsync(lastUberFileViewModel);
 			MakeFileContent.Add(selectableUberFileVm);
 
-			SetWindowTitleIndex(2);
-		}
+            UpdateWindowTitleIndex();
+        }
 
 		private async Task AddUberFileAsync(CMakeFileUberFileViewModel previousVm)
 		{
-			if (NameDialogWindow.ShowFileNameDialog("Enter Uber File name", out string newUberFileName))
+			Predicate<string> predicate = (result) =>
+			{
+				return result.IsValidFileName() && CurrentMakeFile.GetUberFiles().Where(e => e.GetName() == result).Count() == 0;
+			};
+
+			Action<string> errorAction = (result) =>
+			{
+                Community.VisualStudio.Toolkit.MessageBox errorMessageBox = new Community.VisualStudio.Toolkit.MessageBox();
+                errorMessageBox.ShowError($"There already is a uber file named {result}!");
+            };
+
+            if (NameDialogWindow.ShowNameDialog("Enter Uber File name", out string newUberFileName, predicate, errorAction, previousVm?.Name))
 			{
 				CurrentMakeFile = CurrentMakeFile.AddUberFile(previousVm != null ? previousVm.Name : string.Empty, newUberFileName);
 			}
 		}
 
 		private async Task AddGroupToUberFileAsync(CMakeFileUberFileViewModel uberFileVm, CMakeFileGroupViewModel previousVm)
-		{
-			if (NameDialogWindow.ShowNameDialog("Enter Group name", out string newGroupName))
+        {
+            Predicate<string> predicate = (result) =>
+            {
+                return result.IsValidFileName() && CurrentMakeFile.GetUberFiles().Where(e => e.GetName() == uberFileVm.Name).First().GetGroups().Where(e => e.GetName() == result).Count() == 0;
+            };
+
+            Action<string> errorAction = (result) =>
+            {
+                Community.VisualStudio.Toolkit.MessageBox errorMessageBox = new Community.VisualStudio.Toolkit.MessageBox();
+                errorMessageBox.ShowError($"There already is a group named {result}!");
+            };
+
+            if (NameDialogWindow.ShowNameDialog("Enter Group name", out string newGroupName, predicate, errorAction, previousVm?.Name))
 			{
 				CurrentMakeFile = CurrentMakeFile.AddGroup(uberFileVm.Name, previousVm != null ? previousVm.Name : string.Empty, newGroupName);
 			}
@@ -337,8 +416,15 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 				string newGenericFileName = string.Empty;
 				string newFolderPath = string.Empty;
 
-				SaveFileDialog saveDialog = new SaveFileDialog();
-				saveDialog.InitialDirectory = Path.GetDirectoryName(CurrentMakeFile.GetOriginalFilePath());
+				string initialDirectory = Path.GetDirectoryName(CurrentMakeFile.GetOriginalFilePath());
+
+				if (previousVm != null)
+				{
+					initialDirectory = Path.GetDirectoryName(Path.Combine(Path.GetDirectoryName(CurrentMakeFile.GetOriginalFilePath()), previousVm.Name));
+                }
+
+				Microsoft.Win32.SaveFileDialog saveDialog = new Microsoft.Win32.SaveFileDialog();
+				saveDialog.InitialDirectory = initialDirectory;
 				saveDialog.AddExtension = false;
 				saveDialog.ValidateNames = true;
 				saveDialog.Title = "Enter directory and name of new file(s)";
@@ -391,7 +477,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 				if (result.HasValue && result.Value)
 				{
 					string originalMakeFilePath = CurrentMakeFile.GetOriginalFilePath();
-					await PerforceConnection.TryCheckoutFilesAsync([originalMakeFilePath]);
+					await PerforceConnection.TryCheckoutFilesAsync(new string[] { originalMakeFilePath });
 					await PerforceConnection.TryAddFilesAsync(newFilePathsAbsolute);
 
 					//Allow fallback in case we do not have a valid P4 connection or the file is locked etc.
@@ -445,16 +531,37 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 					//Process finished, end the dialog
 					OnRequestClose(this, new EventArgs());
-				}
+
+					GameCodersToolkitPackage.FileTemplateCreatorConfig.ExecutePostBuildScript();
+                }
 			}
 		}
 
 		private string ApplyTemplateArguments(string originalTemplate, string fileName)
 		{
 			string result = originalTemplate;
-			result = result.Replace("##FILENAME", fileName);
-			result = result.Replace("##YEAR", DateTime.UtcNow.Year.ToString());
-			return result;
+			result = result.Replace("##FILENAME##", fileName);
+			result = result.Replace("##YEAR##", DateTime.UtcNow.Year.ToString());
+
+			{
+				string guidString = "##GUID##";
+                int nextGuidOccurenceIndex = result.IndexOf(guidString);
+				while (nextGuidOccurenceIndex > 0)
+				{
+					result = result.Remove(nextGuidOccurenceIndex, guidString.Length).Insert(nextGuidOccurenceIndex, Guid.NewGuid().ToString());
+                    nextGuidOccurenceIndex = result.IndexOf(guidString);
+                }
+			}
+
+			string authorName = GameCodersToolkitPackage.FileTemplateCreatorConfig.CreatorConfig.AuthorName;
+            if (string.IsNullOrWhiteSpace(authorName))
+			{
+				authorName = "AUTHOR (you can add an author name in the extension settings)";
+			}
+
+			result.Replace("##AUTHOR##", authorName);
+
+            return result;
 		}
 
 		private Dictionary<string, List<string>> GetExpandedElementsList()
@@ -465,13 +572,16 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 			{
 				if (uberFileVm != null && uberFileVm.IsExpanded)
 				{
-					currentlyOpenElements.Add(uberFileVm.Name, new List<string>());
-
-					foreach (CMakeFileGroupViewModel groupVm in uberFileVm.Children.OfType<CMakeFileGroupViewModel>())
+					if (!currentlyOpenElements.ContainsKey(uberFileVm.Name))
 					{
-						if (groupVm != null && groupVm.IsExpanded)
+						currentlyOpenElements.Add(uberFileVm.Name, new List<string>());
+
+						foreach (CMakeFileGroupViewModel groupVm in uberFileVm.Children.OfType<CMakeFileGroupViewModel>())
 						{
-							currentlyOpenElements[uberFileVm.Name].Add(groupVm.Name);
+							if (groupVm != null && groupVm.IsExpanded)
+							{
+								currentlyOpenElements[uberFileVm.Name].Add(groupVm.Name);
+							}
 						}
 					}
 				}
@@ -516,8 +626,16 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 			}
 		}
 
-		private void SetWindowTitleIndex(int index)
+		private void UpdateWindowTitleIndex()
 		{
+			int index = 0;
+
+			if (SelectedTemplate != null)
+				index++;
+
+			if (SelectedMakeFile != null)
+				index++;
+
 			WindowTitle = $"({index + 1}/{WindowTitles.Length}) {WindowTitles[index]}";
 		}
 
@@ -534,7 +652,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 			}
 		}
 
-		private string[] WindowTitles { get; set; } = ["Select a template...", "Select make file...", "Select uber file and group to store new file(s)"];
+        private string[] WindowTitles { get; set; } = ["Select a template...", "Select make file...", "Select uber file and group to store new file(s)"];
 
 
 		private string m_windowTitle = string.Empty;
@@ -565,6 +683,6 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 		public ObservableCollection<object> MakeFileContent { get => m_makeFileContent; set => SetProperty(ref m_makeFileContent, value); }
 
 		public event EventHandler OnRequestClose;
-		public event Func<object, SaveFileDialog, bool?> OnSaveFileDialogCreated;
+		public event Func<object, Microsoft.Win32.SaveFileDialog, bool?> OnSaveFileDialogCreated;
 	}
 }

@@ -15,8 +15,8 @@
         xmlns:local="clr-namespace:GameCodersToolkit.FileTemplateCreator.Windows"
         d:DataContext="{d:DesignInstance Type=vm:CFileTemplateDialogViewModel}"
         mc:Ignorable="d" 
-        Height="600"
-        Width="900"
+        Height="900"
+        Width="1300"
 		toolkit:Themes.UseVsTheme="True"
         Title="{Binding WindowTitle}">
 
@@ -31,11 +31,11 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="3*" />
             <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="2*" />
             <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="5*" />
             <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -44,7 +44,7 @@
             <RowDefinition Height="{StaticResource WindowContentMargin}" />
         </Grid.RowDefinitions>
 
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1">
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
             <usercontrols:ExtendedTreeView x:Name="TemplateTree" ItemsSource="{Binding Templates}" SelectedItem_="{Binding SelectedTemplate, Mode=TwoWay}" toolkit:Themes.UseVsTheme="True">
                 <TreeView.Resources>
 
@@ -70,7 +70,7 @@
             </usercontrols:ExtendedTreeView>
         </ScrollViewer>
 
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="3" >
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="3"  PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
             <usercontrols:ExtendedTreeView x:Name="MakeFilesTree" ItemsSource="{Binding MakeFiles}" SelectedItem_="{Binding SelectedMakeFile, Mode=TwoWay}" toolkit:Themes.UseVsTheme="True">
                 <TreeView.Resources>
 
@@ -92,7 +92,7 @@
             </usercontrols:ExtendedTreeView>
         </ScrollViewer>
 
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="5" >
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="5" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
             <TreeView x:Name="MakeFileTree" ItemsSource="{Binding MakeFileContent}" toolkit:Themes.UseVsTheme="True">
                 <TreeView.Resources>
 
@@ -107,12 +107,12 @@
 
                     <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileUberFileViewModel}" ItemsSource="{Binding Children}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding DisplayName}" Style="{StaticResource VSTextBlockStyle}" />
+                            <TextBlock Text="{Binding DisplayName}" Style="{StaticResource VSTextBlockStyle}" Foreground="Red" />
                         </StackPanel>
                     </HierarchicalDataTemplate>
                     <HierarchicalDataTemplate DataType="{x:Type vm:CMakeFileGroupViewModel}" ItemsSource="{Binding Children}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding DisplayName}" Style="{StaticResource VSTextBlockStyle}" />
+                            <TextBlock Text="{Binding DisplayName}" Style="{StaticResource VSTextBlockStyle}"  Foreground="Green"/>
                         </StackPanel>
                     </HierarchicalDataTemplate>
                     <DataTemplate DataType="{x:Type vm:CSelectableEntryViewModel}">
