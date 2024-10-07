@@ -59,9 +59,9 @@ jobs:
       run: |
         Rename-Item -Path "GameCodersToolkit_2022\bin\Release\GameCodersToolkit.vsix" -NewName "GameCodersToolkit_2022.vsix"
         Rename-Item -Path "GameCodersToolkit_2019\bin\Release\GameCodersToolkit.vsix" -NewName "GameCodersToolkit_2019.vsix"
-        New-Item -Path "VSIXOutput -ItemType "Directory"
-        Move-Item -Path "GameCodersToolkit_2022\bin\Release\GameCodersToolkit_2022.vsix" -Destination "VSIXOutput"
-        Move-Item -Path "GameCodersToolkit_2019\bin\Release\GameCodersToolkit_2019.vsix" -Destination "VSIXOutput"        
+        New-Item -Path "VSIXOutput" -ItemType "Directory"
+        Move-Item -Path GameCodersToolkit_2022\bin\Release\GameCodersToolkit_2022.vsix -Destination VSIXOutput
+        Move-Item -Path GameCodersToolkit_2019\bin\Release\GameCodersToolkit_2019.vsix -Destination VSIXOutput  
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
