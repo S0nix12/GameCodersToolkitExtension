@@ -179,6 +179,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 		async Task ExecuteParseOperationAsync(DataFileParser operation, CancellationToken cancellationToken)
 		{
 			DataParsingErrorList errorList = new DataParsingErrorList();
+			errorList.FilePath = operation.FilePath;
 			List<DataEntry> parsedEntries = operation.Parse(errorList, cancellationToken);
 			parsedEntries.TrimExcess();
 

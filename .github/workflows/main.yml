@@ -1,0 +1,69 @@
+name: Build extension
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    outputs:
+      version: ${{ steps.vsix_version.outputs.version-number }}
+    name: Build
+    runs-on: windows-latest
+    env:
+      Configuration: Release
+      DeployExtension: False
+      VsixManifestPath2019: GameCodersToolkit_2019\source.extension.vsixmanifest
+      VsixManifestSourcePath2019: GameCodersToolkit_2019\source.extension.cs      
+      VsixManifestPath2022: GameCodersToolkit_2022\source.extension.vsixmanifest
+      VsixManifestSourcePath2022: GameCodersToolkit_2022\source.extension.cs
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET build dependencies
+      uses: timheuer/bootstrap-dotnet@v2
+      with:
+        nuget: 'false'
+        sdk: 'false'
+        msbuild: 'true'
+
+    - name: Increment VSIX version 2019
+      id: vsix_version_2019
+      uses: timheuer/vsix-version-stamp@v2
+      with:
+        manifest-file: ${{ env.VsixManifestPath2019 }}
+        vsix-token-source-file: ${{ env.VsixManifestSourcePath2019 }}
+
+    - name: Increment VSIX version 2022
+      id: vsix_version_2022
+      uses: timheuer/vsix-version-stamp@v2
+      with:
+        manifest-file: ${{ env.VsixManifestPath2022 }}
+        vsix-token-source-file: ${{ env.VsixManifestSourcePath2022 }}
+
+    - name: Build
+      run: msbuild /v:m -restore
+
+    - name: Add P4Bridge
+      shell: pwsh
+      run: |
+        Compress-Archive -Path GameCodersToolkit_2022\bin\Release\x64\p4bridge.dll -DestinationPath GameCodersToolkit_2022\bin\Release\GameCodersToolkit.vsix
+        Compress-Archive -Path GameCodersToolkit_2019\bin\Release\x86\p4bridge.dll -DestinationPath GameCodersToolkit_2019\bin\Release\GameCodersToolkit.vsix
+
+    - name: Rename VSIX with version
+      shell: pwsh
+      run: |
+        Rename-Item -Path "GameCodersToolkit_2022\bin\Release\GameCodersToolkit.vsix" -NewName "GameCodersToolkit_2022.vsix"
+        Rename-Item -Path "GameCodersToolkit_2019\bin\Release\GameCodersToolkit.vsix" -NewName "GameCodersToolkit_2019.vsix"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: GameCodersToolkit_Output
+        path: |
+          GameCodersToolkit_2019\bin\Release\*.vsix
+          GameCodersToolkit_2022\bin\Release\*.vsix      
