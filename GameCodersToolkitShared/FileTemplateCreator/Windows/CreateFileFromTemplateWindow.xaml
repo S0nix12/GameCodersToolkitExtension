@@ -50,6 +50,7 @@
 
                     <Style TargetType="{x:Type TreeViewItem}">
                         <Setter Property="Focusable" Value="{Binding IsFocusable, Mode=TwoWay}"/>
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
 
                         <Style.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>

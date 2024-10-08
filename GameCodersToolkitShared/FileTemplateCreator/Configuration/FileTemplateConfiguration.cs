@@ -160,8 +160,10 @@ namespace GameCodersToolkit.Configuration
 							lock (SolutionFolder)
 							{
 								CreatorConfig.PostChangeScriptAbsolutePath = Path.Combine(SolutionFolder, CreatorConfig.PostChangeScriptPath);
-							}
-						}
+                            }
+
+                            CreatorConfig.PostChangeScriptAbsolutePath = Path.GetFullPath(CreatorConfig.PostChangeScriptAbsolutePath);
+                        }
 					}
 
 					// Parser config path
@@ -193,7 +195,8 @@ namespace GameCodersToolkit.Configuration
 									cmakeFileEntry.AbsolutePath = Path.Combine(SolutionFolder, cmakeFileEntry.Path);
 								}
 							}
-							cmakeFileEntry.AbsolutePath = Path.GetFullPath(cmakeFileEntry.Path);
+
+							cmakeFileEntry.AbsolutePath = Path.GetFullPath(cmakeFileEntry.AbsolutePath);
 						}
 					}
 
@@ -212,10 +215,11 @@ namespace GameCodersToolkit.Configuration
 									{
 										entry.AbsolutePaths[i] = Path.Combine(SolutionFolder, entry.Paths[i]);
 									}
-								}
-								entry.AbsolutePaths[i] = Path.GetFullPath(entry.Paths[i]);
+                                }
 
-								if (!File.Exists(entry.AbsolutePaths[i]))
+								entry.AbsolutePaths[i] = Path.GetFullPath(entry.AbsolutePaths[i]);
+
+                                if (!File.Exists(entry.AbsolutePaths[i]))
 								{
 									entry.AbsolutePaths.RemoveAt(i);
 								}

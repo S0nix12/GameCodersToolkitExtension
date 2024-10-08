@@ -27,7 +27,10 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 		private bool m_isFocusable = false;
 		public bool IsFocusable { get => m_isFocusable; set => SetProperty(ref m_isFocusable, value); }
-	}
+
+        private bool m_isExpanded = true;
+        public bool IsExpanded { get => m_isExpanded; set => SetProperty(ref m_isExpanded, value); }
+    }
 
 	public partial class CFileTemplateViewModel : ObservableObject
 	{
@@ -386,7 +389,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
         {
             Predicate<string> predicate = (result) =>
             {
-                return result.IsValidFileName() && CurrentMakeFile.GetUberFiles().Where(e => e.GetName() == uberFileVm.Name).First().GetGroups().Where(e => e.GetName() == result).Count() == 0;
+                return CurrentMakeFile.GetUberFiles().Where(e => e.GetName() == uberFileVm.Name).First().GetGroups().Where(e => e.GetName() == result).Count() == 0;
             };
 
             Action<string> errorAction = (result) =>
@@ -410,11 +413,17 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 				string newGenericFileName = string.Empty;
 				string newFolderPath = string.Empty;
 
-				string initialDirectory = Path.GetDirectoryName(CurrentMakeFile.GetOriginalFilePath());
+				string initialDirectory = Path.GetFullPath(Path.GetDirectoryName(CurrentMakeFile.GetOriginalFilePath()));
 
 				if (previousVm != null)
 				{
-					initialDirectory = Path.GetDirectoryName(Path.Combine(Path.GetDirectoryName(CurrentMakeFile.GetOriginalFilePath()), previousVm.Name));
+					string makeFilePath = CurrentMakeFile.GetOriginalFilePath();
+					string vmName = previousVm.Name;
+					string dir = Path.GetDirectoryName(makeFilePath);
+                    string dirName = Path.Combine(dir, vmName);
+					string name = Path.GetDirectoryName(dirName);
+					string fullPath = Path.GetFullPath(name);
+                    initialDirectory = fullPath;
                 }
 
 				Microsoft.Win32.SaveFileDialog saveDialog = new Microsoft.Win32.SaveFileDialog();
@@ -553,7 +562,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 				authorName = "AUTHOR (you can add an author name in the extension settings)";
 			}
 
-			result.Replace("##AUTHOR##", authorName);
+			result = result.Replace("##AUTHOR##", authorName);
 
             return result;
 		}

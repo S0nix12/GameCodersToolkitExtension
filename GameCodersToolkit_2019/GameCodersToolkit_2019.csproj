@@ -62,6 +62,9 @@
     <Content Include="..\SharedProjectFiles\Resources\Icon.png">
       <Link>Resources\Icon.png</Link>
     </Content>
+    <Content Include="p4bridge.dll">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <None Include="..\README.md">
       <Link>README.md</Link>
     </None>
@@ -72,10 +75,6 @@
     </None>
     <Content Include="..\LICENSE.txt">
       <Link>LICENSE.txt</Link>
-    </Content>
-    <Content Include="..\SharedProjectFiles\p4bridge.dll">
-      <Link>p4bridge.dll</Link>
-      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <VSCTCompile Include="..\SharedProjectFiles\VSCommandTable.vsct">
       <Link>VSCommandTable.vsct</Link>
