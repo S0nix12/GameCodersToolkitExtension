@@ -39,7 +39,9 @@ namespace GameCodersToolkit.Configuration
 
 		public string ParserName { get; set; }
 		public string ParserConfigPath { get; set; }
-		[JsonIgnore]
+        [JsonIgnore]
+        public string ParserConfigPathAbsolute { get; set; }
+        [JsonIgnore]
 		public string ParserConfigString { get; set; }
 
 		public string PostChangeScriptPath { get; set; }
@@ -47,7 +49,7 @@ namespace GameCodersToolkit.Configuration
 		public string PostChangeScriptAbsolutePath { get; set; }
 
 
-		[Editable(allowEdit: true)]
+        [Editable(allowEdit: true)]
 		public string P4Server { get; set; }
 		[Editable(allowEdit: true)]
 		public string P4UserName { get; set; }
@@ -55,6 +57,8 @@ namespace GameCodersToolkit.Configuration
 		public string P4Workspace { get; set; }
         [Editable(allowEdit: true)]
         public string AuthorName { get; set; }
+        [Editable(allowEdit: true)]
+        public string PostChangeProjectToBuild { get; set; }
     }
 
 	public class CFileTemplateConfiguration
@@ -133,12 +137,21 @@ namespace GameCodersToolkit.Configuration
 			return JsonSerializer.Deserialize<Type>(CreatorConfig.ParserConfigString);
 		}
 
-		public void ExecutePostBuildScript()
+		public async Task ExecutePostBuildStepsAsync()
 		{
 			if (File.Exists(CreatorConfig.PostChangeScriptAbsolutePath))
 			{
                 Process.Start(CreatorConfig.PostChangeScriptAbsolutePath);
             }
+
+			if (!string.IsNullOrWhiteSpace(CreatorConfig.PostChangeProjectToBuild))
+			{
+                Project? project = await VS.Solutions.FindProjectsAsync(CreatorConfig.PostChangeProjectToBuild);
+				if (project != null)
+				{
+					await project.BuildAsync(BuildAction.Build);
+				}
+			}
 		}
 
 		private async Task LoadConfigAsync(string filePath)
@@ -172,12 +185,12 @@ namespace GameCodersToolkit.Configuration
 						{
 							lock (SolutionFolder)
 							{
-								CreatorConfig.ParserConfigPath = Path.Combine(SolutionFolder, CreatorConfig.ParserConfigPath);
+								CreatorConfig.ParserConfigPathAbsolute = Path.Combine(SolutionFolder, CreatorConfig.ParserConfigPath);
 							}
 
-							if (File.Exists(CreatorConfig.ParserConfigPath))
+							if (File.Exists(CreatorConfig.ParserConfigPathAbsolute))
 							{
-								CreatorConfig.ParserConfigString = File.ReadAllText(CreatorConfig.ParserConfigPath);
+								CreatorConfig.ParserConfigString = File.ReadAllText(CreatorConfig.ParserConfigPathAbsolute);
 							}
 						}
 					}

@@ -535,7 +535,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 					//Process finished, end the dialog
 					OnRequestClose(this, new EventArgs());
 
-					GameCodersToolkitPackage.FileTemplateCreatorConfig.ExecutePostBuildScript();
+					await GameCodersToolkitPackage.FileTemplateCreatorConfig.ExecutePostBuildStepsAsync();
                 }
 			}
 		}
