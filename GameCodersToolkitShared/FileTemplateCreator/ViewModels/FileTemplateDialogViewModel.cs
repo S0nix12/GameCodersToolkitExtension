@@ -33,7 +33,6 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 	{
 		public string Name { get; set; }
 		public string FullName { get; set; }
-		public ObservableCollection<string> Contents { get; set; } = new ObservableCollection<string>();
 		public string MakeFileID { get; set; }
 
 
@@ -198,11 +197,6 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
                 vm.FullName = template.Name;
                 vm.Name = categories.First();
                 vm.MakeFileID = template.MakeFileID;
-
-                foreach (string path in template.Paths)
-                {
-                    vm.Contents.Add(System.IO.File.ReadAllText(path));
-                }
 
                 if (currentModel != null)
                 {
