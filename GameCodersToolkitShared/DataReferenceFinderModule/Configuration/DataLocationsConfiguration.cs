@@ -98,7 +98,10 @@ namespace GameCodersToolkit.Configuration
 
 		private void OnConfigFileChanged(object sender, FileSystemEventArgs eventArgs)
 		{
-			ThreadHelper.JoinableTaskFactory.Run(async delegate { await LoadConfigAsync(eventArgs.FullPath); });
+			if (eventArgs.FullPath == GetConfigFilePath())
+			{
+				ThreadHelper.JoinableTaskFactory.Run(async delegate { await LoadConfigAsync(eventArgs.FullPath); });
+			}
 		}
 
 		public string GetConfigFilePath()

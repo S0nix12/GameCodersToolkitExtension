@@ -1,5 +1,6 @@
 ﻿using GameCodersToolkit;
 using GameCodersToolkit.ReferenceFinder;
+using GameCodersToolkit.Utils;
 using Microsoft.VisualStudio.Language.CodeLens;
 using Microsoft.VisualStudio.Language.Intellisense;
 using Microsoft.VisualStudio.Text;
@@ -178,16 +179,34 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLensTagging
 				if (guidResultLine.LineNumber < startLineNumber)
 					continue;
 
-				ITextSnapshotLine lineSnapshot = entire.Snapshot.GetLineFromLineNumber(guidResultLine.LineNumber);
-				SnapshotSpan tagSpan = GetLineSpanWithoutLeadingWhitespace(lineSnapshot);
-				if (tagSpan.IsEmpty)
-					continue;
+				TagSpan<ICodeLensTag> yieldResult = null;
+				try
+				{
+					ITextSnapshotLine lineSnapshot = entire.Snapshot.GetLineFromLineNumber(guidResultLine.LineNumber);
+					SnapshotSpan tagSpan = GetLineSpanWithoutLeadingWhitespace(lineSnapshot);
+					if (tagSpan.IsEmpty)
+						continue;
 
-				DataReferenceCodeLensTag codeLensTag = new DataReferenceCodeLensTag();
-				codeLensTag.DataReferenceIdentifier = guidResultLine.GuidString;
-				codeLensTag.Descriptor = GetCodeLensDescriptorForSpan(tagSpan);
+					DataReferenceCodeLensTag codeLensTag = new DataReferenceCodeLensTag();
+					codeLensTag.DataReferenceIdentifier = guidResultLine.GuidString;
+					codeLensTag.Descriptor = GetCodeLensDescriptorForSpan(tagSpan);
 
-				yield return new TagSpan<ICodeLensTag>(tagSpan, codeLensTag);
+					yieldResult = new TagSpan<ICodeLensTag>(tagSpan, codeLensTag);
+				}
+				catch (Exception ex)
+				{
+					ThreadHelper.JoinableTaskFactory.Run(async delegate { await DiagnosticUtils.ReportExceptionFromExtensionAsync("[CodeLensTagger] Exception Getting Tags", ex); });
+					yield break;
+				}
+
+				if (yieldResult != null)
+				{
+					yield return yieldResult;
+				}
+				else
+				{
+					yield break;
+				}
 			}
 
 			yield break;
@@ -206,46 +225,53 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLensTagging
 			if (!GameCodersToolkitPackage.IsLoaded)
 				return;
 
-			Stopwatch stopwatch = Stopwatch.StartNew();
+			try
+			{
+				Stopwatch stopwatch = Stopwatch.StartNew();
 
-			ChangedLineTracker changeTracker = new ChangedLineTracker();
+				ChangedLineTracker changeTracker = new ChangedLineTracker();
 
-			// Remove all lines we found in the old span
-			List<string> identifierToReparse = RemoveChangedLineEntries(oldSnapshot, oldSpan, changeTracker);
+				// Remove all lines we found in the old span
+				List<string> identifierToReparse = RemoveChangedLineEntries(oldSnapshot, oldSpan, changeTracker);
 
-			int guidResultCountBefore = m_guidResultLines.Count;
-			int identifierResultCountBefore = m_identifierDefinitionLines.Count;
+				int guidResultCountBefore = m_guidResultLines.Count;
+				int identifierResultCountBefore = m_identifierDefinitionLines.Count;
 
-			SnapshotSpan newSnapshotSpan = new SnapshotSpan(newSnapshot, newSpan);
-			ParseLinesInSnapshotSpan(newSnapshotSpan, changeTracker, out Dictionary<string, List<int>> identifiersToResolve);
+				SnapshotSpan newSnapshotSpan = new SnapshotSpan(newSnapshot, newSpan);
+				ParseLinesInSnapshotSpan(newSnapshotSpan, changeTracker, out Dictionary<string, List<int>> identifiersToResolve);
 
-			// Offset all lines we did not change but come after the new text span by the line delta of the change so our results stay attached to the correct line
-			ApplyLineChangeDelta(lineDelta, newSnapshotSpan.Start.GetContainingLine().LineNumber, m_guidResultLines, guidResultCountBefore, changeTracker);
-			ApplyLineChangeDelta(lineDelta, newSnapshotSpan.Start.GetContainingLine().LineNumber, m_identifierDefinitionLines, identifierResultCountBefore, changeTracker);
+				// Offset all lines we did not change but come after the new text span by the line delta of the change so our results stay attached to the correct line
+				ApplyLineChangeDelta(lineDelta, newSnapshotSpan.Start.GetContainingLine().LineNumber, m_guidResultLines, guidResultCountBefore, changeTracker);
+				ApplyLineChangeDelta(lineDelta, newSnapshotSpan.Start.GetContainingLine().LineNumber, m_identifierDefinitionLines, identifierResultCountBefore, changeTracker);
 
-			ReparseChangedIdentifier(identifierToReparse, guidResultCountBefore, identifiersToResolve, changeTracker);
+				ReparseChangedIdentifier(identifierToReparse, guidResultCountBefore, identifiersToResolve, changeTracker);
 
-			// TODO resolve remaining guid identifiers with corresponding file
+				// TODO resolve remaining guid identifiers with corresponding file
 
-			// Sort all results by their line number again.
-			ParseResultLineComparer resultLineComparer = new ParseResultLineComparer();
-			m_guidResultLines.Sort(resultLineComparer);
-			m_identifierDefinitionLines.Sort(resultLineComparer);
+				// Sort all results by their line number again.
+				ParseResultLineComparer resultLineComparer = new ParseResultLineComparer();
+				m_guidResultLines.Sort(resultLineComparer);
+				m_identifierDefinitionLines.Sort(resultLineComparer);
 
-			stopwatch.Stop();
+				stopwatch.Stop();
 #if DEBUG
-			GameCodersToolkitPackage.ExtensionOutput?.WriteLine($"Parsing Text Buffer took {stopwatch.ElapsedMilliseconds}ms");
+				GameCodersToolkitPackage.ExtensionOutput?.WriteLine($"Parsing Text Buffer took {stopwatch.ElapsedMilliseconds}ms");
 #endif
 
-			m_currentSnapshot = newSnapshot;
-			// We changed atleast one line. Make sure to notify about it
-			if (changeTracker.FirstChangedLine != int.MaxValue)
+				m_currentSnapshot = newSnapshot;
+				// We changed atleast one line. Make sure to notify about it
+				if (changeTracker.FirstChangedLine != int.MaxValue)
+				{
+					ITextSnapshotLine firstSnapshotLine = newSnapshot.GetLineFromLineNumber(changeTracker.FirstChangedLine);
+					ITextSnapshotLine lastSnapshotLine = newSnapshot.GetLineFromLineNumber(changeTracker.LastChangedLine);
+					TagsChanged?.Invoke(this,
+						new SnapshotSpanEventArgs(
+							new SnapshotSpan(firstSnapshotLine.Start, lastSnapshotLine.End)));
+				}
+			}
+			catch (Exception ex)
 			{
-				ITextSnapshotLine firstSnapshotLine = newSnapshot.GetLineFromLineNumber(changeTracker.FirstChangedLine);
-				ITextSnapshotLine lastSnapshotLine = newSnapshot.GetLineFromLineNumber(changeTracker.LastChangedLine);
-				TagsChanged?.Invoke(this,
-					new SnapshotSpanEventArgs(
-						new SnapshotSpan(firstSnapshotLine.Start, lastSnapshotLine.End)));
+				ThreadHelper.JoinableTaskFactory.Run(async delegate { await DiagnosticUtils.ReportExceptionFromExtensionAsync($"[CodeLensTagger] Exception parsing TextBufferSpan: {oldSnapshot.TextBuffer.GetFileName()}", ex); });
 			}
 		}
 

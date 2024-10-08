@@ -1,4 +1,5 @@
 ﻿using GameCodersToolkit.Configuration;
+using GameCodersToolkit.Utils;
 using Microsoft.VisualStudio.TaskStatusCenter;
 using System;
 using System.Collections.Concurrent;
@@ -45,6 +46,10 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 				await parseTask;
 				stopwatch.Stop();
 				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync("Finished Data Parsing. Took: " + stopwatch.ElapsedMilliseconds + "ms");
+			}
+			catch (Exception ex)
+			{
+				await DiagnosticUtils.ReportExceptionFromExtensionAsync("Exception while parsing data files.", ex);
 			}
 			finally
 			{
@@ -179,21 +184,49 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 		async Task ExecuteParseOperationAsync(DataFileParser operation, CancellationToken cancellationToken)
 		{
 			DataParsingErrorList errorList = new DataParsingErrorList();
-			errorList.FilePath = operation.FilePath;
-			List<DataEntry> parsedEntries = operation.Parse(errorList, cancellationToken);
-			parsedEntries.TrimExcess();
-
-			var database = GameCodersToolkitPackage.ReferenceDatabase;
-			database.ClearEntriesForFile(operation.FilePath);
-			if (parsedEntries.Count > 0)
+			try
 			{
-				database.AddEntriesForFile(operation.FilePath, new HashSet<DataEntry>(parsedEntries));
+				errorList.FilePath = operation.FilePath;
+				List<DataEntry> parsedEntries = operation.Parse(errorList, cancellationToken);
+				parsedEntries.TrimExcess();
+
+				var database = GameCodersToolkitPackage.ReferenceDatabase;
+				database.ClearEntriesForFile(operation.FilePath);
+				if (parsedEntries.Count > 0)
+				{
+					database.AddEntriesForFile(operation.FilePath, new HashSet<DataEntry>(parsedEntries));
+				}
+			}
+			catch (Exception ex)
+			{
+				await DiagnosticUtils.ReportExceptionFromExtensionAsync($"Exception parsing data file: {operation.FilePath}", ex);
 			}
 
 			if (errorList.HasEntries())
 			{
 				var textWriter = await GameCodersToolkitPackage.ExtensionOutput.CreateOutputPaneTextWriterAsync();
-				errorList.DumpToOutput(textWriter);
+				errorList.DumpMinimalToOutput(textWriter);
+
+				try
+				{
+					string dataReferenceFinderPath = Path.GetDirectoryName(GameCodersToolkitPackage.DataLocationsConfig.GetConfigFilePath());
+					if (Directory.Exists(dataReferenceFinderPath))
+					{
+						using (FileStream fileStream = File.OpenWrite(Path.Combine(dataReferenceFinderPath, "DataParseLog.log")))
+						{
+							using (TextWriter writer = new StreamWriter(fileStream))
+							{
+								await writer.WriteLineAsync($"<{DateTime.Now}> Data Parsing Errors for new Operation.");
+								errorList.DumpToOutput(writer);
+							}
+						}
+					
+					}
+				}
+				catch (Exception ex)
+				{
+					await DiagnosticUtils.ReportExceptionFromExtensionAsync("Exception writing parsing errors to Log file", ex);
+				}
 			}
 		}
 

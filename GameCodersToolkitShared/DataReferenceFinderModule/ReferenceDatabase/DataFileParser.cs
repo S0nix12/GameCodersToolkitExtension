@@ -14,6 +14,18 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 {
 	public class DataParsingErrorList
 	{
+		public void DumpMinimalToOutput(System.IO.TextWriter output)
+		{
+			if (ErrorMessages.Count > 0 || WarningMessages.Count > 0)
+			{
+				output.WriteLine($"Issues parsing file: {FilePath}. Warnings: {WarningMessages.Count}. Errors: {ErrorMessages.Count}");
+				if (ErrorMessages.Count > 0)
+				{
+					output.WriteLine($"First Error: {ErrorMessages[0]}");
+				}
+			}
+		}
+
 		public void DumpToOutput(System.IO.TextWriter output)
 		{
 			if (ErrorMessages.Count > 0 || WarningMessages.Count > 0)

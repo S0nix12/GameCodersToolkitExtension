@@ -1,6 +1,7 @@
 ﻿using DataReferenceCodeLensProviderShared.Communication;
 using GameCodersToolkit;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
+using GameCodersToolkit.Utils;
 using Microsoft.VisualStudio.Language.CodeLens;
 using Microsoft.VisualStudio.Utilities;
 using System.Collections.Generic;
@@ -74,6 +75,11 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 			}
 
 			return outDetails;
+		}
+
+		public void ReportErrorMessage(string message)
+		{
+			ThreadHelper.JoinableTaskFactory.Run(async delegate { await DiagnosticUtils.ReportErrorMessageFromExtensionAsync("Error from Code Lens Process", message); });
 		}
 	}
 }

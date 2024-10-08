@@ -135,7 +135,7 @@
     <ProjectReference Include="..\DataReferenceCodeLensProvider_2019\DataReferenceCodeLensProvider_2019.csproj">
       <Project>{31057F07-B486-48BC-9478-FB698DB33F3A}</Project>
       <Name>DataReferenceCodeLensProvider_2019</Name>
-      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+      <IncludeOutputGroupsInVSIX>BuiltProjectOutputGroup%3bBuiltProjectOutputGroupDependencies%3bGetCopyToOutputDirectoryItems%3bSatelliteDllsProjectOutputGroup%3bDebugSymbolsProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\GameCodersToolkitShared\GameCodersToolkitShared.projitems" Label="Shared" />
