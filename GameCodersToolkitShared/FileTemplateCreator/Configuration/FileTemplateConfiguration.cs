@@ -166,7 +166,7 @@ namespace GameCodersToolkit.Configuration
 
 					// Parser config path
 					{
-						if (!string.IsNullOrWhiteSpace(CreatorConfig.ParserConfigPath) && !Path.IsPathRooted(CreatorConfig.PostChangeScriptPath))
+						if (!string.IsNullOrWhiteSpace(CreatorConfig.ParserConfigPath))
 						{
 							lock (SolutionFolder)
 							{
