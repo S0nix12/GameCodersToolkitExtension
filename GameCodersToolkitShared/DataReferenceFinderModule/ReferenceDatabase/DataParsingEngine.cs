@@ -1,15 +1,12 @@
 ﻿using GameCodersToolkit.Configuration;
 using GameCodersToolkit.Utils;
 using Microsoft.VisualStudio.TaskStatusCenter;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 {
@@ -34,7 +31,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 
 			TaskProgressData taskData = default;
 			taskData.CanBeCanceled = true;
-			
+
 			try
 			{
 				await m_parseTaskSemaphore.WaitAsync();
@@ -100,7 +97,8 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 
 			CancellationToken cancellationToken = m_parseTaskCancallationSource.Token;
 
-			Task parsingTask = Task.Run(async delegate { await ParseWaitingOperationsAsync(taskHandler, waitingParseOperations, totalCountToParse); });
+			ConcurrentQueue<DataParsingErrorList> parsingErrorsLists = new ConcurrentQueue<DataParsingErrorList>();
+			Task parsingTask = Task.Run(async delegate { await ParseWaitingOperationsAsync(taskHandler, waitingParseOperations, parsingErrorsLists, totalCountToParse); });
 			foreach (var locationEntry in filesToParse)
 			{
 				if (cancellationToken.IsCancellationRequested || taskHandler.UserCancellation.IsCancellationRequested)
@@ -124,9 +122,40 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 				}
 			}
 
-			await parsingTask;
+			try
+			{
+				await parsingTask;
+			}
+			catch (Exception ex)
+			{
+				await DiagnosticUtils.ReportExceptionFromExtensionAsync("[DataReferenceFinder] Exception parsing database", ex);
+			}
+
 			GameCodersToolkitPackage.ReferenceDatabase.TrimDatabaseExcess();
 			GC.Collect();
+
+			try
+			{
+				string dataReferenceFinderPath = Path.GetDirectoryName(GameCodersToolkitPackage.DataLocationsConfig.GetConfigFilePath());
+				if (Directory.Exists(dataReferenceFinderPath))
+				{
+					using (FileStream fileStream = File.OpenWrite(Path.Combine(dataReferenceFinderPath, "DataParseLog.log")))
+					{
+						using (TextWriter writer = new StreamWriter(fileStream))
+						{
+							await writer.WriteAsync($"<{DateTime.Now}> Data Parsing Errors for new Operation.");
+							foreach (var errorList in parsingErrorsLists)
+							{
+								errorList.DumpToOutput(writer);
+							}
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				await DiagnosticUtils.ReportExceptionFromExtensionAsync("Exception writing parsing errors to Log file", ex);
+			}
 
 			if (cancellationToken.IsCancellationRequested || taskHandler.UserCancellation.IsCancellationRequested)
 			{
@@ -136,7 +165,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			}
 		}
 
-		async Task ParseWaitingOperationsAsync(ITaskHandler taskHandler, ConcurrentQueue<DataFileParser> operationQueue, int totalCountToParse)
+		async Task ParseWaitingOperationsAsync(ITaskHandler taskHandler, ConcurrentQueue<DataFileParser> operationQueue, ConcurrentQueue<DataParsingErrorList> outErrorsLists, int totalCountToParse)
 		{
 			int progressCounter = 0;
 			CancellationToken cancellationToken = m_parseTaskCancallationSource.Token;
@@ -158,7 +187,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 						{
 							try
 							{
-								await ExecuteParseOperationAsync(nextOperation, cancellationToken);
+								await ExecuteParseOperationAsync(nextOperation, outErrorsLists, cancellationToken);
 							}
 							finally
 							{
@@ -181,7 +210,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			}
 		}
 
-		async Task ExecuteParseOperationAsync(DataFileParser operation, CancellationToken cancellationToken)
+		async Task ExecuteParseOperationAsync(DataFileParser operation, ConcurrentQueue<DataParsingErrorList> outErrorsLists, CancellationToken cancellationToken)
 		{
 			DataParsingErrorList errorList = new DataParsingErrorList();
 			try
@@ -207,26 +236,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 				var textWriter = await GameCodersToolkitPackage.ExtensionOutput.CreateOutputPaneTextWriterAsync();
 				errorList.DumpMinimalToOutput(textWriter);
 
-				try
-				{
-					string dataReferenceFinderPath = Path.GetDirectoryName(GameCodersToolkitPackage.DataLocationsConfig.GetConfigFilePath());
-					if (Directory.Exists(dataReferenceFinderPath))
-					{
-						using (FileStream fileStream = File.OpenWrite(Path.Combine(dataReferenceFinderPath, "DataParseLog.log")))
-						{
-							using (TextWriter writer = new StreamWriter(fileStream))
-							{
-								await writer.WriteLineAsync($"<{DateTime.Now}> Data Parsing Errors for new Operation.");
-								errorList.DumpToOutput(writer);
-							}
-						}
-					
-					}
-				}
-				catch (Exception ex)
-				{
-					await DiagnosticUtils.ReportExceptionFromExtensionAsync("Exception writing parsing errors to Log file", ex);
-				}
+				outErrorsLists.Enqueue(errorList);
 			}
 		}
 
