@@ -100,17 +100,16 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 			}
 		}
 
-		public IMakeFile AddUberFile(string previousUberFileName, string newUberFileName)
+		public IMakeFile AddUberFile(IUberFileNode prevUberFileNode, string newUberFileName)
 		{
 			SimpleMakeFileParserConfig Config = GameCodersToolkitPackage.FileTemplateCreatorConfig.GetParserConfigAs<SimpleMakeFileParserConfig>();
-		
+
 			// New uber file
 			int newUberFileLine = 0;
 
-			CSimpleUberFileNode previousUberFileEntry = UberFileEntries.Where((Entry) => Entry.Name == previousUberFileName).FirstOrDefault();
-			if (previousUberFileEntry != null)
+			if (UberFileEntries.Contains(prevUberFileNode) && prevUberFileNode is CSimpleUberFileNode prevSimpleUberFileNode)
 			{
-				newUberFileLine = previousUberFileEntry.EndLineNumber + 1;
+				newUberFileLine = prevSimpleUberFileNode.EndLineNumber + 1;
 
 				while (Lines.Count > newUberFileLine && !string.IsNullOrWhiteSpace(Lines[newUberFileLine]))
 				{
@@ -131,22 +130,20 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 			return parser.Parse(FilePath, Lines);
 		}
 
-		public IMakeFile AddGroup(string uberFileName, string previousGroupName, string newGroupName)
+		public IMakeFile AddGroup(IUberFileNode uberFileNode, IGroupNode previousGroupNode, string newGroupName)
 		{
 			SimpleMakeFileParserConfig Config = GameCodersToolkitPackage.FileTemplateCreatorConfig.GetParserConfigAs<SimpleMakeFileParserConfig>();
-			
-			CSimpleUberFileNode uberFileEntry = UberFileEntries.Where((Entry) => Entry.Name == uberFileName).FirstOrDefault();
-			if (uberFileEntry == null)
+
+			if (!UberFileEntries.Contains(uberFileNode) || uberFileNode is not CSimpleUberFileNode simpleUberFileNode)
 			{
 				return this;
 			}
 
-			int newGroupLine = uberFileEntry.StartLineNumber + 1;
+			int newGroupLine = simpleUberFileNode.StartLineNumber + 1;
 
-			SimpleGroupNode previousGroupFileEntry = uberFileEntry.Groups.Where((Group) => Group.Name == previousGroupName).FirstOrDefault();
-			if (previousGroupFileEntry != null)
+			if (simpleUberFileNode.Groups.Contains(previousGroupNode) && previousGroupNode is SimpleGroupNode previousSimpleGroupNode)
 			{
-				newGroupLine = previousGroupFileEntry.LineNumber + previousGroupFileEntry.Files.Count + 1;
+				newGroupLine = previousSimpleGroupNode.LineNumber + previousSimpleGroupNode.Files.Count + 1;
 			}
 
 			string newGroupString = Config.NewGroupString;
@@ -160,28 +157,22 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 			return parser.Parse(FilePath, Lines);
 		}
 
-		public IMakeFile AddFiles(string uberFileName, string groupName, string previousFileName, IEnumerable<string> newFileNames)
+		public IMakeFile AddFiles(IUberFileNode uberFileNode, IGroupNode groupNode, IFileNode prevFileNode, IEnumerable<string> newFileNames)
 		{
-			CSimpleUberFileNode uberFileEntry = UberFileEntries.Where((Entry) => Entry.Name == uberFileName).FirstOrDefault();
-			if (uberFileEntry == null)
+			if (!UberFileEntries.Contains(uberFileNode) || uberFileNode is not CSimpleUberFileNode simpleUberFileNode)
 			{
 				return this;
 			}
 
-			SimpleGroupNode groupEntry = uberFileEntry.Groups.Where((Group) => Group.Name == groupName).FirstOrDefault();
-			if (groupEntry == null)
+			if (!simpleUberFileNode.Groups.Contains(groupNode) || groupNode is not SimpleGroupNode simpleGroupNode)
 			{
 				return this;
 			}
 
-			int lineToInsert = groupEntry.LineNumber + 1;
-			if (!string.IsNullOrWhiteSpace(previousFileName))
+			int lineToInsert = simpleGroupNode.LineNumber + 1;
+			if (simpleGroupNode.Files.Contains(prevFileNode) && prevFileNode is SimpleFileNode simpleFileNode)
 			{
-				SimpleFileNode regularFileEntry = groupEntry.Files.Where(Entry => Entry.Name == previousFileName).FirstOrDefault();
-				if (regularFileEntry != null)
-				{
-					lineToInsert = regularFileEntry.LineNumber + 1;
-				}
+				lineToInsert = simpleFileNode.LineNumber + 1;
 			}
 
 			InsertFileNames(lineToInsert, newFileNames);
@@ -222,7 +213,7 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 				if (File.Exists(originalFilePath))
 				{
 					SimpleMakeFileParserConfig Config = GameCodersToolkitPackage.FileTemplateCreatorConfig.GetParserConfigAs<SimpleMakeFileParserConfig>();
-		
+
 					SimpleMakeFile makeFile = new SimpleMakeFile();
 					makeFile.FilePath = originalFilePath;
 					makeFile.Lines = lines.ToList();
@@ -241,12 +232,7 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 							if (uberFileEndMatch.Success)
 							{
 								currentUberFile.EndLineNumber = i;
-
-								if (!makeFile.UberFileEntries.Contains(currentUberFile))
-								{
-									makeFile.UberFileEntries.Add(currentUberFile);
-								}
-
+								makeFile.UberFileEntries.Add(currentUberFile);
 								currentUberFile = null;
 								currentSourceGroup = null;
 							}
@@ -262,13 +248,9 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 
 							string uberFileName = uberFileMatch.Groups[1].Value;
 
-                            currentUberFile = makeFile.UberFileEntries.Find(entry => entry.Name == uberFileName);
-                            if (currentUberFile == null)
-							{
-								currentUberFile = new CSimpleUberFileNode();
-								currentUberFile.Name = uberFileName;
-								currentUberFile.StartLineNumber = i;
-							}
+							currentUberFile = new CSimpleUberFileNode();
+							currentUberFile.Name = uberFileName;
+							currentUberFile.StartLineNumber = i;
 
 							continue;
 						}

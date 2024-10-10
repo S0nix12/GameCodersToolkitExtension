@@ -87,6 +87,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 	public partial class CMakeFileUberFileViewModel : ObservableObject
 	{
+		public IUberFileNode Node { get; set; }
 		public string DisplayName { get; set; }
 		public string Name { get; set; }
 		public ObservableCollection<object> Children { get; set; } = new ObservableCollection<object>();
@@ -100,6 +101,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 	public partial class CMakeFileGroupViewModel : ObservableObject
 	{
+		public IGroupNode Node { get; set; }
 		public string DisplayName { get; set; }
 		public string Name { get; set; }
 		public ObservableCollection<object> Children { get; set; } = new ObservableCollection<object>();
@@ -113,6 +115,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 	public partial class CMakeFileFileViewModel : ObservableObject
 	{
+		public IFileNode Node { get; set; }
 		public string Name { get; set; }
 
 		private bool m_isFocusable = false;
@@ -322,28 +325,31 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 			foreach (IUberFileNode uberFile in CurrentMakeFile.GetUberFiles())
 			{
 				CMakeFileUberFileViewModel uberFileVm = new CMakeFileUberFileViewModel();
+				uberFileVm.Node = uberFile;
 				uberFileVm.Name = uberFile.GetName();
 				uberFileVm.DisplayName = uberFileVm.Name + $" ({uberFile.GetGroups().Count()} Groups)";
 
 				foreach (IGroupNode sourceGroup in uberFile.GetGroups())
 				{
 					CMakeFileGroupViewModel sourceGroupVm = new CMakeFileGroupViewModel();
+					sourceGroupVm.Node = sourceGroup;
 					sourceGroupVm.Name = sourceGroup.GetName();
 					sourceGroupVm.DisplayName = sourceGroup.GetName() + $" ({sourceGroup.GetFiles().Count()} Files)";
 
 					foreach (IFileNode regularFileEntry in sourceGroup.GetFiles())
 					{
 						CMakeFileFileViewModel regularFileVm = new CMakeFileFileViewModel();
+						regularFileVm.Node = regularFileEntry;
 						regularFileVm.Name = regularFileEntry.GetName();
 
 						sourceGroupVm.Children.Add(regularFileVm);
 					}
 
 					CMakeFileFileViewModel lastFileViewModel = sourceGroupVm.Children.LastOrDefault() as CMakeFileFileViewModel;
-					CSelectableEntryViewModel selectablFileVm = new CSelectableEntryViewModel();
-					selectablFileVm.Name = "Add Template Here";
-					selectablFileVm.OnSelect += (vm) => AddFileToGroupAsync(uberFileVm, sourceGroupVm, lastFileViewModel);
-					sourceGroupVm.Children.Add(selectablFileVm);
+					CSelectableEntryViewModel selectableFileVm = new CSelectableEntryViewModel();
+					selectableFileVm.Name = "Add Template Here";
+					selectableFileVm.OnSelect += (vm) => AddFileToGroupAsync(uberFileVm, sourceGroupVm, lastFileViewModel);
+					sourceGroupVm.Children.Add(selectableFileVm);
 
 					uberFileVm.Children.Add(sourceGroupVm);
 				}
@@ -381,7 +387,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
             if (NameDialogWindow.ShowNameDialog("Enter Uber File name", out string newUberFileName, predicate, errorAction, previousVm?.Name))
 			{
-				CurrentMakeFile = CurrentMakeFile.AddUberFile(previousVm != null ? previousVm.Name : string.Empty, newUberFileName);
+				CurrentMakeFile = CurrentMakeFile.AddUberFile(previousVm?.Node, newUberFileName);
 			}
 		}
 
@@ -400,7 +406,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
             if (NameDialogWindow.ShowNameDialog("Enter Group name", out string newGroupName, predicate, errorAction, previousVm?.Name))
 			{
-				CurrentMakeFile = CurrentMakeFile.AddGroup(uberFileVm.Name, previousVm != null ? previousVm.Name : string.Empty, newGroupName);
+				CurrentMakeFile = CurrentMakeFile.AddGroup(uberFileVm.Node, previousVm?.Node, newGroupName);
 			}
 		}
 
@@ -522,7 +528,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 					}
 
 					// Add the new files to the make file and save it to disk
-					CurrentMakeFile = CurrentMakeFile.AddFiles(uberFileVm.Name, groupVm.Name, previousVm != null ? previousVm.Name : string.Empty, newFilePathsRelative);
+					CurrentMakeFile = CurrentMakeFile.AddFiles(uberFileVm?.Node, groupVm?.Node, previousVm?.Node, newFilePathsRelative);
 					CurrentMakeFile.Save();
 
 					List<Task> openFileTasks = new List<Task>();
