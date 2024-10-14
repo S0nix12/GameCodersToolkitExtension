@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows.Shapes;
 
 namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 {
@@ -86,9 +89,9 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 			return UberFileEntries;
 		}
 
-		private void InsertFileNames(int lineNumber, IEnumerable<string> fileNames)
+		private async Task InsertFileNamesAsync(int lineNumber, IEnumerable<string> fileNames)
 		{
-			SimpleMakeFileParserConfig Config = GameCodersToolkitPackage.FileTemplateCreatorConfig.GetParserConfigAs<SimpleMakeFileParserConfig>();
+			SimpleMakeFileParserConfig Config = await GameCodersToolkitPackage.FileTemplateCreatorConfig.GetParserConfigAsAsync<SimpleMakeFileParserConfig>();
 
 			foreach (string newFileName in fileNames)
 			{
@@ -100,9 +103,9 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 			}
 		}
 
-		public IMakeFile AddUberFile(IUberFileNode prevUberFileNode, string newUberFileName)
+		public async Task<IMakeFile> AddUberFileAsync(IUberFileNode prevUberFileNode, string newUberFileName)
 		{
-			SimpleMakeFileParserConfig Config = GameCodersToolkitPackage.FileTemplateCreatorConfig.GetParserConfigAs<SimpleMakeFileParserConfig>();
+			SimpleMakeFileParserConfig Config = await GameCodersToolkitPackage.FileTemplateCreatorConfig.GetParserConfigAsAsync<SimpleMakeFileParserConfig>();
 
 			// New uber file
 			int newUberFileLine = 0;
@@ -130,9 +133,9 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 			return parser.Parse(FilePath, Lines);
 		}
 
-		public IMakeFile AddGroup(IUberFileNode uberFileNode, IGroupNode previousGroupNode, string newGroupName)
+		public async Task<IMakeFile> AddGroupAsync(IUberFileNode uberFileNode, IGroupNode previousGroupNode, string newGroupName)
 		{
-			SimpleMakeFileParserConfig Config = GameCodersToolkitPackage.FileTemplateCreatorConfig.GetParserConfigAs<SimpleMakeFileParserConfig>();
+			SimpleMakeFileParserConfig Config = await GameCodersToolkitPackage.FileTemplateCreatorConfig.GetParserConfigAsAsync<SimpleMakeFileParserConfig>();
 
 			if (!UberFileEntries.Contains(uberFileNode) || uberFileNode is not CSimpleUberFileNode simpleUberFileNode)
 			{
@@ -157,7 +160,7 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 			return parser.Parse(FilePath, Lines);
 		}
 
-		public IMakeFile AddFiles(IUberFileNode uberFileNode, IGroupNode groupNode, IFileNode prevFileNode, IEnumerable<string> newFileNames)
+		public async Task<IMakeFile> AddFilesAsync(IUberFileNode uberFileNode, IGroupNode groupNode, IFileNode prevFileNode, IEnumerable<string> newFileNames)
 		{
 			if (!UberFileEntries.Contains(uberFileNode) || uberFileNode is not CSimpleUberFileNode simpleUberFileNode)
 			{
@@ -175,23 +178,25 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 				lineToInsert = simpleFileNode.LineNumber + 1;
 			}
 
-			InsertFileNames(lineToInsert, newFileNames);
+			await InsertFileNamesAsync(lineToInsert, newFileNames);
 
 			SimpleMakeFileParser parser = new SimpleMakeFileParser();
 			return parser.Parse(FilePath, Lines);
 		}
 
-		public string GetOriginalFilePath()
-		{
-			return FilePath;
-		}
-
-		public void Save()
+		public async Task SaveAsync()
 		{
 			if (File.Exists(FilePath))
 			{
-				File.WriteAllLines(FilePath, Lines);
+				using var memoryStream = new MemoryStream(Lines.SelectMany(s => Encoding.UTF8.GetBytes(s.EndsWith("\r\n") ? s : s + "\r\n")).ToArray());
+				using var stream = new FileStream(FilePath, FileMode.Create, FileAccess.Write, FileShare.None, 0x2000, true);
+				await memoryStream.CopyToAsync(stream, 0x2000);
 			}
+		}
+
+		public string GetOriginalFilePath()
+		{
+			return FilePath;
 		}
 
 		public string FilePath { get; set; }

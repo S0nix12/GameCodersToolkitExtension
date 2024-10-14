@@ -33,12 +33,13 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 				EditableAttribute attribute = property.GetCustomAttribute<EditableAttribute>();
 				if (attribute != null)
 				{
-					string currentValue = property.GetValue(GameCodersToolkitPackage.FileTemplateCreatorConfig.CreatorConfig) as string;
-					if (currentValue != null && attribute.AllowEdit)
+					if (attribute.AllowEdit)
 					{
+						string currentValue = property.GetValue(GameCodersToolkitPackage.FileTemplateCreatorConfig.CreatorConfig) as string;
+						
 						VariableViewModel variable = new VariableViewModel();
 						variable.Name = property.Name;
-						variable.Value = currentValue;
+						variable.Value = currentValue ?? "";
 
 						Variables.Add(variable);
 					}

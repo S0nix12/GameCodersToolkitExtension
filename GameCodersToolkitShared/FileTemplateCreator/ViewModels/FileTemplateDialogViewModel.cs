@@ -296,10 +296,10 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 			{
 				if (SelectedTemplate is CFileTemplateViewModel templateVm)
 				{
-					string makeFilePath = GameCodersToolkitPackage.FileTemplateCreatorConfig.GetMakeFilePathByID(makeFileVm.ID);
+					string makeFilePath = GameCodersToolkitPackage.FileTemplateCreatorConfig.FindMakeFilePathByID(makeFileVm.ID);
 					if (File.Exists(makeFilePath))
 					{
-						CurrentTemplate = GameCodersToolkitPackage.FileTemplateCreatorConfig.GetTemplateByName(templateVm.FullName);
+						CurrentTemplate = GameCodersToolkitPackage.FileTemplateCreatorConfig.FindTemplateByName(templateVm.FullName);
 						if (CurrentTemplate != null)
 						{
 							IMakeFileParser parser = GameCodersToolkitPackage.FileTemplateCreatorConfig.CreateParser();
@@ -387,7 +387,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
             if (NameDialogWindow.ShowNameDialog("Enter Uber File name", out string newUberFileName, predicate, errorAction, previousVm?.Name))
 			{
-				CurrentMakeFile = CurrentMakeFile.AddUberFile(previousVm?.Node, newUberFileName);
+				CurrentMakeFile = await CurrentMakeFile.AddUberFileAsync(previousVm?.Node, newUberFileName);
 			}
 		}
 
@@ -406,7 +406,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
             if (NameDialogWindow.ShowNameDialog("Enter Group name", out string newGroupName, predicate, errorAction, previousVm?.Name))
 			{
-				CurrentMakeFile = CurrentMakeFile.AddGroup(uberFileVm.Node, previousVm?.Node, newGroupName);
+				CurrentMakeFile = await CurrentMakeFile.AddGroupAsync(uberFileVm.Node, previousVm?.Node, newGroupName);
 			}
 		}
 
@@ -528,8 +528,8 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 					}
 
 					// Add the new files to the make file and save it to disk
-					CurrentMakeFile = CurrentMakeFile.AddFiles(uberFileVm?.Node, groupVm?.Node, previousVm?.Node, newFilePathsRelative);
-					CurrentMakeFile.Save();
+					CurrentMakeFile = await CurrentMakeFile.AddFilesAsync(uberFileVm?.Node, groupVm?.Node, previousVm?.Node, newFilePathsRelative);
+					await CurrentMakeFile.SaveAsync();
 
 					List<Task> openFileTasks = new List<Task>();
 					foreach (string newFilePath in newFilePathsAbsolute)

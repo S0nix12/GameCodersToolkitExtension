@@ -25,6 +25,11 @@ namespace GameCodersToolkit.FileTemplateCreator.Windows
 			InitializeComponent();
 		}
 
+		private void SaveButton_Click(object sender, RoutedEventArgs e)
+		{
+			Close();
+		}
+
 		private void TextBox_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.Enter)
@@ -34,6 +39,7 @@ namespace GameCodersToolkit.FileTemplateCreator.Windows
 					if (SaveButton.Command.CanExecute(null))
 					{
 						SaveButton.Command.Execute(null);
+						Close();
 					}
 				}
 			}

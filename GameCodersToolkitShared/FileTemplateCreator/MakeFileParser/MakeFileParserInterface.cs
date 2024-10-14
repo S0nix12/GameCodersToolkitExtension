@@ -29,10 +29,10 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 
 	public interface IMakeFile
 	{
-		public abstract IMakeFile AddUberFile(IUberFileNode prevUberFileNode, string newUberFileName);
-		public abstract IMakeFile AddGroup(IUberFileNode uberFileNode, IGroupNode prevGroupNode, string newGroupName);
-		public abstract IMakeFile AddFiles(IUberFileNode uberFileNode, IGroupNode groupNode, IFileNode prevFileNode, IEnumerable<string> newFileNames);
-		public abstract void Save();
+		public abstract Task<IMakeFile> AddUberFileAsync(IUberFileNode prevUberFileNode, string newUberFileName);
+		public abstract Task<IMakeFile> AddGroupAsync(IUberFileNode uberFileNode, IGroupNode prevGroupNode, string newGroupName);
+		public abstract Task<IMakeFile> AddFilesAsync(IUberFileNode uberFileNode, IGroupNode groupNode, IFileNode prevFileNode, IEnumerable<string> newFileNames);
+		public abstract Task SaveAsync();
 
 		public abstract IEnumerable<IUberFileNode> GetUberFiles();
 		public abstract string GetOriginalFilePath();

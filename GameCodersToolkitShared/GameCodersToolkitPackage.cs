@@ -45,7 +45,7 @@ namespace GameCodersToolkit
 				ExtensionOutput = await VS.Windows.CreateOutputWindowPaneAsync("GameCodersToolkit");
 
 				DataLocationsConfig = new CDataLocationsConfiguration();
-				FileTemplateCreatorConfig = new CFileTemplateConfiguration();
+				FileTemplateCreatorConfig = new CFileTemplateCreatorConfiguration();
 				DataParsingEngine = new DataParsingEngine();
 				ReferenceDatabase = new Database();
 				DataEditorConnection = new DataEditorConnection();
@@ -73,7 +73,7 @@ namespace GameCodersToolkit
 
 		internal static FindReferenceResultsStorage FindReferenceResultsStorage { get; private set; }
 		public static CDataLocationsConfiguration DataLocationsConfig { get; private set; }
-		public static CFileTemplateConfiguration FileTemplateCreatorConfig { get; private set; }
+		public static CFileTemplateCreatorConfiguration FileTemplateCreatorConfig { get; private set; }
 		public static DataParsingEngine DataParsingEngine {  get; private set; }
 		public static DataReferenceFinderModule.ReferenceDatabase.Database ReferenceDatabase { get; private set; }
 		public static DataEditorConnection DataEditorConnection { get; private set; }

@@ -16,7 +16,7 @@
         d:DataContext="{d:DesignInstance Type=vm:ConfigurationViewModel}"
         mc:Ignorable="d" 
         WindowStartupLocation="CenterScreen"
-        Height="300"
+        Height="320"
         Width="600"
 		toolkit:Themes.UseVsTheme="True"
         KeyDown="Window_KeyDown">
@@ -51,7 +51,7 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid>
+                    <Grid Margin="0, 2, 0, 2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="10" />
@@ -65,7 +65,7 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <Button x:Name="SaveButton" Grid.Row="3" Grid.Column="1" Command="{Binding SaveCommand}">
+        <Button x:Name="SaveButton" Grid.Row="3" Grid.Column="1" Command="{Binding SaveCommand}" Click="SaveButton_Click">
             Save
         </Button>
 

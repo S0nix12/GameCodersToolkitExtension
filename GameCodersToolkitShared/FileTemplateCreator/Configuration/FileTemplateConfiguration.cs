@@ -26,42 +26,44 @@ namespace GameCodersToolkit.Configuration
 	{
 		public string Name { get; set; }
 		public string MakeFileID { get; set; }
-		public List<string> Paths { get; set; } = new List<string>();
+		public List<string> Paths { get; set; } = [];
 
 		[JsonIgnore]
-		public List<string> AbsolutePaths { get; set; } = new List<string>();
+		public List<string> AbsolutePaths { get; set; } = [];
 	}
 
 	public class CFileTemplateCreatorConfig
 	{
-		public List<CMakeFileEntry> CMakeFileEntries { get; set; } = new List<CMakeFileEntry>();
-		public List<CTemplateEntry> FileTemplateEntries { get; set; } = new List<CTemplateEntry>();
+		public List<CMakeFileEntry> CMakeFileEntries { get; set; } = [];
+		public List<CTemplateEntry> FileTemplateEntries { get; set; } = [];
 
 		public string ParserName { get; set; }
 		public string ParserConfigPath { get; set; }
-        [JsonIgnore]
-        public string ParserConfigPathAbsolute { get; set; }
-        [JsonIgnore]
-		public string ParserConfigString { get; set; }
 
 		public string PostChangeScriptPath { get; set; }
-		[JsonIgnore]
-		public string PostChangeScriptAbsolutePath { get; set; }
 
 
-        [Editable(allowEdit: true)]
+		[Editable(allowEdit: true)]
 		public string P4Server { get; set; }
 		[Editable(allowEdit: true)]
 		public string P4UserName { get; set; }
 		[Editable(allowEdit: true)]
 		public string P4Workspace { get; set; }
-        [Editable(allowEdit: true)]
-        public string AuthorName { get; set; }
-        [Editable(allowEdit: true)]
-        public string PostChangeProjectToBuild { get; set; }
-    }
+		[Editable(allowEdit: true)]
+		public string AuthorName { get; set; }
+		[Editable(allowEdit: true)]
+		public string PostChangeProjectToBuild { get; set; }
 
-	public class CFileTemplateConfiguration
+
+		[JsonIgnore]
+		public string PostChangeScriptAbsolutePath { get; set; }
+		[JsonIgnore]
+		public string ParserConfigPathAbsolute { get; set; }
+		[JsonIgnore]
+		public JsonDocument ParserConfig { get; set; }
+	}
+
+	public class CFileTemplateCreatorConfiguration
 	{
 		// Relative to the Solution Directory
 		public const string cConfigFilePath = "FileTemplateCreator/FileTemplateCreatorConfig.json";
@@ -94,7 +96,17 @@ namespace GameCodersToolkit.Configuration
 		public async Task LoadSolutionConfigAsync()
 		{
 			string configFilePath = GetConfigFilePath();
-            await LoadConfigAsync(configFilePath);
+			await LoadConfigAsync(configFilePath);
+
+			ConfigFileWatcher?.Dispose();
+			ConfigFileWatcher = new FileSystemWatcher(Path.GetDirectoryName(configFilePath))
+			{
+				EnableRaisingEvents = true
+			};
+			ConfigFileWatcher.Changed += OnConfigFileChanged;
+			ConfigFileWatcher.IncludeSubdirectories = false;
+			ConfigFileWatcher.Filter = "*.json";
+			ConfigFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastAccess;
 		}
 
 		private void OnConfigFileChanged(object sender, FileSystemEventArgs eventArgs)
@@ -122,31 +134,56 @@ namespace GameCodersToolkit.Configuration
 			return null;
 		}
 
-		public string GetMakeFilePathByID(string id)
+		public string FindMakeFilePathByID(string id)
 		{
 			return CreatorConfig.CMakeFileEntries.Where(makeFile => makeFile.ID == id).FirstOrDefault()?.AbsolutePath;
 		}
 
-		public CTemplateEntry GetTemplateByName(string name)
+		public CTemplateEntry FindTemplateByName(string name)
 		{
 			return CreatorConfig.FileTemplateEntries.Where(entry => entry.Name == name).FirstOrDefault();
 		}
 
+		public async Task<Type> GetParserConfigAsAsync<Type>()
+		{
+			Type result = default;
+			try
+			{
+				result = JsonSerializer.Deserialize<Type>(CreatorConfig.ParserConfig);
+			}
+			catch (Exception ex)
+			{
+				await DiagnosticUtils.ReportExceptionFromExtensionAsync("[FileTemplateCreator] Exception while retrieving parser config", ex);
+			}
+
+			return result;
+		}
+
 		public Type GetParserConfigAs<Type>()
 		{
-			return JsonSerializer.Deserialize<Type>(CreatorConfig.ParserConfigString);
+			Type result = default;
+			try
+			{
+				result = JsonSerializer.Deserialize<Type>(CreatorConfig.ParserConfig);
+			}
+			catch (Exception ex)
+			{
+				ThreadHelper.JoinableTaskFactory.Run(async delegate { await DiagnosticUtils.ReportExceptionFromExtensionAsync("[FileTemplateCreator] Exception while retrieving parser config", ex); });
+			}
+
+			return result;
 		}
 
 		public async Task ExecutePostBuildStepsAsync()
 		{
 			if (File.Exists(CreatorConfig.PostChangeScriptAbsolutePath))
 			{
-                Process.Start(CreatorConfig.PostChangeScriptAbsolutePath);
-            }
+				Process.Start(CreatorConfig.PostChangeScriptAbsolutePath);
+			}
 
 			if (!string.IsNullOrWhiteSpace(CreatorConfig.PostChangeProjectToBuild))
 			{
-                Project? project = await VS.Solutions.FindProjectsAsync(CreatorConfig.PostChangeProjectToBuild);
+				var project = await VS.Solutions.FindProjectsAsync(CreatorConfig.PostChangeProjectToBuild);
 				if (project != null)
 				{
 					await project.BuildAsync(BuildAction.Build);
@@ -158,6 +195,8 @@ namespace GameCodersToolkit.Configuration
 		{
 			try
 			{
+				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Attempting to load FileTemplateCreator config at '{filePath}'");
+
 				if (File.Exists(filePath))
 				{
 					FileOptions combinedOption = FileOptions.Asynchronous | FileOptions.SequentialScan | FileOptions.None;
@@ -173,10 +212,19 @@ namespace GameCodersToolkit.Configuration
 							lock (SolutionFolder)
 							{
 								CreatorConfig.PostChangeScriptAbsolutePath = Path.Combine(SolutionFolder, CreatorConfig.PostChangeScriptPath);
-                            }
+							}
 
-                            CreatorConfig.PostChangeScriptAbsolutePath = Path.GetFullPath(CreatorConfig.PostChangeScriptAbsolutePath);
-                        }
+							CreatorConfig.PostChangeScriptAbsolutePath = Path.GetFullPath(CreatorConfig.PostChangeScriptAbsolutePath);
+						}
+
+						bool exists = File.Exists(CreatorConfig.PostChangeScriptAbsolutePath);
+						await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] PostChangeScript at '{CreatorConfig.PostChangeScriptAbsolutePath}' (File exists: {exists})");
+					}
+
+					// Post-Change project to build
+					{
+						bool exists = (await VS.Solutions.FindProjectsAsync(CreatorConfig.PostChangeProjectToBuild)) != null;
+						await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] PostChangeProjectToBuild is '{CreatorConfig.PostChangeProjectToBuild}' (Exists: {exists})");
 					}
 
 					// Parser config path
@@ -187,20 +235,35 @@ namespace GameCodersToolkit.Configuration
 							{
 								CreatorConfig.ParserConfigPathAbsolute = Path.Combine(SolutionFolder, CreatorConfig.ParserConfigPath);
 							}
+						}
 
-							if (File.Exists(CreatorConfig.ParserConfigPathAbsolute))
+						bool exists = File.Exists(CreatorConfig.ParserConfigPathAbsolute);
+						if (exists)
+						{
+							try
 							{
-								CreatorConfig.ParserConfigString = File.ReadAllText(CreatorConfig.ParserConfigPathAbsolute);
+								string fileContent = File.ReadAllText(CreatorConfig.ParserConfigPathAbsolute);
+								CreatorConfig.ParserConfig = JsonDocument.Parse(fileContent);
+							}
+							catch (Exception ex)
+							{
+								await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+									"[FileTemplateCreator] Exception while retrieving parser configuration",
+									ex);
 							}
 						}
+
+						await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] ParserConfig at '{CreatorConfig.ParserConfigPathAbsolute}' (File exists: {exists})");
 					}
 
 					// Makefiles
 					{
 						List<CMakeFileEntry> entries = CreatorConfig.CMakeFileEntries;
 
-						foreach (CMakeFileEntry cmakeFileEntry in entries)
+						for (int i = entries.Count - 1; i >= 0; i--)
 						{
+							CMakeFileEntry cmakeFileEntry = entries[i];
+
 							if (!Path.IsPathRooted(cmakeFileEntry.Path))
 							{
 								lock (SolutionFolder)
@@ -210,36 +273,58 @@ namespace GameCodersToolkit.Configuration
 							}
 
 							cmakeFileEntry.AbsolutePath = Path.GetFullPath(cmakeFileEntry.AbsolutePath);
+
+							if (!File.Exists(cmakeFileEntry.AbsolutePath))
+							{
+								entries.RemoveAt(i);
+								await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Couldn't find MakeFile at path '{cmakeFileEntry.AbsolutePath}'");
+							}
 						}
+
+						await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Found {entries.Count} valid MakeFile entries");
 					}
 
 					// Templates
 					{
 						List<CTemplateEntry> entries = CreatorConfig.FileTemplateEntries;
 
-						foreach (CTemplateEntry entry in entries)
+						for (int i = entries.Count - 1; i >= 0; i--)
 						{
-							entry.AbsolutePaths = Enumerable.Repeat(string.Empty, entry.Paths.Count).ToList();
-							for (int i = entry.Paths.Count - 1; i >= 0; i--)
+							bool isValid = true;
+							foreach (string path in entries[i].Paths)
 							{
-								if (!Path.IsPathRooted(entry.Paths[i]))
+								string absolutePath = path;
+
+								if (!Path.IsPathRooted(absolutePath))
 								{
 									lock (SolutionFolder)
 									{
-										entry.AbsolutePaths[i] = Path.Combine(SolutionFolder, entry.Paths[i]);
+										absolutePath = Path.Combine(SolutionFolder, absolutePath);
 									}
-                                }
-
-								entry.AbsolutePaths[i] = Path.GetFullPath(entry.AbsolutePaths[i]);
-
-                                if (!File.Exists(entry.AbsolutePaths[i]))
-								{
-									entry.AbsolutePaths.RemoveAt(i);
 								}
+
+								absolutePath = Path.GetFullPath(absolutePath);
+
+								if (!File.Exists(absolutePath))
+								{
+									isValid = false;
+									await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Couldn't locate file '{absolutePath}' in template '{entries[i].Name}'. Skipping.");
+									break;
+								}
+
+								entries[i].AbsolutePaths.Add(absolutePath);
+							}
+
+							if (!isValid)
+							{
+								entries.RemoveAt(i);
 							}
 						}
+
+						await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Found {entries.Count} valid template entries");
 					}
 
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Finished loading config.");
 					await EstablishPerforceConnectionAsync();
 				}
 				else
@@ -251,7 +336,7 @@ namespace GameCodersToolkit.Configuration
 			catch (Exception ex)
 			{
 				await DiagnosticUtils.ReportExceptionFromExtensionAsync(
-					"Exception while loading File Template Creator Config File", 
+					"Exception while loading File Template Creator Config File",
 					ex);
 			}
 		}
