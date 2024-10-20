@@ -195,6 +195,10 @@ namespace GameCodersToolkit.Configuration
 		{
 			try
 			{
+				if (CreatorConfig != null)
+				{
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Reloading FileTemplateCreator config after change");
+				}
 				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Attempting to load FileTemplateCreator config at '{filePath}'");
 
 				if (File.Exists(filePath))
@@ -369,7 +373,7 @@ namespace GameCodersToolkit.Configuration
 			return false;
 		}
 
-		public CFileTemplateCreatorConfig CreatorConfig { get; set; } = new CFileTemplateCreatorConfig();
+		public CFileTemplateCreatorConfig CreatorConfig { get; set; }
 		private FileSystemWatcher ConfigFileWatcher { get; set; }
 
 		private string SolutionFolder { get; set; } = "";
