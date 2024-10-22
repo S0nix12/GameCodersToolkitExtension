@@ -26,6 +26,7 @@ namespace GameCodersToolkit.Configuration
 	{
 		public string Name { get; set; }
 		public string MakeFileID { get; set; }
+		public string Description { get; set; }
 		public List<string> Paths { get; set; } = [];
 
 		[JsonIgnore]

@@ -37,6 +37,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 		public string Name { get; set; }
 		public string FullName { get; set; }
 		public string MakeFileID { get; set; }
+		public string Description { get; set; }
 
 
 		private bool m_isFocusable = true;
@@ -199,12 +200,15 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
                     categories.RemoveAt(0);
                 }
 
-                CFileTemplateViewModel vm = new CFileTemplateViewModel();
-                vm.FullName = template.Name;
-                vm.Name = categories.First();
-                vm.MakeFileID = template.MakeFileID;
+				CFileTemplateViewModel vm = new()
+				{
+					FullName = template.Name,
+					Name = categories.First(),
+					MakeFileID = template.MakeFileID,
+					Description = template.Description
+				};
 
-                if (currentModel != null)
+				if (currentModel != null)
                 {
                     currentModel.Children.Add(vm);
 
@@ -244,9 +248,9 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 			SelectedMakeFile = null;
 			MakeFileContent.Clear();
 
-			if (SelectedTemplate is CFileTemplateViewModel vm)
+			if (SelectedTemplate != null)
 			{
-				CreateMakeFiles(vm.MakeFileID);
+				CreateMakeFiles(SelectedTemplate.MakeFileID);
             }
 
             UpdateWindowTitleIndex();
@@ -294,12 +298,12 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 		{
 			if (SelectedMakeFile is CMakeFileViewModel makeFileVm)
 			{
-				if (SelectedTemplate is CFileTemplateViewModel templateVm)
+				if (SelectedTemplate != null)
 				{
 					string makeFilePath = GameCodersToolkitPackage.FileTemplateCreatorConfig.FindMakeFilePathByID(makeFileVm.ID);
 					if (File.Exists(makeFilePath))
 					{
-						CurrentTemplate = GameCodersToolkitPackage.FileTemplateCreatorConfig.FindTemplateByName(templateVm.FullName);
+						CurrentTemplate = GameCodersToolkitPackage.FileTemplateCreatorConfig.FindTemplateByName(SelectedTemplate.FullName);
 						if (CurrentTemplate != null)
 						{
 							IMakeFileParser parser = GameCodersToolkitPackage.FileTemplateCreatorConfig.CreateParser();
@@ -672,8 +676,8 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 		public CTemplateEntry CurrentTemplate { get => m_currentTemplate; set => SetProperty(ref m_currentTemplate, value); }
 
 
-		private object m_selectedTemplate = null;
-		public object SelectedTemplate { get => m_selectedTemplate; set { SetProperty(ref m_selectedTemplate, value); OnTemplateSelected(); } }
+		private CFileTemplateViewModel m_selectedTemplate = null;
+		public CFileTemplateViewModel SelectedTemplate { get => m_selectedTemplate; set { SetProperty(ref m_selectedTemplate, value); OnTemplateSelected(); } }
 
 
 		private ObservableCollection<object> m_templates = new ObservableCollection<object>();

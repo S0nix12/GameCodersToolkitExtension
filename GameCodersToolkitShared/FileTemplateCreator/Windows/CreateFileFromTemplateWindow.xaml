@@ -42,6 +42,8 @@
             <RowDefinition Height="{StaticResource WindowContentMargin}" />
             <RowDefinition Height="*" />
             <RowDefinition Height="{StaticResource WindowContentMargin}" />
+            <RowDefinition Height="100" />
+            <RowDefinition Height="{StaticResource WindowContentMargin}" />
         </Grid.RowDefinitions>
 
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
@@ -130,6 +132,10 @@
                     </DataTemplate>
                 </TreeView.Resources>
             </TreeView>
+        </ScrollViewer>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"  Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="5" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+            <TextBlock FontSize="18" TextWrapping="WrapWithOverflow" Text="{Binding SelectedTemplate.Description}" />
         </ScrollViewer>
     </Grid>
 </Window>
