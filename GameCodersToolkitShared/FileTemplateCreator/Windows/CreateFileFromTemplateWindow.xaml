@@ -42,6 +42,8 @@
             <RowDefinition Height="{StaticResource WindowContentMargin}" />
             <RowDefinition Height="*" />
             <RowDefinition Height="{StaticResource WindowContentMargin}" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="{StaticResource WindowContentMargin}" />
         </Grid.RowDefinitions>
 
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
