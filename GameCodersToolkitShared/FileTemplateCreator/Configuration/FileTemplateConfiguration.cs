@@ -7,12 +7,9 @@ using System.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using GameCodersToolkit.SourceControl;
-using System.IO.Pipes;
 using GameCodersToolkit.Utils;
-using System.Diagnostics;
 using EnvDTE80;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Shell;
+using EnvDTE;
 
 namespace GameCodersToolkit.Configuration
 {
@@ -85,7 +82,7 @@ namespace GameCodersToolkit.Configuration
 			VS.Events.SolutionEvents.OnAfterOpenSolution += HandleOpenSolution;
 		}
 
-		private void HandleOpenSolution(Solution solution = null)
+		private void HandleOpenSolution(Community.VisualStudio.Toolkit.Solution solution = null)
 		{
 			if (solution != null)
 			{
@@ -182,23 +179,24 @@ namespace GameCodersToolkit.Configuration
 		{
 			if (File.Exists(CreatorConfig.PostChangeScriptAbsolutePath))
 			{
-				Process.Start(CreatorConfig.PostChangeScriptAbsolutePath);
+				System.Diagnostics.Process.Start(CreatorConfig.PostChangeScriptAbsolutePath);
             }
 
             await ThreadHelper.JoinableTaskFactory.RunAsync(async delegate
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                DTE2 dte = Package.GetGlobalService(typeof(DTE2)) as DTE2;
-				if (dte != null)
+
+                DTE2 dte = GameCodersToolkitPackage.Package.GetService<EnvDTE.DTE, DTE2>();
+                if (dte != null)
 				{
-					bool isBuildingAlready = dte.Solution.SolutionBuild.BuildState == EnvDTE.vsBuildState.vsBuildStateInProgress;
+                    bool isBuildingAlready = dte.Solution.SolutionBuild.BuildState == EnvDTE.vsBuildState.vsBuildStateInProgress;
 
 					if (!isBuildingAlready && !string.IsNullOrWhiteSpace(CreatorConfig.PostChangeProjectToBuild))
 					{
 					    var project = await VS.Solutions.FindProjectsAsync(CreatorConfig.PostChangeProjectToBuild);
 					    if (project != null)
 					    {
-					        await project.BuildAsync(BuildAction.Build);
+					        project.BuildAsync(BuildAction.Build);
 					    }
 					}
 				}
