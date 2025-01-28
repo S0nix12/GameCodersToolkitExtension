@@ -99,10 +99,20 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			SearchTerm = model.SearchTerm;
 			Status = model.Status;
 
-			model.OperationStatusChanged += HandleOperationStatusChanged;
-			model.ResultsUpdated += HandleResultsUpdate;
 			m_fileResultsView = new ListCollectionView(FileResults);
 			FileResultsView.SortDescriptions.Add(new SortDescription("FilePath", ListSortDirection.Ascending));
+
+			if (model.Status == EFindReferenceOperationStatus.Finished)
+			{
+				OperationDuration = model.OperationDuration;
+				SearchedFileCount = model.SearchedFileCount;
+				HandleResultsUpdate(model, new EventArgs());
+			}
+			else
+			{
+				model.OperationStatusChanged += HandleOperationStatusChanged;
+				model.ResultsUpdated += HandleResultsUpdate;
+			}
 		}
 
 		void HandleOperationStatusChanged(object operation, FindReferenceOperationResults.OperationStatusEventArgs eventArgs)
@@ -230,6 +240,12 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 	{
 		public ReferenceResultsWindowViewModel()
 		{
+			foreach (var operation in GameCodersToolkitPackage.FindReferenceResultsStorage.Results)
+			{
+				var newResult = new OperationResultsViewModel(operation);
+				newResult.SetSearchFilter(m_searchFilter);
+				OperationResults.Insert(0, newResult);
+			}
 			GameCodersToolkitPackage.FindReferenceResultsStorage.Results.CollectionChanged += HandleResultsCollectionChanged;
 		}
 
