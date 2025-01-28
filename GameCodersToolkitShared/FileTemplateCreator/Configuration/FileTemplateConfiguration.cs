@@ -87,6 +87,11 @@ namespace GameCodersToolkit.Configuration
 			VS.Events.SolutionEvents.OnAfterOpenSolution += HandleOpenSolution;
 		}
 
+		public void Reload()
+        {
+            ThreadHelper.JoinableTaskFactory.Run(LoadSolutionConfigAsync);
+        }
+
 		private void HandleOpenSolution(Community.VisualStudio.Toolkit.Solution solution = null)
 		{
 			if (solution != null)
@@ -109,6 +114,8 @@ namespace GameCodersToolkit.Configuration
             bool hasDifferentPaths = configDirectory != userConfigDirectory;
 
             ConfigFileWatcher?.Dispose();
+			UserConfigFileWatcher?.Dispose();
+
 			ConfigFileWatcher = new FileSystemWatcher(configDirectory)
 			{
 				EnableRaisingEvents = true
@@ -120,15 +127,14 @@ namespace GameCodersToolkit.Configuration
 
 			if (hasDifferentPaths)
             {
-                ConfigFileWatcher?.Dispose();
-                ConfigFileWatcher = new FileSystemWatcher(userConfigDirectory)
+                UserConfigFileWatcher = new FileSystemWatcher(userConfigDirectory)
                 {
                     EnableRaisingEvents = true
                 };
-                ConfigFileWatcher.Changed += OnConfigFileChanged;
-                ConfigFileWatcher.IncludeSubdirectories = false;
-                ConfigFileWatcher.Filter = "*.json";
-                ConfigFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastAccess;
+                UserConfigFileWatcher.Changed += OnConfigFileChanged;
+                UserConfigFileWatcher.IncludeSubdirectories = false;
+                UserConfigFileWatcher.Filter = "*.json";
+                UserConfigFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastAccess;
             }
         }
 
@@ -431,7 +437,8 @@ namespace GameCodersToolkit.Configuration
 		public CFileTemplateCreatorConfig CreatorConfig { get; set; } = new CFileTemplateCreatorConfig();
 		public CFileTemplateCreatorUserConfig UserConfig { get; set; } = new CFileTemplateCreatorUserConfig();
 		private FileSystemWatcher ConfigFileWatcher { get; set; }
+        private FileSystemWatcher UserConfigFileWatcher { get; set; }
 
-		private string SolutionFolder { get; set; } = "";
+        private string SolutionFolder { get; set; } = "";
 	}
 }

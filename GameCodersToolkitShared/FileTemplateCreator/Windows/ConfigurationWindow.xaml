@@ -16,7 +16,7 @@
         d:DataContext="{d:DesignInstance Type=vm:ConfigurationViewModel}"
         mc:Ignorable="d" 
         WindowStartupLocation="CenterScreen"
-        Height="320"
+        Height="360"
         Width="600"
 		toolkit:Themes.UseVsTheme="True"
         KeyDown="Window_KeyDown">
@@ -38,6 +38,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="15" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="15" />
+            <RowDefinition Height="25" />
             <RowDefinition Height="15" />
             <RowDefinition Height="25" />
             <RowDefinition Height="15" />
@@ -65,7 +67,11 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <Button x:Name="SaveButton" Grid.Row="3" Grid.Column="1" Command="{Binding SaveCommand}" Click="SaveButton_Click">
+        <Button x:Name="ReloadButton" Grid.Row="3" Grid.Column="1" Command="{Binding ReloadCommand}" Click="ReloadButton_Click">
+            Reload File Template Creator
+        </Button>
+
+        <Button x:Name="SaveButton" Grid.Row="5" Grid.Column="1" Command="{Binding SaveCommand}" Click="SaveButton_Click">
             Save
         </Button>
 

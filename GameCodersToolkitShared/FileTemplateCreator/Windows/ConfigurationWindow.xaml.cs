@@ -30,6 +30,11 @@ namespace GameCodersToolkit.FileTemplateCreator.Windows
 			Close();
 		}
 
+		private void ReloadButton_Click(object sender, RoutedEventArgs e)
+		{
+			Close();
+		}
+
 		private void TextBox_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (e.Key == Key.Enter)

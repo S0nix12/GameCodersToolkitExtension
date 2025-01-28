@@ -76,9 +76,15 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 				MessageBox errorMessageBox = new MessageBox();
 				await errorMessageBox.ShowErrorAsync("Unable to save due to invalid configuration");
 			}
-		}
+        }
 
-		private ObservableCollection<VariableViewModel> m_variables = new ObservableCollection<VariableViewModel>();
+        [RelayCommand]
+        public void Reload()
+        {
+			GameCodersToolkitPackage.FileTemplateCreatorConfig.Reload();
+        }
+
+        private ObservableCollection<VariableViewModel> m_variables = new ObservableCollection<VariableViewModel>();
 		public ObservableCollection<VariableViewModel> Variables { get => m_variables; set => SetProperty(ref m_variables, value); }
 	}
 }
