@@ -395,7 +395,7 @@ namespace GameCodersToolkit.Configuration
                 else
                 {
                     Directory.CreateDirectory(Path.GetDirectoryName(userConfigFilePath));
-                    File.Create(userConfigFilePath).Dispose();
+					await SaveConfigAsync();
                 }
             }
 			catch (Exception ex)
@@ -412,12 +412,12 @@ namespace GameCodersToolkit.Configuration
 			string[] configFilePaths = GetConfigFilePaths();
 
 			await EstablishPerforceConnectionAsync();
-			bool isWritable = configFilePaths[1].IsFileWritable();
+			bool isWritable = !File.Exists(configFilePaths[1]) || configFilePaths[1].IsFileWritable();
 
 			if (isWritable)
 			{
 				using FileStream fileStream = File.Create(configFilePaths[1]);
-				JsonSerializer.Serialize(fileStream, CreatorConfig, options);
+				JsonSerializer.Serialize(fileStream, UserConfig, options);
 			}
 
 			return isWritable;
