@@ -566,7 +566,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
                 }
 			}
 
-			string authorName = GameCodersToolkitPackage.FileTemplateCreatorConfig.CreatorConfig.AuthorName;
+			string authorName = GameCodersToolkitPackage.FileTemplateCreatorConfig.UserConfig.AuthorName;
             if (string.IsNullOrWhiteSpace(authorName))
 			{
 				authorName = "AUTHOR (you can add an author name in the extension settings)";

@@ -27,7 +27,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 		private void ReadConfigValues()
 		{
-			PropertyInfo[] properties = typeof(CFileTemplateCreatorConfig).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+			PropertyInfo[] properties = typeof(CFileTemplateCreatorUserConfig).GetProperties(BindingFlags.Public | BindingFlags.Instance);
 			foreach (PropertyInfo property in properties)
 			{
 				EditableAttribute attribute = property.GetCustomAttribute<EditableAttribute>();
@@ -35,7 +35,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 				{
 					if (attribute.AllowEdit)
 					{
-						string currentValue = property.GetValue(GameCodersToolkitPackage.FileTemplateCreatorConfig.CreatorConfig) as string;
+						string currentValue = property.GetValue(GameCodersToolkitPackage.FileTemplateCreatorConfig.UserConfig) as string;
 						
 						VariableViewModel variable = new VariableViewModel();
 						variable.Name = property.Name;
@@ -49,12 +49,12 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 		private void ApplyConfigValues()
 		{
-			Type configType = typeof(CFileTemplateCreatorConfig);
+			Type configType = typeof(CFileTemplateCreatorUserConfig);
 
 			foreach (VariableViewModel vm in Variables)
 			{
 				PropertyInfo propertyInfo = configType.GetProperty(vm.Name);
-				propertyInfo.SetValue(GameCodersToolkitPackage.FileTemplateCreatorConfig.CreatorConfig, vm.Value);
+				propertyInfo.SetValue(GameCodersToolkitPackage.FileTemplateCreatorConfig.UserConfig, vm.Value);
 			}
 		}
 

@@ -16,7 +16,7 @@
         d:DataContext="{d:DesignInstance Type=vm:CFileTemplateDialogViewModel}"
         mc:Ignorable="d" 
         Height="900"
-        Width="1300"
+        Width="1400"
 		toolkit:Themes.UseVsTheme="True"
         Title="{Binding WindowTitle}">
 
@@ -31,14 +31,16 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
             <ColumnDefinition Width="3*" />
             <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
-            <ColumnDefinition Width="5*" />
+            <ColumnDefinition Width="6*" />
             <ColumnDefinition Width="{StaticResource WindowContentMargin}" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="{StaticResource WindowContentMargin}" />
+            <RowDefinition Height="25" />
             <RowDefinition Height="{StaticResource WindowContentMargin}" />
             <RowDefinition Height="*" />
             <RowDefinition Height="{StaticResource WindowContentMargin}" />
@@ -46,7 +48,8 @@
             <RowDefinition Height="{StaticResource WindowContentMargin}" />
         </Grid.RowDefinitions>
 
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="1" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource VSTextBlockStyle}">Template</TextBlock>
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="1" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
             <usercontrols:ExtendedTreeView x:Name="TemplateTree" ItemsSource="{Binding Templates}" SelectedItem_="{Binding SelectedTemplate, Mode=TwoWay}" toolkit:Themes.UseVsTheme="True">
                 <TreeView.Resources>
 
@@ -73,7 +76,8 @@
             </usercontrols:ExtendedTreeView>
         </ScrollViewer>
 
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="3"  PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+        <TextBlock Grid.Row="1" Grid.Column="3" Style="{StaticResource VSTextBlockStyle}">Make File</TextBlock>
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="3"  PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
             <usercontrols:ExtendedTreeView x:Name="MakeFilesTree" ItemsSource="{Binding MakeFiles}" SelectedItem_="{Binding SelectedMakeFile, Mode=TwoWay}" toolkit:Themes.UseVsTheme="True">
                 <TreeView.Resources>
 
@@ -95,7 +99,8 @@
             </usercontrols:ExtendedTreeView>
         </ScrollViewer>
 
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="1" Grid.Column="5" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+        <TextBlock Grid.Row="1" Grid.Column="5" Style="{StaticResource VSTextBlockStyle}">Uber File/Group</TextBlock>
+        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Grid.Row="3" Grid.Column="5" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
             <TreeView x:Name="MakeFileTree" ItemsSource="{Binding MakeFileContent}" toolkit:Themes.UseVsTheme="True">
                 <TreeView.Resources>
 
@@ -134,7 +139,7 @@
             </TreeView>
         </ScrollViewer>
 
-        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"  Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="5" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"  Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="5" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
             <TextBlock FontSize="18" TextWrapping="WrapWithOverflow" Text="{Binding SelectedTemplate.Description}" />
         </ScrollViewer>
     </Grid>

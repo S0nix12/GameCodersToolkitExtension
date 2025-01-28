@@ -47,9 +47,13 @@ namespace GameCodersToolkit.SourceControl
 	{
 		private static Connection s_perforceConnection;
 		private static Repository s_repository;
+		public static bool IsEnabled { get; set; } = true;
 
 		public static async Task<bool> InitAsync(PerforceID id)
 		{
+			if (!IsEnabled)
+				return false;
+
 			return await Task.Run(async () =>
 			{
 				if (s_perforceConnection != null && s_perforceConnection.Status == ConnectionStatus.Connected)
@@ -85,8 +89,11 @@ namespace GameCodersToolkit.SourceControl
 		}
 
 		public static async Task<bool> ShutdownAsync()
-		{
-			return await Task.Run(() =>
+        {
+            if (!IsEnabled)
+                return false;
+
+            return await Task.Run(() =>
 			{
 				if (s_perforceConnection != null && s_perforceConnection.Status == ConnectionStatus.Connected)
 				{
@@ -101,8 +108,11 @@ namespace GameCodersToolkit.SourceControl
 		}
 
 		public static async Task<bool> TryAddFilesAsync(IList<string> filePaths)
-		{
-			return await Task.Run(async () =>
+        {
+            if (!IsEnabled)
+                return false;
+
+            return await Task.Run(async () =>
 			{
 				if (s_perforceConnection == null || s_perforceConnection.Status == ConnectionStatus.Disconnected)
 					return false;
@@ -132,8 +142,11 @@ namespace GameCodersToolkit.SourceControl
 		}
 
 		public static async Task<bool> TryCheckoutFilesAsync(IList<string> filePaths)
-		{
-			return await Task.Run(async () =>
+        {
+            if (!IsEnabled)
+                return false;
+
+            return await Task.Run(async () =>
 			{
 				if (s_perforceConnection == null || s_perforceConnection.Status == ConnectionStatus.Disconnected)
 					return false;
@@ -163,8 +176,11 @@ namespace GameCodersToolkit.SourceControl
 		}
 
 		public static async Task<PerforceWorkspace> FindWorkspaceAsync(string currentDirectory)
-		{
-			return await Task.Run(() =>
+        {
+            if (!IsEnabled)
+                return null;
+
+            return await Task.Run(() =>
 			{
 				PerforceWorkspace foundWorkspace = new PerforceWorkspace();
 
