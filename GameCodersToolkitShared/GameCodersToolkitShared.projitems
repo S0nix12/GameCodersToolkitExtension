@@ -9,6 +9,8 @@
     <Import_RootNamespace>GameCodersToolkitShared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)autodataexposer\commands\ImplementRegistrationCodeCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)autodataexposer\configuration\AutoDataExposerConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLens\CodeLensCustomDataView.xaml.cs">
       <DependentUpon>CodeLensCustomDataView.xaml</DependentUpon>
     </Compile>
@@ -108,5 +110,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)AutoDataExposer\Commands\" />
+    <Folder Include="$(MSBuildThisFileDirectory)AutoDataExposer\Configuration\" />
   </ItemGroup>
 </Project>

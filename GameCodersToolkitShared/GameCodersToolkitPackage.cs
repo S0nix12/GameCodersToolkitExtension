@@ -46,12 +46,14 @@ namespace GameCodersToolkit
 
 				DataLocationsConfig = new CDataLocationsConfiguration();
 				FileTemplateCreatorConfig = new CFileTemplateCreatorConfiguration();
-				DataParsingEngine = new DataParsingEngine();
+                AutoDataExposerConfig = new CAutoDataExposerConfiguration();
+                DataParsingEngine = new DataParsingEngine();
 				ReferenceDatabase = new Database();
 				DataEditorConnection = new DataEditorConnection();
 
 				await DataLocationsConfig.InitAsync();
 				await FileTemplateCreatorConfig.InitAsync();
+				await AutoDataExposerConfig.InitAsync();
 
 				IsLoaded = true;
 				PackageLoaded?.Invoke(this, new EventArgs());
@@ -74,6 +76,7 @@ namespace GameCodersToolkit
 		internal static FindReferenceResultsStorage FindReferenceResultsStorage { get; private set; }
 		public static CDataLocationsConfiguration DataLocationsConfig { get; private set; }
 		public static CFileTemplateCreatorConfiguration FileTemplateCreatorConfig { get; private set; }
+		public static CAutoDataExposerConfiguration AutoDataExposerConfig { get; private set; }
 		public static DataParsingEngine DataParsingEngine {  get; private set; }
 		public static DataReferenceFinderModule.ReferenceDatabase.Database ReferenceDatabase { get; private set; }
 		public static DataEditorConnection DataEditorConnection { get; private set; }

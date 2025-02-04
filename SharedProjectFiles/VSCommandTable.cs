@@ -26,6 +26,9 @@ namespace GameCodersToolkit
 
         public const string FileTemplateCreatorSet_GuidString = "c614691e-88df-43e1-9d6e-28ca3a32fb57";
         public static Guid FileTemplateCreatorSet_Guid = new Guid(FileTemplateCreatorSet_GuidString);
+
+        public const string guidMyCmdSetString = "e7b95c06-f8a5-4c4c-ba8d-d727f865cea6";
+        public static readonly Guid guidMyCmdSet = new Guid(guidMyCmdSetString);
     }
     /// <summary>
     /// Helper class that encapsulates all CommandIDs uses across VS Package.
@@ -70,5 +73,6 @@ namespace GameCodersToolkit
         public const int OpenTemplateFileCreatorConfigExtensionsMenu = 0x0030;
         public const int OpenTemplateFileCreatorConfig = 0x0040;
         public const int FileTemplateCreatorExtensionsMenuGroup = 0x0007;
+        public const int DynamicCommandId = 0x1000;
     }
 }
