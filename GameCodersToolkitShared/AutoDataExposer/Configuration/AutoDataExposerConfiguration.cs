@@ -46,89 +46,6 @@ namespace GameCodersToolkit.Configuration
             VS.Events.SolutionEvents.OnAfterOpenSolution += HandleOpenSolution;
         }
 
-        private void DynamicItem_BeforeQueryStatus(object sender, EventArgs e)
-        {
-            if (GameCodersToolkitPackage.Package.GetService<IMenuCommandService, OleMenuCommandService>() is OleMenuCommandService commandService)
-            {
-                foreach (OleMenuCommand command in RegisteredCommands)
-                {
-                    commandService.RemoveCommand(command);
-                }
-
-                RegisteredCommands.Clear();
-            }
-
-            ThreadHelper.ThrowIfNotOnUIThread();
-            var cmd = sender as OleMenuCommand;
-            if (cmd == null)
-                return;
-
-            cmd.Visible = false;
-
-            if (GameCodersToolkitPackage.Package.GetService<IMenuCommandService, OleMenuCommandService>() is OleMenuCommandService cmdService)
-            {
-                for (int i = 0; i < ExposerConfig.AutoDataExposerEntries.Count; i++)
-                {
-                    CAutoDataExposerEntry entry = ExposerConfig.AutoDataExposerEntries[i];
-
-                    CommandID dynamicStartCmdID = new CommandID(PackageGuids.guidMyCmdSet, 0x2000 + i + 1);
-                    OleMenuCommand dynamicItem = new OleMenuCommand(DynamicItem_Invoke, dynamicStartCmdID);
-                    dynamicItem.Enabled = true;
-                    dynamicItem.Visible = true;
-                    dynamicItem.Text = entry.Name;
-
-                    cmdService.AddCommand(dynamicItem);
-                    RegisteredCommands.Add(dynamicItem);
-                }
-            }
-        }
-
-        private void DynamicItem_Invoke(object sender, EventArgs e)
-        {
-            ThreadHelper.ThrowIfNotOnUIThread();
-            var cmd = sender as OleMenuCommand;
-            if (cmd == null)
-                return;
-
-            int commandIndex = cmd.CommandID.ID - 0x1000;
-            if (commandIndex >= 0 && commandIndex < ExposerConfig.AutoDataExposerEntries.Count)
-            {
-                ExecuteCommand(ExposerConfig.AutoDataExposerEntries[commandIndex]);
-            }
-        }
-
-        private bool IsLineMatchingRegex(string pattern)
-        {
-            ThreadHelper.ThrowIfNotOnUIThread();
-
-            if (!(ServiceProvider.GlobalProvider.GetService(typeof(SVsTextManager)) is IVsTextManager textManager))
-                return false;
-
-            textManager.GetActiveView(1, null, out IVsTextView textView);
-            if (textView == null)
-                return false;
-
-            textView.GetSelection(out int startLine, out _, out _, out _);
-
-            if (!(textView.GetBuffer(out IVsTextLines textLines) == VSConstants.S_OK && textLines != null))
-                return false;
-
-            textLines.GetLineText(startLine, 0, startLine, int.MaxValue, out string lineText);
-
-            return Regex.IsMatch(lineText.Trim(), pattern);
-        }
-        private void ExecuteCommand(CAutoDataExposerEntry commandConfig)
-        {
-            ThreadHelper.ThrowIfNotOnUIThread();
-            VsShellUtilities.ShowMessageBox(
-                GameCodersToolkitPackage.Package,
-                $"Command {commandConfig.Name} executed!",
-                "Dynamic Command",
-                OLEMSGICON.OLEMSGICON_INFO,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
-        }
-
         public void Reload()
         {
             ThreadHelper.JoinableTaskFactory.Run(LoadSolutionConfigAsync);
@@ -200,20 +117,20 @@ namespace GameCodersToolkit.Configuration
                     ExposerConfig = await JsonSerializer.DeserializeAsync<CAutoDataExposerConfig>(fileStream);
 
                     //Create context menu items
-                    {
-                        await GameCodersToolkitPackage.Package.JoinableTaskFactory.SwitchToMainThreadAsync();
+                    //{
+                    //    await GameCodersToolkitPackage.Package.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-                        if (await GameCodersToolkitPackage.Package.GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService cmdService)
-                        {
-                            CommandID dynamicStartCmdID = new CommandID(PackageGuids.guidMyCmdSet, 0x2000);
-                            OleMenuCommand dynamicItem = new OleMenuCommand(null, dynamicStartCmdID);
-                            dynamicItem.BeforeQueryStatus += DynamicItem_BeforeQueryStatus;
-                            dynamicItem.MatchedCommandId = 0x2000; // Ensures dynamic commands match correctly
+                    //    if (await GameCodersToolkitPackage.Package.GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService cmdService)
+                    //    {
+                    //        CommandID dynamicStartCmdID = new CommandID(PackageGuids.guidMyCmdSet, 0x2000);
+                    //        OleMenuCommand dynamicItem = new OleMenuCommand(null, dynamicStartCmdID);
+                    //        dynamicItem.BeforeQueryStatus += DynamicItem_BeforeQueryStatus;
+                    //        dynamicItem.MatchedCommandId = 0x2000; // Ensures dynamic commands match correctly
 
-                            cmdService.AddCommand(dynamicItem);
-                            RegisteredCommands.Add(dynamicItem);
-                        }
-                    }
+                    //        cmdService.AddCommand(dynamicItem);
+                    //        RegisteredCommands.Add(dynamicItem);
+                    //    }
+                    //}
 
                     await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Finished loading config.");
                 }

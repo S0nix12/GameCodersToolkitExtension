@@ -39,19 +39,19 @@
 				<Parent guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplateExtensionsMenu"/>
 			</Group>
 
-			<Group guid="guidMyCmdSet" id="MyMenuGroup" priority="0x0600">
+			<Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerContextMenuGroup" priority="0x0600">
 				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
 			</Group>
 
-			<Group guid="guidMyCmdSet" id="SubMenuGroup" priority="0x0602">
-				<Parent guid="guidMyCmdSet" id="SubMenu" />
+			<Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenuGroup" priority="0x0602">
+				<Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenu" />
 			</Group>
 		</Groups>
 
 		<Menus>
 
-			<Menu guid="guidMyCmdSet" id="SubMenu" priority="0x0200" type="Menu">
-				<Parent guid="guidMyCmdSet" id="MyMenuGroup" />
+			<Menu guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenu" priority="0x0200" type="Menu">
+				<Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerContextMenuGroup" />
 				<Strings>
 					<ButtonText>Expose To Data</ButtonText>
 				</Strings>
@@ -93,8 +93,8 @@
         or combo box in a toolbar. -->
 		<Buttons>
 
-			<Button guid="guidMyCmdSet" id="cmdidMyCommand" priority="0x0100" type="Button">
-				<Parent guid="guidMyCmdSet" id="SubMenuGroup" />
+			<Button guid="AutoDataExposerSet_Guid" id="ExposeToDataCommand" priority="0x0100" type="Button">
+				<Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenuGroup" />
 				<CommandFlag>DynamicItemStart</CommandFlag>
 				<CommandFlag>DynamicVisibility</CommandFlag>
 				<CommandFlag>DefaultDisabled</CommandFlag>
@@ -388,12 +388,11 @@
 			<IDSymbol name="FileTemplateCreatorExtensionsMenuGroup" value="0x0007" />
 		</GuidSymbol>
 
-		<GuidSymbol name="guidMyCmdSet" value="{E7B95C06-F8A5-4C4C-BA8D-D727F865CEA6}">
-			<IDSymbol name="SubMenu" value="0x1001"/>
-			<IDSymbol name="SubMenuGroup" value="0x1000"/>
-			<IDSymbol name="MyMenuGroup" value="0x1020" />
-			<IDSymbol name="cmdidMyCommand" value="0x2000" />
-			<IDSymbol name="cmdidDynamicItemStart" value="0x1000"/>
+		<GuidSymbol name="AutoDataExposerSet_Guid" value="{E7B95C06-F8A5-4C4C-BA8D-D727F865CEA6}">
+			<IDSymbol name="AutoDataExposerSubMenu" value="0x1001"/>
+			<IDSymbol name="AutoDataExposerSubMenuGroup" value="0x1000"/>
+			<IDSymbol name="AutoDataExposerContextMenuGroup" value="0x1020" />
+			<IDSymbol name="ExposeToDataCommand" value="0x2000" />
 		</GuidSymbol>
 	</Symbols>
 </CommandTable>
