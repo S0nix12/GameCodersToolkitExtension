@@ -20,12 +20,41 @@ namespace GameCodersToolkit.Configuration
     public class CAutoDataExposerEntry
     {
         public string Name { get; set; }
-        public string Regex { get; set; }
+        public string LineValidityRegex { get; set; }
+        public string TargetFunctionRegex { get; set; }
+
+        // Regex zum erkennen von einer C++ function syntaxc
+        //  Regex zum erkennen des Funtiosnamens
+        // tegex zum erkennen der Funktionsparameter inklusive Type
+        // Regex zum erkennen des Return value types
+        // Setting für default values?
+        // 
+        // Setting ob namen in camel case gepackt werden sollen? 
+        // Setting wie die einzelnen Parameter exposed werden sollen (Tokens? 
+        /*
+         *  {
+                IComponentMemberFunctionPtr pFunction = SCHEMATYC2_MAKE_COMPONENT_MEMBER_FUNCTION_SHARED(CEntityFunctionalityComponent::GetFunctionalityStatus, GET_FUNCTIONALITY_STATUS_FUNCTION_GUID, COMPONENT_GUID);
+                ##PARAMS##
+                envRegistry.RegisterComponentMemberFunction(pGetAbilityStatus);
+            }
+         */
+
+        /*
+
+            "pFunction->BindInput(##PARAMINDEX##, "##PARAMNAME##", "##PARAMNAME_CAMELCASE##", ##DEFAULTVALUE##)";
+         */
+    }
+
+    public class CAutoDataExposerDefaultValue
+    {
+        public string TypeName { get; set; }
+        public string DefaultValue { get; set; }
     }
 
     public class CAutoDataExposerConfig
     {
         public List<CAutoDataExposerEntry> AutoDataExposerEntries { get; set; } = new List<CAutoDataExposerEntry>();
+        public List<CAutoDataExposerDefaultValue> DefaultValues { get; set; }
     }
 
     public class CAutoDataExposerConfiguration
