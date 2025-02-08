@@ -83,7 +83,7 @@ namespace GameCodersToolkit.AutoDataExposerModule
 			return -1; // No matching '}' found
 		}
 
-		List<FunctionArgument> ExtractParameters(string functionSignatureLine, CAutoDataExposerEntry entry)
+		List<FunctionArgument> ExtractParameters(string functionSignatureLine, string currentNamespace, CAutoDataExposerEntry entry)
 		{
 			List<FunctionArgument> parameters = new List<FunctionArgument>();
 			int currentArgumentIndex = 0;
@@ -104,6 +104,12 @@ namespace GameCodersToolkit.AutoDataExposerModule
 				argument.RawType = returnValueType;
 				argument.Type = returnValueType;
 				argument.Index = currentArgumentIndex++;
+
+				if (argument.Type.StartsWith(currentNamespace))
+				{
+					argument.Type = argument.Type.Substring(currentNamespace.Length + 2); //Take :: into account
+				}
+
 				parameters.Add(argument);
 			}
 
@@ -141,6 +147,11 @@ namespace GameCodersToolkit.AutoDataExposerModule
 				argument.Type = argument.RawType.Replace("const", "").Replace("*", "").Replace("&", "").Trim();
 				argument.Index = currentArgumentIndex++;
 
+				if (argument.Type.StartsWith(currentNamespace))
+				{
+					argument.Type = argument.Type.Substring(currentNamespace.Length + 2); //Take :: into account
+				}
+
 				parameters.Add(argument);
 			}
 
@@ -170,7 +181,8 @@ namespace GameCodersToolkit.AutoDataExposerModule
 						SnapshotPoint caretSnapshotPoint = documentView.TextView.Caret.Position.BufferPosition;
 						ITextSnapshotLine caretLineSnapshot = caretSnapshotPoint.GetContainingLine();
 						string currentSelectedLine = caretLineSnapshot.GetText().Trim();
-						var arguments = ExtractParameters(currentSelectedLine, entry);
+						string registerFunctionNamespace = CodeParseUtils.FindNamespaceAtIndex(documentText, endBraceIndex);
+						var arguments = ExtractParameters(currentSelectedLine, registerFunctionNamespace, entry);
 
 						ExposedFunctionInfo info = new ExposedFunctionInfo();
 						info.Arguments = arguments;
@@ -181,13 +193,15 @@ namespace GameCodersToolkit.AutoDataExposerModule
 						exposeString = CodeParseUtils.IndentAllLines(exposeString, indentLevel + 1);
 						exposeString += Environment.NewLine;
 
+						if (indentLevel > 0)
+						{
+							exposeString = exposeString.Substring(1);
+						}
+
 						for (int i = 0; i < indentLevel; i++)
 						{
 							exposeString += '\t';
 						}
-
-						string registerFunctionNamespace = CodeParseUtils.FindNamespaceAtIndex(documentText, endBraceIndex);
-						string exposedFunctionNamespace = CodeParseUtils.FindNamespaceAtIndex(documentText, caretSnapshotPoint.Position);
 
 						edit.Insert(endBraceIndex, exposeString);
 						edit.Apply();
