@@ -78,6 +78,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)QuickAttach\Options\QuickAttachOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAttach\QuickAttachService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SourceControl\PerforceConnection.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\CodeParseUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\DiagnosticUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\SearchEntryUtils.cs" />
   </ItemGroup>

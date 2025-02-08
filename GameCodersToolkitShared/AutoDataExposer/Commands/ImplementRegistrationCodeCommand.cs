@@ -13,211 +13,320 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
 using static System.Net.Mime.MediaTypeNames;
 using System.Reflection;
+using GameCodersToolkitShared.Utils;
 
 namespace GameCodersToolkit.AutoDataExposerModule
 {
-    [Command(PackageGuids.AutoDataExposerSet_GuidString, PackageIds.ExposeToDataCommand)]
-    internal sealed class ImplementRegistrationCodeCommand : BaseCommand<ImplementRegistrationCodeCommand>
-    {
-        const string c_propertyDictionaryIdentifier = "dataExposerEntry";
-        private List<OleMenuCommand> menuCommands = new List<OleMenuCommand>();
+	public class FunctionArgument
+	{
+		public int Index { get; set; }
+		public bool IsOut { get; set; }
+		public string RawType { get; set; }
+		public string Type { get; set; }
+		public string Name { get; set; }
+	}
 
-        protected override void Execute(object sender, EventArgs e)
-        {
-            if (sender is OleMenuCommand command)
-            {
-                CAutoDataExposerEntry entry = command.Properties[c_propertyDictionaryIdentifier] as CAutoDataExposerEntry;
+	public class ExposedFunctionInfo
+	{
+		public string FullyQualifiedFunctionName { get; set; }
+		public string FunctionName { get; set; }
+		public List<FunctionArgument> Arguments { get; set; }
+	}
 
-                string newContent = ThreadHelper.JoinableTaskFactory.Run(() => GenerateExposeCodeAsync(entry));
-            }
-        }
+	[Command(PackageGuids.AutoDataExposerSet_GuidString, PackageIds.ExposeToDataCommand)]
+	internal sealed class ImplementRegistrationCodeCommand : BaseCommand<ImplementRegistrationCodeCommand>
+	{
+		const string c_propertyDictionaryIdentifier = "dataExposerEntry";
+		private List<OleMenuCommand> menuCommands = new List<OleMenuCommand>();
 
-        private int FindMatchingBrace(string text, int startIndex)
-        {
-            // Find the first '{' after or at startIndex
-            int openBraceIndex = text.IndexOf('{', startIndex);
-            if (openBraceIndex == -1)
-            {
-                Console.WriteLine("No '{' found after the given index.");
-                return -1;
-            }
 
-            int depth = 0; // Stack counter for nested braces
+		private CAutoDataExposerConfig Config { get { return GameCodersToolkitPackage.AutoDataExposerConfig.ExposerConfig; } }
 
-            for (int i = openBraceIndex; i < text.Length; i++)
-            {
-                if (text[i] == '{')
-                {
-                    depth++; // Push onto stack
-                }
-                else if (text[i] == '}')
-                {
-                    depth--; // Pop from stack
-                    if (depth == 0)
-                    {
-                        return i; // Found the matching '}'
-                    }
-                }
-            }
+		protected override void Execute(object sender, EventArgs e)
+		{
+			if (sender is OleMenuCommand command)
+			{
+				CAutoDataExposerEntry entry = command.Properties[c_propertyDictionaryIdentifier] as CAutoDataExposerEntry;
 
-            return -1; // No matching '}' found
-        }
+				string newContent = ThreadHelper.JoinableTaskFactory.Run(() => GenerateExposeCodeAsync(entry));
+			}
+		}
 
-        List<(string Type, string Name)> ExtractParameters(string functionSignature)
-        {
-            Match match = Regex.Match(functionSignature, @"\((.*?)\)$");
+		private int FindMatchingBrace(string text, int startIndex)
+		{
+			// Find the first '{' after or at startIndex
+			int openBraceIndex = text.IndexOf('{', startIndex);
+			if (openBraceIndex == -1)
+			{
+				Console.WriteLine("No '{' found after the given index.");
+				return -1;
+			}
 
-            if (!match.Success)
-            {
-                throw new ArgumentException($"Failed to parse function signature: {functionSignature}");
-            }
+			int depth = 0; // Stack counter for nested braces
 
-            string parametersText = match.Groups[1].Value.Trim();
-            List<(string Type, string Name)> parameters = new List<(string, string)>();
+			for (int i = openBraceIndex; i < text.Length; i++)
+			{
+				if (text[i] == '{')
+				{
+					depth++; // Push onto stack
+				}
+				else if (text[i] == '}')
+				{
+					depth--; // Pop from stack
+					if (depth == 0)
+					{
+						return i; // Found the matching '}'
+					}
+				}
+			}
 
-            if (string.IsNullOrEmpty(parametersText))
-            {
-                return parameters;
-            }
+			return -1; // No matching '}' found
+		}
 
-            string[] paramList = parametersText.Split(',');
+		List<FunctionArgument> ExtractParameters(string functionSignatureLine, CAutoDataExposerEntry entry)
+		{
+			List<FunctionArgument> parameters = new List<FunctionArgument>();
+			int currentArgumentIndex = 0;
 
-            foreach (string param in paramList)
-            {
-                string[] parts = param.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+			// Return value
+			Match returnValueRegex = Regex.Match(functionSignatureLine, entry.FunctionReturnValueRegex);
+			if (!returnValueRegex.Success)
+			{
+				throw new ArgumentException($"Failed to parse function return value: {functionSignatureLine}");
+			}
 
-                if (parts.Length < 2)
-                {
-                    throw new ArgumentException($"Invalid parameter format: '{param.Trim()}'");
-                }
+			string returnValueType = returnValueRegex.Groups[1].Value.Trim();
+			if (returnValueType != "void")
+			{
+				FunctionArgument argument = new FunctionArgument();
+				argument.IsOut = true;
+				argument.Name = "Result";
+				argument.RawType = returnValueType;
+				argument.Type = returnValueType;
+				argument.Index = currentArgumentIndex++;
+				parameters.Add(argument);
+			}
 
-                string type = string.Join(" ", parts, 0, parts.Length - 1);
-                string name = parts[parts.Length - 1];
+			// Arguments
+			Match argumentRegex = Regex.Match(functionSignatureLine, entry.FunctionArgumentsRegex);
 
-                parameters.Add((type, name));
-            }
+			if (!argumentRegex.Success)
+			{
+				throw new ArgumentException($"Failed to parse function arguments: {functionSignatureLine}");
+			}
 
-            return parameters;
-        }
+			string parametersText = argumentRegex.Groups[1].Value.Trim();
 
-        static string GetLineAtIndex(string text, int index)
-        {
-            if (string.IsNullOrEmpty(text) || index < 0 || index >= text.Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(index), "Index is out of range.");
-            }
+			if (string.IsNullOrEmpty(parametersText))
+			{
+				return parameters;
+			}
 
-            int lineStart = text.LastIndexOfAny(new[] { '\r', '\n' }, index) + 1; // Start of the line
-            int lineEnd = text.IndexOfAny(new[] { '\r', '\n' }, index); // End of the line
+			string[] paramList = parametersText.Split(',');
 
-            if (lineEnd == -1)
-            {
-                return text.Substring(lineStart); // No newline found, return till end
-            }
+			foreach (string param in paramList)
+			{
+				string[] parts = param.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-            return text.Substring(lineStart, lineEnd - lineStart);
-        }
+				if (parts.Length < 2)
+				{
+					throw new ArgumentException($"Invalid parameter format: '{param.Trim()}'");
+				}
 
-        private async Task<string> GenerateExposeCodeAsync(CAutoDataExposerEntry entry)
-        {
-            try
-            {
-                DocumentView documentView = await VS.Documents.GetActiveDocumentViewAsync();
-                if (documentView == null || documentView.TextView == null)
-                    return "";
+				FunctionArgument argument = new FunctionArgument();
 
-                ITextSnapshot snapshot = documentView.TextView.TextBuffer.CurrentSnapshot;
-                string documentText = snapshot.GetText();
+				argument.Name = parts[parts.Length - 1];
+				argument.RawType = string.Join(" ", parts, 0, parts.Length - 1);
+				argument.IsOut = argument.RawType.Contains("&") && !argument.RawType.Contains("const");
+				argument.Type = argument.RawType.Replace("const", "").Replace("*", "").Replace("&", "").Trim();
+				argument.Index = currentArgumentIndex++;
 
-                Regex regex = new Regex(entry.TargetFunctionRegex, RegexOptions.Multiline);
-                Match match = regex.Match(documentText);
-                if (match.Success)
-                {
-                    int index = FindMatchingBrace(documentText, match.Index);
-                    if (index != -1)
-                    {
-                        string exposedFunctionLine = GetLineAtIndex(documentText, match.Index);
+				parameters.Add(argument);
+			}
 
-                        await VS.MessageBox.ShowAsync(exposedFunctionLine);
-                    }
-                }
+			parameters = parameters.OrderBy(arg => arg.Index).ToList();
+			return parameters;
+		}
 
-                return "";
-            }
-            catch (Exception e)
-            {
-                await VS.MessageBox.ShowAsync(e.Message);
-                return "";
-            }
-        }
+		private async Task<string> GenerateExposeCodeAsync(CAutoDataExposerEntry entry)
+		{
+			try
+			{
+				DocumentView documentView = await VS.Documents.GetActiveDocumentViewAsync();
+				if (documentView == null || documentView.TextView == null)
+					return "";
 
-        protected override void BeforeQueryStatus(EventArgs e)
-        {
-            var entries = GameCodersToolkitPackage.AutoDataExposerConfig.ExposerConfig.AutoDataExposerEntries;
+				ITextSnapshot snapshot = documentView.TextView.TextBuffer.CurrentSnapshot;
+				using ITextEdit edit = documentView.TextView.TextBuffer.CreateEdit();
+				string documentText = snapshot.GetText();
 
-            if (entries.Count == 0)
-            {
-                return;
-            }
+				Regex registrationFunctionRegex = new Regex(entry.TargetFunctionRegex, RegexOptions.Multiline);
+				Match registrationFunctionMatch = registrationFunctionRegex.Match(documentText);
+				if (registrationFunctionMatch.Success)
+				{
+					int endBraceIndex = FindMatchingBrace(documentText, registrationFunctionMatch.Index);
+					if (endBraceIndex != -1)
+					{
+						SnapshotPoint caretSnapshotPoint = documentView.TextView.Caret.Position.BufferPosition;
+						ITextSnapshotLine caretLineSnapshot = caretSnapshotPoint.GetContainingLine();
+						string currentSelectedLine = caretLineSnapshot.GetText().Trim();
+						var arguments = ExtractParameters(currentSelectedLine, entry);
 
-            DetermineVisibility(Command, new EventArgs());
+						ExposedFunctionInfo info = new ExposedFunctionInfo();
+						info.Arguments = arguments;
+						FillFunctionNames(currentSelectedLine, entry, info);
 
-            if (menuCommands.Count > 0)
-            {
-                return;
-            }
+						string exposeString = GetTokenizedString(entry.ExposeString, entry, info);
+						int indentLevel = CodeParseUtils.CountLeadingTabs(documentText, endBraceIndex);
+						exposeString = CodeParseUtils.IndentAllLines(exposeString, indentLevel + 1);
+						exposeString += Environment.NewLine;
 
-            OleMenuCommandService mcs = Package.GetService<IMenuCommandService, OleMenuCommandService>();
+						for (int i = 0; i < indentLevel; i++)
+						{
+							exposeString += '\t';
+						}
 
-            SetupCommand(Command, entries.First());
+						string registerFunctionNamespace = CodeParseUtils.FindNamespaceAtIndex(documentText, endBraceIndex);
+						string exposedFunctionNamespace = CodeParseUtils.FindNamespaceAtIndex(documentText, caretSnapshotPoint.Position);
 
-            for (int i = 1; i < entries.Count; i++)
-            {
-                Configuration.CAutoDataExposerEntry entry = GameCodersToolkitPackage.AutoDataExposerConfig.ExposerConfig.AutoDataExposerEntries[i];
+						edit.Insert(endBraceIndex, exposeString);
+						edit.Apply();
+					}
+				}
 
-                CommandID cmdId = new(PackageGuids.AutoDataExposerSet_Guid, PackageIds.ExposeToDataCommand + i);
+				return "";
+			}
+			catch (Exception e)
+			{
+				await VS.MessageBox.ShowAsync(e.Message);
+				return "";
+			}
+		}
 
-                OleMenuCommand command = new(Execute, null, DetermineVisibility, cmdId);
-                SetupCommand(command, entry);
-                mcs.AddCommand(command);
-            }
-        }
+		private void FillFunctionNames(string functionSignatureLine, CAutoDataExposerEntry entry, ExposedFunctionInfo info)
+		{
+			Match returnValueRegex = Regex.Match(functionSignatureLine, entry.FunctionNameRegex);
+			if (!returnValueRegex.Success)
+			{
+				throw new ArgumentException($"Failed to parse function name: {functionSignatureLine}");
+			}
 
-        private void DetermineVisibility(object sender, EventArgs e)
-        {
-            if (sender is OleMenuCommand command)
-            {
-                CAutoDataExposerEntry entry = command.Properties[c_propertyDictionaryIdentifier] as CAutoDataExposerEntry;
+			info.FullyQualifiedFunctionName = returnValueRegex.Groups[1].Value + returnValueRegex.Groups[2].Value;
+			info.FunctionName = returnValueRegex.Groups[2].Value;
+		}
 
-                command.Enabled = entry != null ? ThreadHelper.JoinableTaskFactory.Run(() => IsLineMatchingRegex(entry.LineValidityRegex)) : false;
-            }
-        }
+		private string GetTokenizedString(string str, CAutoDataExposerEntry entry, ExposedFunctionInfo info)
+		{
+			string authorName = GameCodersToolkitPackage.FileTemplateCreatorConfig.UserConfig.AuthorName;
+			if (string.IsNullOrWhiteSpace(authorName))
+			{
+				authorName = "AuthorName";
+			}
 
-        private void SetupCommand(OleMenuCommand command, CAutoDataExposerEntry entry)
-        {
-            command.Text = entry.Name;
-            command.Visible = true;
-            command.Enabled = true;
-            command.Properties[c_propertyDictionaryIdentifier] = entry;
-            menuCommands.Add(command);
-        }
+			str = str.Replace("##FUNCTIONNAME##", info.FullyQualifiedFunctionName);
+			str = str.Replace("##GUID##", Guid.NewGuid().ToString());
+			str = str.Replace("##AUTHORNAME##", authorName);
+			str = str.Replace("##PARAMS##", GenerateParamString(entry, info));
 
-        private static async Task<bool> IsLineMatchingRegex(string pattern)
-        {
-            if (string.IsNullOrWhiteSpace(pattern))
-            {
-                return true;
-            }
+			return str;
+		}
 
-            DocumentView documentView = await VS.Documents.GetActiveDocumentViewAsync();
-            if (documentView == null || documentView.TextView == null)
-                return false;
+		private string GenerateParamString(CAutoDataExposerEntry entry, ExposedFunctionInfo info)
+		{
+			string result = "";
 
-            SnapshotPoint caretSnapshotPoint = documentView.TextView.Caret.Position.BufferPosition;
-            ITextSnapshotLine caretLineSnapshot = caretSnapshotPoint.GetContainingLine();
+			foreach (var argument in info.Arguments)
+			{
+				string paramLine = argument.IsOut ? entry.OutParamLine : entry.InParamLine;
 
-            string line = caretLineSnapshot.GetText().Trim();
-            return Regex.IsMatch(line, pattern);
-        }
-    }
+				paramLine = paramLine.Replace("##PARAMINDEX##", argument.Index.ToString());
+				paramLine = paramLine.Replace("##PARAMNAME##", argument.Name.FirstLetterToUpper());
+				paramLine = paramLine.Replace("##RAWPARAMNAME##", argument.Name);
+				paramLine = paramLine.Replace("##PARAMDEFAULTVALUE##", GetParamDefaultValue(entry, argument));
+				result += paramLine + Environment.NewLine;
+			}
+
+			return result;
+		}
+
+		private string GetParamDefaultValue(CAutoDataExposerEntry entry, FunctionArgument arg)
+		{
+			var defaultValue = GameCodersToolkitPackage.AutoDataExposerConfig.ExposerConfig.DefaultValues?.Where(val => val.TypeName == arg.Type).FirstOrDefault();
+			if (defaultValue != null)
+			{
+				return defaultValue.DefaultValue;
+			}
+
+			return entry.DefaultValueFormat.Replace("##TYPE##", arg.Type);
+		}
+
+		protected override void BeforeQueryStatus(EventArgs e)
+		{
+			var entries = GameCodersToolkitPackage.AutoDataExposerConfig.ExposerConfig.AutoDataExposerEntries;
+
+			if (entries.Count == 0)
+			{
+				return;
+			}
+
+			DetermineVisibility(Command, new EventArgs());
+
+			if (menuCommands.Count > 0)
+			{
+				return;
+			}
+
+			OleMenuCommandService mcs = Package.GetService<IMenuCommandService, OleMenuCommandService>();
+
+			SetupCommand(Command, entries.First());
+
+			for (int i = 1; i < entries.Count; i++)
+			{
+				Configuration.CAutoDataExposerEntry entry = GameCodersToolkitPackage.AutoDataExposerConfig.ExposerConfig.AutoDataExposerEntries[i];
+
+				CommandID cmdId = new(PackageGuids.AutoDataExposerSet_Guid, PackageIds.ExposeToDataCommand + i);
+
+				OleMenuCommand command = new(Execute, null, DetermineVisibility, cmdId);
+				SetupCommand(command, entry);
+				mcs.AddCommand(command);
+			}
+		}
+
+		private void DetermineVisibility(object sender, EventArgs e)
+		{
+			if (sender is OleMenuCommand command)
+			{
+				CAutoDataExposerEntry entry = command.Properties[c_propertyDictionaryIdentifier] as CAutoDataExposerEntry;
+
+				command.Enabled = entry != null ? ThreadHelper.JoinableTaskFactory.Run(() => IsLineMatchingRegex(entry.LineValidityRegex)) : false;
+			}
+		}
+
+		private void SetupCommand(OleMenuCommand command, CAutoDataExposerEntry entry)
+		{
+			command.Text = entry.Name;
+			command.Visible = true;
+			command.Enabled = true;
+			command.Properties[c_propertyDictionaryIdentifier] = entry;
+			menuCommands.Add(command);
+		}
+
+		private static async Task<bool> IsLineMatchingRegex(string pattern)
+		{
+			if (string.IsNullOrWhiteSpace(pattern))
+			{
+				return true;
+			}
+
+			DocumentView documentView = await VS.Documents.GetActiveDocumentViewAsync();
+			if (documentView == null || documentView.TextView == null)
+				return false;
+
+			SnapshotPoint caretSnapshotPoint = documentView.TextView.Caret.Position.BufferPosition;
+			ITextSnapshotLine caretLineSnapshot = caretSnapshotPoint.GetContainingLine();
+
+			string line = caretLineSnapshot.GetText().Trim();
+			return Regex.IsMatch(line, pattern);
+		}
+	}
 }
