@@ -40,15 +40,19 @@ namespace GameCodersToolkit.AutoDataExposerModule
 		private List<OleMenuCommand> menuCommands = new List<OleMenuCommand>();
 
 
-		private CAutoDataExposerConfig Config { get { return GameCodersToolkitPackage.AutoDataExposerConfig.ExposerConfig; } }
+		private CAutoDataExposerConfiguration Config { get { return GameCodersToolkitPackage.AutoDataExposerConfig; } }
 
 		protected override void Execute(object sender, EventArgs e)
 		{
 			if (sender is OleMenuCommand command)
 			{
-				CAutoDataExposerEntry entry = command.Properties[c_propertyDictionaryIdentifier] as CAutoDataExposerEntry;
+				string entryName = command.Properties[c_propertyDictionaryIdentifier] as string;
 
-				string newContent = ThreadHelper.JoinableTaskFactory.Run(() => GenerateExposeCodeAsync(entry));
+				CAutoDataExposerEntry entry = Config.FindExposerEntryByName(entryName);
+				if (entry != null)
+				{
+					ThreadHelper.JoinableTaskFactory.Run(() => GenerateExposeCodeAsync(entry));
+				}
 			}
 		}
 
@@ -159,13 +163,13 @@ namespace GameCodersToolkit.AutoDataExposerModule
 			return parameters;
 		}
 
-		private async Task<string> GenerateExposeCodeAsync(CAutoDataExposerEntry entry)
+		private async Task<bool> GenerateExposeCodeAsync(CAutoDataExposerEntry entry)
 		{
 			try
 			{
 				DocumentView documentView = await VS.Documents.GetActiveDocumentViewAsync();
 				if (documentView == null || documentView.TextView == null)
-					return "";
+					return false;
 
 				ITextSnapshot snapshot = documentView.TextView.TextBuffer.CurrentSnapshot;
 				using ITextEdit edit = documentView.TextView.TextBuffer.CreateEdit();
@@ -205,15 +209,17 @@ namespace GameCodersToolkit.AutoDataExposerModule
 
 						edit.Insert(endBraceIndex, exposeString);
 						edit.Apply();
+				
+						return true;
 					}
 				}
 
-				return "";
+				return false;
 			}
 			catch (Exception e)
 			{
 				await VS.MessageBox.ShowAsync(e.Message);
-				return "";
+				return false;
 			}
 		}
 
@@ -310,9 +316,17 @@ namespace GameCodersToolkit.AutoDataExposerModule
 		{
 			if (sender is OleMenuCommand command)
 			{
-				CAutoDataExposerEntry entry = command.Properties[c_propertyDictionaryIdentifier] as CAutoDataExposerEntry;
+				string entryName = command.Properties[c_propertyDictionaryIdentifier] as string;
 
-				command.Enabled = entry != null ? ThreadHelper.JoinableTaskFactory.Run(() => IsLineMatchingRegex(entry.LineValidityRegex)) : false;
+				CAutoDataExposerEntry entry = Config.FindExposerEntryByName(entryName);
+				if (entry != null)
+				{
+					command.Enabled = entry != null ? ThreadHelper.JoinableTaskFactory.Run(() => IsLineMatchingRegex(entry.LineValidityRegex)) : false;
+				}
+				else
+				{
+					command.Enabled = false;
+				}
 			}
 		}
 
@@ -321,7 +335,7 @@ namespace GameCodersToolkit.AutoDataExposerModule
 			command.Text = entry.Name;
 			command.Visible = true;
 			command.Enabled = true;
-			command.Properties[c_propertyDictionaryIdentifier] = entry;
+			command.Properties[c_propertyDictionaryIdentifier] = entry.Name;
 			menuCommands.Add(command);
 		}
 
