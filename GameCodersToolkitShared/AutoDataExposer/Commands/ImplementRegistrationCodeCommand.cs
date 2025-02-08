@@ -199,7 +199,7 @@ namespace GameCodersToolkit.AutoDataExposerModule
 
 						if (indentLevel > 0)
 						{
-							exposeString = exposeString.Substring(1);
+							exposeString = exposeString.Substring(indentLevel);
 						}
 
 						for (int i = 0; i < indentLevel; i++)

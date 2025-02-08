@@ -39,7 +39,7 @@
 				<Parent guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplateExtensionsMenu"/>
 			</Group>
 
-			<Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerContextMenuGroup" priority="0x0600">
+			<Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerContextMenuGroup" priority="0x0100">
 				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
 			</Group>
 
@@ -53,7 +53,7 @@
 			<Menu guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenu" priority="0x0200" type="Menu">
 				<Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerContextMenuGroup" />
 				<Strings>
-					<ButtonText>Expose To Data</ButtonText>
+					<ButtonText>Expose Function As</ButtonText>
 				</Strings>
 			</Menu>
 
