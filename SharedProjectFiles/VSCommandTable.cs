@@ -77,5 +77,8 @@ namespace GameCodersToolkit
         public const int AutoDataExposerSubMenuGroup = 0x1000;
         public const int AutoDataExposerContextMenuGroup = 0x1020;
         public const int ExposeToDataCommand = 0x2000;
+        public const int AutoDataExposerExtensionsMenuGroup = 0x0007;
+        public const int OpenAutoDataExposerCreatorConfigExtensionsMenu = 0x0030;
+        public const int OpenAutoDataExposerConfig = 0x0040;
     }
 }

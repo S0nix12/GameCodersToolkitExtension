@@ -1,18 +1,10 @@
 using GameCodersToolkit.Configuration;
-using GameCodersToolkit.Utils;
-using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TextManager.Interop;
-using Microsoft.VisualStudio;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.Shell;
-using static System.Net.Mime.MediaTypeNames;
-using System.Reflection;
 using GameCodersToolkitShared.Utils;
 
 namespace GameCodersToolkit.AutoDataExposerModule
@@ -37,6 +29,8 @@ namespace GameCodersToolkit.AutoDataExposerModule
 	internal sealed class ImplementRegistrationCodeCommand : BaseCommand<ImplementRegistrationCodeCommand>
 	{
 		const string c_propertyDictionaryIdentifier = "dataExposerEntry";
+
+		private bool SubscribedToDataExposer { get; set; }
 		private List<OleMenuCommand> menuCommands = new List<OleMenuCommand>();
 
 
@@ -207,13 +201,18 @@ namespace GameCodersToolkit.AutoDataExposerModule
 							exposeString += '\t';
 						}
 
+						if (Config.ExposerUserConfig.JumpToGeneratedCode)
+						{
+							documentView.TextView.Caret.MoveTo(new SnapshotPoint(snapshot, endBraceIndex));
+							documentView.TextView.ViewScroller.EnsureSpanVisible(new SnapshotSpan(snapshot, endBraceIndex, 1));
+						}
+
 						edit.Insert(endBraceIndex, exposeString);
 						edit.Apply();
-				
+
 						return true;
 					}
 				}
-
 				return false;
 			}
 			catch (Exception e)
@@ -280,12 +279,34 @@ namespace GameCodersToolkit.AutoDataExposerModule
 			return entry.DefaultValueFormat.Replace("##TYPE##", arg.Type);
 		}
 
+		private void OnAutoDataExposerConfigLoaded(object sender, EventArgs args)
+		{
+			OleMenuCommandService mcs = Package.GetService<IMenuCommandService, OleMenuCommandService>();
+			foreach (var menuCommand in menuCommands)
+			{
+				mcs.RemoveCommand(menuCommand);
+			}
+
+			Command.Enabled = false;
+			Command.Text = "No config loaded";
+
+			menuCommands.Clear();
+		}
+
 		protected override void BeforeQueryStatus(EventArgs e)
 		{
-			var entries = GameCodersToolkitPackage.AutoDataExposerConfig.ExposerConfig.AutoDataExposerEntries;
+			if (!SubscribedToDataExposer)
+			{
+				Config.OnPreConfigLoad += OnAutoDataExposerConfigLoaded;
+				SubscribedToDataExposer = true;
+			}
+
+			var entries = Config.ExposerConfig.AutoDataExposerEntries;
 
 			if (entries.Count == 0)
 			{
+				Command.Enabled = false;
+				Command.Text = "No config loaded";
 				return;
 			}
 
@@ -336,7 +357,9 @@ namespace GameCodersToolkit.AutoDataExposerModule
 			command.Visible = true;
 			command.Enabled = true;
 			command.Properties[c_propertyDictionaryIdentifier] = entry.Name;
-			menuCommands.Add(command);
+
+			if (command != Command)
+				menuCommands.Add(command);
 		}
 
 		private static async Task<bool> IsLineMatchingRegex(string pattern)

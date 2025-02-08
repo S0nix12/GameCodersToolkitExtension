@@ -10,7 +10,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)autodataexposer\commands\ImplementRegistrationCodeCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AutoDataExposer\Commands\OpenAutoDataExposerConfigurationCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)autodataexposer\configuration\AutoDataExposerConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AutoDataExposer\TemplateSelector\VariableEditorTemplateSelector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AutoDataExposer\ViewModels\AutoDataExposerConfigurationViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)AutoDataExposer\Windows\AutoDataExposerConfigurationWindow.xaml.cs">
+      <DependentUpon>AutoDataExposerConfigurationWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLens\CodeLensCustomDataView.xaml.cs">
       <DependentUpon>CodeLensCustomDataView.xaml</DependentUpon>
     </Compile>
@@ -83,6 +89,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utils\SearchEntryUtils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)AutoDataExposer\Windows\AutoDataExposerConfigurationWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLens\CodeLensCustomDataView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -113,7 +123,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)AutoDataExposer\Commands\" />
     <Folder Include="$(MSBuildThisFileDirectory)AutoDataExposer\Configuration\" />
   </ItemGroup>
 </Project>

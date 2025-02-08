@@ -1,398 +1,418 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-	<Extern href="stdidcmd.h"/>
-	<Extern href="vsshlids.h"/>
-	<Include href="KnownImageIds.vsct"/>
-	<Include href="VSGlobals.vsct"/>
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+  <Include href="KnownImageIds.vsct"/>
+  <Include href="VSGlobals.vsct"/>
 
-	<Commands package="GameCodersToolkitPackage_Guid">
-		<Groups>
-			<Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup0" priority="0x0200">
-				<Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu"/>
-			</Group>
-			<Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup1" priority="0x0300">
-				<Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu"/>
-			</Group>
-			<Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup2" priority="0x0400">
-				<Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu"/>
-			</Group>
-			<Group guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup0" priority="0x0000">
-				<Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar"/>
-			</Group>
-			<Group guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup1" priority="0x0001">
-				<Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar"/>
-			</Group>
-			<Group guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup2" priority="0x0002">
-				<Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar"/>
-			</Group>
-			<Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesMenuGroupAll" priority="0x0001">
-				<Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesEditMenu"/>
-			</Group>
-			<Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesMenuGroupSpecific" priority="0x0002">
-				<Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesEditMenu"/>
-			</Group>
-			<Group guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbarGroup" priority="0x0000">
-				<Parent guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbar"/>
-			</Group>
-			<Group guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup" priority="0x0400">
-				<Parent guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplateExtensionsMenu"/>
-			</Group>
+  <Commands package="GameCodersToolkitPackage_Guid">
+    <Groups>
+      <Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup0" priority="0x0200">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu"/>
+      </Group>
+      <Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup1" priority="0x0300">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu"/>
+      </Group>
+      <Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup2" priority="0x0400">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu"/>
+      </Group>
+      <Group guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup0" priority="0x0000">
+        <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar"/>
+      </Group>
+      <Group guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup1" priority="0x0001">
+        <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar"/>
+      </Group>
+      <Group guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup2" priority="0x0002">
+        <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar"/>
+      </Group>
+      <Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesMenuGroupAll" priority="0x0001">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesEditMenu"/>
+      </Group>
+      <Group guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesMenuGroupSpecific" priority="0x0002">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesEditMenu"/>
+      </Group>
+      <Group guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbarGroup" priority="0x0000">
+        <Parent guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbar"/>
+      </Group>
+      <Group guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup" priority="0x0400">
+        <Parent guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplateExtensionsMenu"/>
+      </Group>
 
-			<Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerContextMenuGroup" priority="0x0100">
-				<Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
-			</Group>
+      <Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerExtensionsMenuGroup" priority="0x0500">
+        <Parent guid="AutoDataExposerSet_Guid" id="OpenAutoDataExposerCreatorConfigExtensionsMenu"/>
+      </Group>
+      <Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerContextMenuGroup" priority="0x0100">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+      </Group>
+      <Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenuGroup" priority="0x0602">
+        <Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenu" />
+      </Group>
+    </Groups>
 
-			<Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenuGroup" priority="0x0602">
-				<Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenu" />
-			</Group>
-		</Groups>
+    <Menus>
+      <Menu guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar" type="ToolWindowToolbar">
+        <CommandFlag>DefaultDocked</CommandFlag>
+        <Strings>
+          <ButtonText>WindowToolbar</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesEditMenu" type="Menu" priority="0x0200">
+        <Parent guid="VSMainMenu" id="Edit.GoToGroup"/>
+        <Strings>
+          <ButtonText>Data Reference Finder</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu" type="Menu" priority="0x0900">
+        <Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
+        <Strings>
+          <ButtonText>Data Reference Finder</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbar" type="Toolbar">
+        <CommandFlag>DefaultDocked</CommandFlag>
+        <Strings>
+          <ButtonText>Quick Attach</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplateExtensionsMenu" type="Menu" priority="0x0900">
+        <Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
+        <Strings>
+          <ButtonText>File Template Creator</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="AutoDataExposerSet_Guid" id="OpenAutoDataExposerCreatorConfigExtensionsMenu" priority="0x1000" type="Menu">
+        <Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
+        <Strings>
+          <ButtonText>Auto Data Exposer</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenu" priority="0x0200" type="Menu">
+        <Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerContextMenuGroup" />
+        <Strings>
+          <ButtonText>Expose Function As</ButtonText>
+        </Strings>
+      </Menu>
+    </Menus>
 
-		<Menus>
-
-			<Menu guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenu" priority="0x0200" type="Menu">
-				<Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerContextMenuGroup" />
-				<Strings>
-					<ButtonText>Expose Function As</ButtonText>
-				</Strings>
-			</Menu>
-
-			<Menu guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbar" type="ToolWindowToolbar">
-				<CommandFlag>DefaultDocked</CommandFlag>
-				<Strings>
-					<ButtonText>WindowToolbar</ButtonText>
-				</Strings>
-			</Menu>
-			<Menu guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesEditMenu" type="Menu" priority="0x0200">
-				<Parent guid="VSMainMenu" id="Edit.GoToGroup"/>
-				<Strings>
-					<ButtonText>Data Reference Finder</ButtonText>
-				</Strings>
-			</Menu>
-			<Menu guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenu" type="Menu" priority="0x0900">
-				<Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
-				<Strings>
-					<ButtonText>Data Reference Finder</ButtonText>
-				</Strings>
-			</Menu>
-			<Menu guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbar" type="Toolbar">
-				<CommandFlag>DefaultDocked</CommandFlag>
-				<Strings>
-					<ButtonText>Quick Attach</ButtonText>
-				</Strings>
-			</Menu>
-			<Menu guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplateExtensionsMenu" type="Menu" priority="0x0900">
-				<Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
-				<Strings>
-					<ButtonText>File Template Creator</ButtonText>
-				</Strings>
-			</Menu>
-		</Menus>
-
-		<!--This section defines the elements the user can interact with, like a menu command or a button
+    <!--This section defines the elements the user can interact with, like a menu command or a button
         or combo box in a toolbar. -->
-		<Buttons>
+    <Buttons>
 
-			<Button guid="AutoDataExposerSet_Guid" id="ExposeToDataCommand" priority="0x0100" type="Button">
-				<Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenuGroup" />
-				<CommandFlag>DynamicItemStart</CommandFlag>
-				<CommandFlag>DynamicVisibility</CommandFlag>
-				<CommandFlag>DefaultDisabled</CommandFlag>
-				<Strings>
-					<ButtonText>No config loaded</ButtonText>
-				</Strings>
-			</Button>
+      <Button guid="AutoDataExposerSet_Guid" id="ExposeToDataCommand" priority="0x0100" type="Button">
+        <Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenuGroup" />
+        <CommandFlag>DynamicItemStart</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultDisabled</CommandFlag>
+        <Strings>
+          <ButtonText>No config loaded</ButtonText>
+        </Strings>
+      </Button>
 
-			<Button guid="DataReferenceFinderCommandSet_Guid" id="OpenReferenceResults" priority="0x0100" type="Button">
-				<Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup0"/>
-				<Icon guid="ImageCatalogGuid" id="DocumentOutline"/>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-					<ButtonText>Data Reference Results</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.OpenReferenceResults</LocCanonicalName>
-				</Strings>
-			</Button>
-			<Button guid="DataReferenceFinderCommandSet_Guid" id="OpenDataExplorer" priority="0x0200" type="Button">
-				<Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup0"/>
-				<Icon guid="ImageCatalogGuid" id="DatabaseApplication"/>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-					<ButtonText>Data Explorer</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.OpenDataExplorer</LocCanonicalName>
-				</Strings>
-			</Button>
-			<Button guid="DataReferenceFinderCommandSet_Guid" id="ParseAllDataLocation" priority="0x0100" type="Button">
-				<Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup1"/>
-				<Icon guid="ImageCatalogGuid" id="DatabaseFile"/>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-					<ButtonText>Parse All Data Locations</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.ParseAllLocations</LocCanonicalName>
-				</Strings>
-			</Button>
-			<Button guid="DataReferenceFinderCommandSet_Guid" id="ClearReferenceDatabase" priority="0x0200" type="Button">
-				<Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup1"/>
-				<Icon guid="ImageCatalogGuid" id="DeleteDatabase"/>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-					<ButtonText>Clear Reference Database</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.ClearReferenceDatabase</LocCanonicalName>
-				</Strings>
-			</Button>
-			<Button guid="DataReferenceFinderCommandSet_Guid" id="OpenConfigFile" priority="0x0100" type="Button">
-				<Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup2"/>
-				<Icon guid="ImageCatalogGuid" id="ConfigurationFile"/>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-					<ButtonText>Open Config File</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.OpenConfig</LocCanonicalName>
-				</Strings>
-			</Button>
-			<!-- Find Data References Buttons-->
-			<Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferencesInDatabase" priority="0x0100" type="Button">
-				<Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesMenuGroupAll" />
-				<Icon guid="ImageCatalogGuid" id="FindDown" />
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<CommandFlag>TextChanges</CommandFlag>
-				<CommandFlag>DynamicVisibility</CommandFlag>
-				<CommandFlag>DontCache</CommandFlag>
-				<Strings>
-					<ButtonText>Find GUID References In Database</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.FindGuidReferencesInDatabase</LocCanonicalName>
-				</Strings>
-			</Button>
-			<Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_AllLocations" priority="0x0100" type="Button">
-				<Icon guid="ImageCatalogGuid" id="QuickFind" />
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<CommandFlag>DontCache</CommandFlag>
-				<Strings>
-					<ButtonText>Find GUID References | All Locations</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.FindGuidReferences_AllLocations</LocCanonicalName>
-				</Strings>
-			</Button>
-			<Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_Location1" priority="0x0100" type="Button">
-				<Icon guid="ImageCatalogGuid" id="FindDown" />
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<CommandFlag>TextChanges</CommandFlag>
-				<CommandFlag>DynamicVisibility</CommandFlag>
-				<CommandFlag>DontCache</CommandFlag>
-				<Strings>
-					<ButtonText>Find GUID References | Location 1</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.FindGuidReferences_Location1</LocCanonicalName>
-				</Strings>
-			</Button>
-			<Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_Location2" priority="0x0200" type="Button">
-				<Icon guid="ImageCatalogGuid" id="FindDown" />
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<CommandFlag>TextChanges</CommandFlag>
-				<CommandFlag>DynamicVisibility</CommandFlag>
-				<CommandFlag>DontCache</CommandFlag>
-				<Strings>
-					<ButtonText>Find GUID References | Location 2</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.FindGuidReferences_Location2</LocCanonicalName>
-				</Strings>
-			</Button>
-			<Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_Location3" priority="0x0300" type="Button">
-				<Icon guid="ImageCatalogGuid" id="FindDown" />
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<CommandFlag>TextChanges</CommandFlag>
-				<CommandFlag>DynamicVisibility</CommandFlag>
-				<CommandFlag>DontCache</CommandFlag>
-				<Strings>
-					<ButtonText>Find GUID References | Location 3</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.FindGuidReferences_Location3</LocCanonicalName>
-				</Strings>
-			</Button>
-			<Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_Location4" priority="0x0400" type="Button">
-				<Icon guid="ImageCatalogGuid" id="FindDown" />
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<CommandFlag>TextChanges</CommandFlag>
-				<CommandFlag>DynamicVisibility</CommandFlag>
-				<CommandFlag>DontCache</CommandFlag>
-				<Strings>
-					<ButtonText>Find GUID References | Location 4</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.FindGuidReferences_Location4</LocCanonicalName>
-				</Strings>
-			</Button>
-			<Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_Location5" priority="0x0500" type="Button">
-				<Icon guid="ImageCatalogGuid" id="FindDown" />
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<CommandFlag>TextChanges</CommandFlag>
-				<CommandFlag>DynamicVisibility</CommandFlag>
-				<CommandFlag>DontCache</CommandFlag>
-				<Strings>
-					<ButtonText>Find GUID References | Location 5</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.FindGuidReferences_Location5</LocCanonicalName>
-				</Strings>
-			</Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="OpenReferenceResults" priority="0x0100" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup0"/>
+        <Icon guid="ImageCatalogGuid" id="DocumentOutline"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Data Reference Results</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.OpenReferenceResults</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="OpenDataExplorer" priority="0x0200" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup0"/>
+        <Icon guid="ImageCatalogGuid" id="DatabaseApplication"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Data Explorer</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.OpenDataExplorer</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="ParseAllDataLocation" priority="0x0100" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup1"/>
+        <Icon guid="ImageCatalogGuid" id="DatabaseFile"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Parse All Data Locations</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.ParseAllLocations</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="ClearReferenceDatabase" priority="0x0200" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup1"/>
+        <Icon guid="ImageCatalogGuid" id="DeleteDatabase"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Clear Reference Database</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.ClearReferenceDatabase</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="OpenConfigFile" priority="0x0100" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesExtensionsMenuGroup2"/>
+        <Icon guid="ImageCatalogGuid" id="ConfigurationFile"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Open Config File</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.OpenConfig</LocCanonicalName>
+        </Strings>
+      </Button>
+      <!-- Find Data References Buttons-->
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferencesInDatabase" priority="0x0100" type="Button">
+        <Parent guid="DataReferenceFinderCommandSet_Guid" id="FindDataReferencesMenuGroupAll" />
+        <Icon guid="ImageCatalogGuid" id="FindDown" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DontCache</CommandFlag>
+        <Strings>
+          <ButtonText>Find GUID References In Database</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.FindGuidReferencesInDatabase</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_AllLocations" priority="0x0100" type="Button">
+        <Icon guid="ImageCatalogGuid" id="QuickFind" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>DontCache</CommandFlag>
+        <Strings>
+          <ButtonText>Find GUID References | All Locations</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.FindGuidReferences_AllLocations</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_Location1" priority="0x0100" type="Button">
+        <Icon guid="ImageCatalogGuid" id="FindDown" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DontCache</CommandFlag>
+        <Strings>
+          <ButtonText>Find GUID References | Location 1</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.FindGuidReferences_Location1</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_Location2" priority="0x0200" type="Button">
+        <Icon guid="ImageCatalogGuid" id="FindDown" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DontCache</CommandFlag>
+        <Strings>
+          <ButtonText>Find GUID References | Location 2</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.FindGuidReferences_Location2</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_Location3" priority="0x0300" type="Button">
+        <Icon guid="ImageCatalogGuid" id="FindDown" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DontCache</CommandFlag>
+        <Strings>
+          <ButtonText>Find GUID References | Location 3</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.FindGuidReferences_Location3</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_Location4" priority="0x0400" type="Button">
+        <Icon guid="ImageCatalogGuid" id="FindDown" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DontCache</CommandFlag>
+        <Strings>
+          <ButtonText>Find GUID References | Location 4</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.FindGuidReferences_Location4</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="DataReferenceFinderCommandSet_Guid" id="FindGuidReferences_Location5" priority="0x0500" type="Button">
+        <Icon guid="ImageCatalogGuid" id="FindDown" />
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DontCache</CommandFlag>
+        <Strings>
+          <ButtonText>Find GUID References | Location 5</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.FindGuidReferences_Location5</LocCanonicalName>
+        </Strings>
+      </Button>
 
-			<!-- Reference Results Window Toolbar Buttons-->
-			<Button guid="ReferenceResultsToolbarCommandSet_Guid" id="ClearAllResults">
-				<Icon guid="ImageCatalogGuid" id="ClearWindowContent"/>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-					<ButtonText>Clear All</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.ReferenceResults.ClearAll</LocCanonicalName>
-				</Strings>
-			</Button>
-			<Button guid="ReferenceResultsToolbarCommandSet_Guid" id="CollapseAllResults">
-				<Icon guid="ImageCatalogGuid" id="CollapseAll"/>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-					<ButtonText>Collapse All</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.ReferenceResults.CollapseAll</LocCanonicalName>
-				</Strings>
-			</Button>
-			<Button guid="ReferenceResultsToolbarCommandSet_Guid" id="ExpandAllResults">
-				<Icon guid="ImageCatalogGuid" id="ExpandAll"/>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-					<ButtonText>Collapse All</ButtonText>
-					<LocCanonicalName>.DataReferenceFinder.ReferenceResults.ExpandAll</LocCanonicalName>
-				</Strings>
-			</Button>
+      <!-- Reference Results Window Toolbar Buttons-->
+      <Button guid="ReferenceResultsToolbarCommandSet_Guid" id="ClearAllResults">
+        <Icon guid="ImageCatalogGuid" id="ClearWindowContent"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Clear All</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.ReferenceResults.ClearAll</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="ReferenceResultsToolbarCommandSet_Guid" id="CollapseAllResults">
+        <Icon guid="ImageCatalogGuid" id="CollapseAll"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Collapse All</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.ReferenceResults.CollapseAll</LocCanonicalName>
+        </Strings>
+      </Button>
+      <Button guid="ReferenceResultsToolbarCommandSet_Guid" id="ExpandAllResults">
+        <Icon guid="ImageCatalogGuid" id="ExpandAll"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Collapse All</ButtonText>
+          <LocCanonicalName>.DataReferenceFinder.ReferenceResults.ExpandAll</LocCanonicalName>
+        </Strings>
+      </Button>
 
-			<!-- Quick Attach Toolbar-->
-			<Button guid="QuickAttachCommandSet_Guid" id="QuickAttachCommand" priority="0x0000">
-				<Parent guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbarGroup"/>
-				<Icon guid="ImageCatalogGuid" id="RunFilter"/>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-					<ButtonText>Quick Attach</ButtonText>
-					<LocCanonicalName>.GameCodersToolkit.QuickAttach</LocCanonicalName>
-				</Strings>
-			</Button>
+      <!-- Quick Attach Toolbar-->
+      <Button guid="QuickAttachCommandSet_Guid" id="QuickAttachCommand" priority="0x0000">
+        <Parent guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbarGroup"/>
+        <Icon guid="ImageCatalogGuid" id="RunFilter"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Quick Attach</ButtonText>
+          <LocCanonicalName>.GameCodersToolkit.QuickAttach</LocCanonicalName>
+        </Strings>
+      </Button>
 
-			<!-- File Template Creator -->
-			<Button guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplate" priority="0x0100" type="Button">
-				<Parent guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup"/>
-				<Icon guid="ImageCatalogGuid" id="AddDocument"/>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-					<ButtonText>Create File From Template</ButtonText>
-					<LocCanonicalName>.FileTemplateCreator.CreateFileFromTemplate</LocCanonicalName>
-				</Strings>
-			</Button>
+      <!-- File Template Creator -->
+      <Button guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplate" priority="0x0100" type="Button">
+        <Parent guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="AddDocument"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Create File From Template</ButtonText>
+          <LocCanonicalName>.FileTemplateCreator.CreateFileFromTemplate</LocCanonicalName>
+        </Strings>
+      </Button>
 
-			<Button guid="FileTemplateCreatorSet_Guid" id="OpenTemplateFileCreatorConfig" priority="0x0200" type="Button">
-				<Parent guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup"/>
-				<Icon guid="ImageCatalogGuid" id="ConfigurationEditor"/>
-				<CommandFlag>IconIsMoniker</CommandFlag>
-				<Strings>
-					<ButtonText>Open Config</ButtonText>
-					<LocCanonicalName>.FileTemplateCreator.OpenTemplateFileCreatorConfig</LocCanonicalName>
-				</Strings>
-			</Button>
-		</Buttons>
+      <Button guid="FileTemplateCreatorSet_Guid" id="OpenTemplateFileCreatorConfig" priority="0x0200" type="Button">
+        <Parent guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="ConfigurationEditor"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Open Config</ButtonText>
+          <LocCanonicalName>.FileTemplateCreator.OpenTemplateFileCreatorConfig</LocCanonicalName>
+        </Strings>
+      </Button>
 
-		<Combos>
-			<!-- Reference Results Window-->
-			<Combo guid="ReferenceResultsToolbarCommandSet_Guid" id="FilterResults" type="MRUCombo" defaultWidth="150" idCommandList="0">
-				<CommandFlag>IconAndText</CommandFlag>
-				<Strings>
-					<ButtonText>Filter: </ButtonText>
-					<ToolTipText>Filter search results</ToolTipText>
-					<LocCanonicalName>.DataReferenceFinder.ReferenceResults.Filter</LocCanonicalName>
-				</Strings>
-			</Combo>
+      <!-- Auto Data Exposer -->
+      <Button guid="AutoDataExposerSet_Guid" id="OpenAutoDataExposerConfig" priority="0x0200" type="Button">
+        <Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="ConfigurationEditor"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Open Config</ButtonText>
+          <LocCanonicalName>.AutoDataExposer.OpenAutoDataExposerConfig</LocCanonicalName>
+        </Strings>
+      </Button>
+    </Buttons>
 
-			<!-- Quick Attach Toolbar-->
-			<Combo guid="QuickAttachCommandSet_Guid" id="QuickAttachSelector" type="IndexCombo" defaultWidth="300" idCommandList="QuickAttachSelectorListCmd">
-				<CommandFlag>IconAndText</CommandFlag>
-				<Strings>
-					<ButtonText>Quick Attach:</ButtonText>
-					<ToolTipText>Select Target to Quick Attach</ToolTipText>
-					<LocCanonicalName>.GameCodersToolkit.QuickAttachSelector</LocCanonicalName>
-				</Strings>
-			</Combo>
-		</Combos>
-	</Commands>
+    <Combos>
+      <!-- Reference Results Window-->
+      <Combo guid="ReferenceResultsToolbarCommandSet_Guid" id="FilterResults" type="MRUCombo" defaultWidth="150" idCommandList="0">
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+          <ButtonText>Filter: </ButtonText>
+          <ToolTipText>Filter search results</ToolTipText>
+          <LocCanonicalName>.DataReferenceFinder.ReferenceResults.Filter</LocCanonicalName>
+        </Strings>
+      </Combo>
 
-	<CommandPlacements>
-		<!-- Data Reference Search-->
-		<CommandPlacement guid ="DataReferenceFinderCommandSet_Guid" id="FindGuidReferencesInDatabase" priority="0x0001">
-			<Parent guid="guidSHLMainMenu" id="IDG_VS_CODEWIN_NAVIGATETOLOCATION"/>
-		</CommandPlacement>
+      <!-- Quick Attach Toolbar-->
+      <Combo guid="QuickAttachCommandSet_Guid" id="QuickAttachSelector" type="IndexCombo" defaultWidth="300" idCommandList="QuickAttachSelectorListCmd">
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+          <ButtonText>Quick Attach:</ButtonText>
+          <ToolTipText>Select Target to Quick Attach</ToolTipText>
+          <LocCanonicalName>.GameCodersToolkit.QuickAttachSelector</LocCanonicalName>
+        </Strings>
+      </Combo>
+    </Combos>
+  </Commands>
 
-		<!-- Reference Results Window-->
-		<CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="FilterResults" priority="0x0001">
-			<Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup0"/>
-		</CommandPlacement>
-		<CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="ClearAllResults" priority="0x0002">
-			<Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup1"/>
-		</CommandPlacement>
-		<CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="CollapseAllResults" priority="0x0003">
-			<Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup2"/>
-		</CommandPlacement>
-		<CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="ExpandAllResults" priority="0x0004">
-			<Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup2"/>
-		</CommandPlacement>
+  <CommandPlacements>
+    <!-- Data Reference Search-->
+    <CommandPlacement guid ="DataReferenceFinderCommandSet_Guid" id="FindGuidReferencesInDatabase" priority="0x0001">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CODEWIN_NAVIGATETOLOCATION"/>
+    </CommandPlacement>
 
-		<!-- Quick Attach Toolbar-->
-		<CommandPlacement guid="QuickAttachCommandSet_Guid" id="QuickAttachSelector" priority="0x0010">
-			<Parent guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbarGroup"/>
-		</CommandPlacement>
-	</CommandPlacements>
+    <!-- Reference Results Window-->
+    <CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="FilterResults" priority="0x0001">
+      <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup0"/>
+    </CommandPlacement>
+    <CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="ClearAllResults" priority="0x0002">
+      <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup1"/>
+    </CommandPlacement>
+    <CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="CollapseAllResults" priority="0x0003">
+      <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup2"/>
+    </CommandPlacement>
+    <CommandPlacement guid="ReferenceResultsToolbarCommandSet_Guid" id="ExpandAllResults" priority="0x0004">
+      <Parent guid="ReferenceResultsToolbarCommandSet_Guid" id="ReferenceResultsToolbarGroup2"/>
+    </CommandPlacement>
 
-	<Symbols>
-		<GuidSymbol name ="GameCodersToolkitPackage_Guid" value ="{f45b95a6-2eab-4919-a16f-81bb14ca671f}"/>
+    <!-- Quick Attach Toolbar-->
+    <CommandPlacement guid="QuickAttachCommandSet_Guid" id="QuickAttachSelector" priority="0x0010">
+      <Parent guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbarGroup"/>
+    </CommandPlacement>
+  </CommandPlacements>
 
-		<GuidSymbol name="DataReferenceFinderCommandSet_Guid" value="{4bb2a331-cebe-4cf2-a093-203a5a7f2e95}">
-			<IDSymbol name="FindDataReferencesEditMenu" value="0x0003" />
-			<IDSymbol name="FindDataReferencesMenuGroupAll" value="0x0004" />
-			<IDSymbol name="FindDataReferencesMenuGroupSpecific" value="0x0005" />
-			<IDSymbol name="FindDataReferencesExtensionsMenu" value="0x0006" />
-			<IDSymbol name="FindDataReferencesExtensionsMenuGroup0" value="0x0007" />
-			<IDSymbol name="FindDataReferencesExtensionsMenuGroup1" value="0x0008" />
-			<IDSymbol name="FindDataReferencesExtensionsMenuGroup2" value="0x0009" />
-			<IDSymbol name="FindGuidReferences_AllLocations" value="0x0010" />
-			<IDSymbol name="FindGuidReferences_Location1" value="0x0020" />
-			<IDSymbol name="FindGuidReferences_Location2" value="0x0030" />
-			<IDSymbol name="FindGuidReferences_Location3" value="0x0040" />
-			<IDSymbol name="FindGuidReferences_Location4" value="0x0050" />
-			<IDSymbol name="FindGuidReferences_Location5" value="0x0060" />
-			<IDSymbol name="OpenReferenceResults" value="0x1010" />
-			<IDSymbol name="OpenDataExplorer" value="0x1011"/>
-			<IDSymbol name="OpenConfigFile" value="0x1020" />
-			<IDSymbol name="SaveDataReferenceFinderConfig" value="0x1030" />
-			<IDSymbol name="ParseAllDataLocation" value="0x1040"/>
-			<IDSymbol name="ClearReferenceDatabase" value="0x1050"/>
-			<IDSymbol name="FindGuidReferencesInDatabase" value="0x1060"/>
-		</GuidSymbol>
+  <Symbols>
+    <GuidSymbol name ="GameCodersToolkitPackage_Guid" value ="{f45b95a6-2eab-4919-a16f-81bb14ca671f}"/>
 
-		<GuidSymbol name="ReferenceResultsToolbarCommandSet_Guid" value="{f5e1e0b2-af34-4f67-b8d5-813bf2bc7eda}">
-			<IDSymbol name="ClearAllResults" value="0x1100"/>
-			<IDSymbol name="CollapseAllResults" value="0x1200"/>
-			<IDSymbol name="ExpandAllResults" value="0x1300"/>
-			<IDSymbol name="FilterResults" value="0x1400"/>
-			<IDSymbol name="ReferenceResultsToolbar" value="0x1010"/>
-			<IDSymbol name="ReferenceResultsToolbarGroup0" value="0x1020"/>
-			<IDSymbol name="ReferenceResultsToolbarGroup1" value="0x1030"/>
-			<IDSymbol name="ReferenceResultsToolbarGroup2" value="0x1040"/>
-		</GuidSymbol>
+    <GuidSymbol name="DataReferenceFinderCommandSet_Guid" value="{4bb2a331-cebe-4cf2-a093-203a5a7f2e95}">
+      <IDSymbol name="FindDataReferencesEditMenu" value="0x0003" />
+      <IDSymbol name="FindDataReferencesMenuGroupAll" value="0x0004" />
+      <IDSymbol name="FindDataReferencesMenuGroupSpecific" value="0x0005" />
+      <IDSymbol name="FindDataReferencesExtensionsMenu" value="0x0006" />
+      <IDSymbol name="FindDataReferencesExtensionsMenuGroup0" value="0x0007" />
+      <IDSymbol name="FindDataReferencesExtensionsMenuGroup1" value="0x0008" />
+      <IDSymbol name="FindDataReferencesExtensionsMenuGroup2" value="0x0009" />
+      <IDSymbol name="FindGuidReferences_AllLocations" value="0x0010" />
+      <IDSymbol name="FindGuidReferences_Location1" value="0x0020" />
+      <IDSymbol name="FindGuidReferences_Location2" value="0x0030" />
+      <IDSymbol name="FindGuidReferences_Location3" value="0x0040" />
+      <IDSymbol name="FindGuidReferences_Location4" value="0x0050" />
+      <IDSymbol name="FindGuidReferences_Location5" value="0x0060" />
+      <IDSymbol name="OpenReferenceResults" value="0x1010" />
+      <IDSymbol name="OpenDataExplorer" value="0x1011"/>
+      <IDSymbol name="OpenConfigFile" value="0x1020" />
+      <IDSymbol name="SaveDataReferenceFinderConfig" value="0x1030" />
+      <IDSymbol name="ParseAllDataLocation" value="0x1040"/>
+      <IDSymbol name="ClearReferenceDatabase" value="0x1050"/>
+      <IDSymbol name="FindGuidReferencesInDatabase" value="0x1060"/>
+    </GuidSymbol>
 
-		<GuidSymbol name="QuickAttachCommandSet_Guid" value="{ffea98d0-3d8b-4f5c-be66-0df1926b700a}">
-			<IDSymbol name="QuickAttachToolbar" value="0x0010"/>
-			<IDSymbol name="QuickAttachToolbarGroup" value="0x0020"/>
-			<IDSymbol name="QuickAttachCommand" value="0x0100"/>
-			<IDSymbol name="QuickAttachSelector" value="0x0200"/>
-			<IDSymbol name="QuickAttachSelectorListCmd" value="0x0300"/>
-		</GuidSymbol>
+    <GuidSymbol name="ReferenceResultsToolbarCommandSet_Guid" value="{f5e1e0b2-af34-4f67-b8d5-813bf2bc7eda}">
+      <IDSymbol name="ClearAllResults" value="0x1100"/>
+      <IDSymbol name="CollapseAllResults" value="0x1200"/>
+      <IDSymbol name="ExpandAllResults" value="0x1300"/>
+      <IDSymbol name="FilterResults" value="0x1400"/>
+      <IDSymbol name="ReferenceResultsToolbar" value="0x1010"/>
+      <IDSymbol name="ReferenceResultsToolbarGroup0" value="0x1020"/>
+      <IDSymbol name="ReferenceResultsToolbarGroup1" value="0x1030"/>
+      <IDSymbol name="ReferenceResultsToolbarGroup2" value="0x1040"/>
+    </GuidSymbol>
+
+    <GuidSymbol name="QuickAttachCommandSet_Guid" value="{ffea98d0-3d8b-4f5c-be66-0df1926b700a}">
+      <IDSymbol name="QuickAttachToolbar" value="0x0010"/>
+      <IDSymbol name="QuickAttachToolbarGroup" value="0x0020"/>
+      <IDSymbol name="QuickAttachCommand" value="0x0100"/>
+      <IDSymbol name="QuickAttachSelector" value="0x0200"/>
+      <IDSymbol name="QuickAttachSelectorListCmd" value="0x0300"/>
+    </GuidSymbol>
 
 
-		<GuidSymbol name="FileTemplateCreatorSet_Guid" value="{C614691E-88DF-43E1-9D6E-28CA3A32FB57}">
-			<IDSymbol name="CreateFileFromTemplateExtensionsMenu" value="0x0010"/>
-			<IDSymbol name="CreateFileFromTemplate" value="0x0020"/>
-			<IDSymbol name="OpenTemplateFileCreatorConfigExtensionsMenu" value="0x0030"/>
-			<IDSymbol name="OpenTemplateFileCreatorConfig" value="0x0040"/>
-			<IDSymbol name="FileTemplateCreatorExtensionsMenuGroup" value="0x0007" />
-		</GuidSymbol>
+    <GuidSymbol name="FileTemplateCreatorSet_Guid" value="{C614691E-88DF-43E1-9D6E-28CA3A32FB57}">
+      <IDSymbol name="CreateFileFromTemplateExtensionsMenu" value="0x0010"/>
+      <IDSymbol name="CreateFileFromTemplate" value="0x0020"/>
+      <IDSymbol name="OpenTemplateFileCreatorConfigExtensionsMenu" value="0x0030"/>
+      <IDSymbol name="OpenTemplateFileCreatorConfig" value="0x0040"/>
+      <IDSymbol name="FileTemplateCreatorExtensionsMenuGroup" value="0x0007" />
+    </GuidSymbol>
 
-		<GuidSymbol name="AutoDataExposerSet_Guid" value="{E7B95C06-F8A5-4C4C-BA8D-D727F865CEA6}">
-			<IDSymbol name="AutoDataExposerSubMenu" value="0x1001"/>
-			<IDSymbol name="AutoDataExposerSubMenuGroup" value="0x1000"/>
-			<IDSymbol name="AutoDataExposerContextMenuGroup" value="0x1020" />
-			<IDSymbol name="ExposeToDataCommand" value="0x2000" />
-		</GuidSymbol>
-	</Symbols>
+    <GuidSymbol name="AutoDataExposerSet_Guid" value="{E7B95C06-F8A5-4C4C-BA8D-D727F865CEA6}">
+      <IDSymbol name="AutoDataExposerSubMenu" value="0x1001"/>
+      <IDSymbol name="AutoDataExposerSubMenuGroup" value="0x1000"/>
+      <IDSymbol name="AutoDataExposerContextMenuGroup" value="0x1020" />
+      <IDSymbol name="ExposeToDataCommand" value="0x2000" />
+      <IDSymbol name="AutoDataExposerExtensionsMenuGroup" value="0x0007" />
+      <IDSymbol name="OpenAutoDataExposerCreatorConfigExtensionsMenu" value="0x0030"/>
+      <IDSymbol name="OpenAutoDataExposerConfig" value="0x0040"/>
+    </GuidSymbol>
+  </Symbols>
 </CommandTable>
