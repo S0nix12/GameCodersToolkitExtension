@@ -30,11 +30,13 @@ namespace GameCodersToolkit.AutoDataExposerModule
 	{
 		const string c_propertyDictionaryIdentifier = "dataExposerEntry";
 
+		private CAutoDataExposerUserConfig UserConfig { get { return GameCodersToolkitPackage.AutoDataExposerConfig.GetConfig<CAutoDataExposerUserConfig>(); } }
+		private CAutoDataExposerConfig MainConfig { get { return GameCodersToolkitPackage.AutoDataExposerConfig.GetConfig<CAutoDataExposerConfig>(); } }
+
 		private bool SubscribedToDataExposer { get; set; }
 		private List<OleMenuCommand> menuCommands = new List<OleMenuCommand>();
 
 
-		private CAutoDataExposerConfiguration Config { get { return GameCodersToolkitPackage.AutoDataExposerConfig; } }
 
 		protected override void Execute(object sender, EventArgs e)
 		{
@@ -42,7 +44,7 @@ namespace GameCodersToolkit.AutoDataExposerModule
 			{
 				string entryName = command.Properties[c_propertyDictionaryIdentifier] as string;
 
-				CAutoDataExposerEntry entry = Config.FindExposerEntryByName(entryName);
+				CAutoDataExposerEntry entry = MainConfig.FindExposerEntryByName(entryName);
 				if (entry != null)
 				{
 					ThreadHelper.JoinableTaskFactory.Run(() => GenerateExposeCodeAsync(entry));
@@ -201,7 +203,7 @@ namespace GameCodersToolkit.AutoDataExposerModule
 							exposeString += '\t';
 						}
 
-						if (Config.ExposerUserConfig.JumpToGeneratedCode)
+						if (UserConfig.JumpToGeneratedCode)
 						{
 							documentView.TextView.Caret.MoveTo(new SnapshotPoint(snapshot, endBraceIndex));
 							documentView.TextView.ViewScroller.EnsureSpanVisible(new SnapshotSpan(snapshot, endBraceIndex, 1));
@@ -270,7 +272,7 @@ namespace GameCodersToolkit.AutoDataExposerModule
 
 		private string GetParamDefaultValue(CAutoDataExposerEntry entry, FunctionArgument arg)
 		{
-			var defaultValue = GameCodersToolkitPackage.AutoDataExposerConfig.ExposerConfig.DefaultValues?.Where(val => val.TypeName == arg.Type).FirstOrDefault();
+			var defaultValue = MainConfig.DefaultValues?.Where(val => val.TypeName == arg.Type).FirstOrDefault();
 			if (defaultValue != null)
 			{
 				return defaultValue.DefaultValue;
@@ -297,11 +299,11 @@ namespace GameCodersToolkit.AutoDataExposerModule
 		{
 			if (!SubscribedToDataExposer)
 			{
-				Config.OnPreConfigLoad += OnAutoDataExposerConfigLoaded;
+				GameCodersToolkitPackage.AutoDataExposerConfig.OnPreConfigLoad += OnAutoDataExposerConfigLoaded;
 				SubscribedToDataExposer = true;
 			}
 
-			var entries = Config.ExposerConfig.AutoDataExposerEntries;
+			var entries = MainConfig.AutoDataExposerEntries;
 
 			if (entries.Count == 0)
 			{
@@ -323,7 +325,7 @@ namespace GameCodersToolkit.AutoDataExposerModule
 
 			for (int i = 1; i < entries.Count; i++)
 			{
-				Configuration.CAutoDataExposerEntry entry = GameCodersToolkitPackage.AutoDataExposerConfig.ExposerConfig.AutoDataExposerEntries[i];
+				Configuration.CAutoDataExposerEntry entry = MainConfig.AutoDataExposerEntries[i];
 
 				CommandID cmdId = new(PackageGuids.AutoDataExposerSet_Guid, PackageIds.ExposeToDataCommand + i);
 
@@ -339,10 +341,10 @@ namespace GameCodersToolkit.AutoDataExposerModule
 			{
 				string entryName = command.Properties[c_propertyDictionaryIdentifier] as string;
 
-				CAutoDataExposerEntry entry = Config.FindExposerEntryByName(entryName);
+				CAutoDataExposerEntry entry = MainConfig.FindExposerEntryByName(entryName);
 				if (entry != null)
 				{
-					command.Enabled = entry != null ? ThreadHelper.JoinableTaskFactory.Run(() => IsLineMatchingRegex(entry.LineValidityRegex)) : false;
+					command.Enabled = entry != null ? ThreadHelper.JoinableTaskFactory.Run(() => IsLineMatchingRegexAsync(entry.LineValidityRegex)) : false;
 				}
 				else
 				{
@@ -362,7 +364,7 @@ namespace GameCodersToolkit.AutoDataExposerModule
 				menuCommands.Add(command);
 		}
 
-		private static async Task<bool> IsLineMatchingRegex(string pattern)
+		private static async Task<bool> IsLineMatchingRegexAsync(string pattern)
 		{
 			if (string.IsNullOrWhiteSpace(pattern))
 			{

@@ -79,6 +79,7 @@
       <DependentUpon>NameDialogWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)GameCodersToolkitPackage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ModuleUtils\ModuleBaseConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAttach\Commands\QuickAttachCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAttach\Commands\QuickAttachSelectionCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAttach\Options\QuickAttachOptions.cs" />

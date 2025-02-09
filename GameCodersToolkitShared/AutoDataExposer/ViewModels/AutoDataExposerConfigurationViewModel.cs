@@ -21,6 +21,8 @@ namespace GameCodersToolkit.AutoDataExposerModule.ViewModels
 
 	public partial class AutoDataExposerConfigurationViewModel : ObservableObject
 	{
+		public CAutoDataExposerUserConfig UserConfig { get { return GameCodersToolkitPackage.AutoDataExposerConfig.GetConfig<CAutoDataExposerUserConfig>(); } }
+
 		public AutoDataExposerConfigurationViewModel()
 		{
 			ReadConfigValues();
@@ -36,7 +38,7 @@ namespace GameCodersToolkit.AutoDataExposerModule.ViewModels
 				{
 					if (attribute.AllowEdit)
 					{
-						object currentValue = property.GetValue(GameCodersToolkitPackage.AutoDataExposerConfig.ExposerUserConfig);
+						object currentValue = property.GetValue(UserConfig);
 						
 						VariableViewModel variable = new VariableViewModel();
 						variable.Name = property.Name;
@@ -63,7 +65,7 @@ namespace GameCodersToolkit.AutoDataExposerModule.ViewModels
 			foreach (VariableViewModel vm in Variables)
 			{
 				PropertyInfo propertyInfo = configType.GetProperty(vm.Name);
-				propertyInfo.SetValue(GameCodersToolkitPackage.AutoDataExposerConfig.ExposerUserConfig, vm.Value);
+				propertyInfo.SetValue(UserConfig, vm.Value);
 			}
 		}
 
@@ -78,7 +80,7 @@ namespace GameCodersToolkit.AutoDataExposerModule.ViewModels
 			if (IsConfigValid())
 			{
 				ApplyConfigValues();
-				await GameCodersToolkitPackage.AutoDataExposerConfig.SaveConfigAsync();
+				GameCodersToolkitPackage.AutoDataExposerConfig.SaveConfig<CAutoDataExposerUserConfig>();
 			}
 			else
 			{
