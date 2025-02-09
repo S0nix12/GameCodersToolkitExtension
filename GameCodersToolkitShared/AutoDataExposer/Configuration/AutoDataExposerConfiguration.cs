@@ -31,6 +31,7 @@ namespace GameCodersToolkit.Configuration
 		public string InParamLine { get; set; }
 		public string ExposeString { get; set; }
 		public string DefaultValueFormat { get; set; }
+		public List<int> IgnoreParameterIndices { get; set; } = [];
 	}
 
 	public class CAutoDataExposerDefaultValue

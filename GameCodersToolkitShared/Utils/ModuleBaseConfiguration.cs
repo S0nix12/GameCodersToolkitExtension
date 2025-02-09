@@ -191,7 +191,7 @@ namespace GameCodersToolkitShared.Utils
 						$"Exception while loading {ModuleName}::{configFile.Name} config file!",
 						ex);
 
-					OnConfigLoadFailed?.Invoke(this, new EventArgs());
+					OnConfigLoadFailed?.Invoke(this, new ConfigFileEventArgs(configFile));
 				}
 			}
 		}
@@ -237,9 +237,9 @@ namespace GameCodersToolkitShared.Utils
 			}
 		}
 
-		public event EventHandler OnPreConfigLoad;
-		public event EventHandler OnConfigLoadFailed;
-		public event EventHandler OnConfigLoadSucceeded;
+		public event EventHandler<ConfigFileEventArgs> OnPreConfigLoad;
+		public event EventHandler<ConfigFileEventArgs> OnConfigLoadFailed;
+		public event EventHandler<ConfigFileEventArgs> OnConfigLoadSucceeded;
 
 		public string ModuleName { get; protected set; }
 		protected string SolutionFolder { get; private set; } = "";

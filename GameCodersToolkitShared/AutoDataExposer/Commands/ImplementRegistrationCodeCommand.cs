@@ -54,6 +54,7 @@ namespace GameCodersToolkit.AutoDataExposerModule
 		{
 			List<FunctionArgument> parameters = [];
 			int currentArgumentIndex = 0;
+			int currentRawArgumentIndex = 0;
 
 			// Return value
 			Match returnValueRegex = Regex.Match(functionSignatureLine, entry.FunctionReturnValueRegex);
@@ -65,21 +66,25 @@ namespace GameCodersToolkit.AutoDataExposerModule
 			string returnValueType = returnValueRegex.Groups[1].Value.Trim();
 			if (returnValueType != "void")
 			{
-				FunctionArgument argument = new()
+				if (!entry.IgnoreParameterIndices.Contains(currentRawArgumentIndex))
 				{
-					IsOut = true,
-					Name = "Result",
-					RawType = returnValueType,
-					Type = returnValueType,
-					Index = currentArgumentIndex++
-				};
+					FunctionArgument argument = new()
+					{
+						IsOut = true,
+						Name = "Result",
+						RawType = returnValueType,
+						Type = returnValueType,
+						Index = currentArgumentIndex++
+					};
 
-				if (argument.Type.StartsWith(currentNamespace))
-				{
-					argument.Type = argument.Type.Substring(currentNamespace.Length + 2); //Take :: into account
+					if (argument.Type.StartsWith(currentNamespace))
+					{
+						argument.Type = argument.Type.Substring(currentNamespace.Length + 2); //Take :: into account
+					}
+
+					parameters.Add(argument);
 				}
-
-				parameters.Add(argument);
+				currentRawArgumentIndex++;
 			}
 
 			// Arguments
@@ -99,8 +104,14 @@ namespace GameCodersToolkit.AutoDataExposerModule
 
 			string[] paramList = parametersText.Split(',');
 
-			foreach (string param in paramList)
+			for (int i = 0; i < paramList.Length; i++)
 			{
+				if (entry.IgnoreParameterIndices.Contains(currentRawArgumentIndex++))
+				{
+					continue;
+				}
+
+				string param = paramList[i];
 				string[] parts = param.Trim().Split([' '], StringSplitOptions.RemoveEmptyEntries);
 
 				if (parts.Length < 2)
@@ -231,6 +242,7 @@ namespace GameCodersToolkit.AutoDataExposerModule
 			}
 
 			str = str.Replace("##FUNCTIONNAME##", info.FullyQualifiedFunctionName);
+			str = str.Replace("##SHORTFUNCTIONNAME##", info.FunctionName);
 			str = str.Replace("##GUID##", Guid.NewGuid().ToString());
 			str = str.Replace("##AUTHORNAME##", authorName);
 			str = str.Replace("##PARAMS##", GenerateParamString(entry, info));
@@ -267,18 +279,21 @@ namespace GameCodersToolkit.AutoDataExposerModule
 			return entry.DefaultValueFormat.Replace("##TYPE##", arg.Type);
 		}
 
-		private void OnAutoDataExposerConfigLoaded(object sender, EventArgs args)
+		private void OnAutoDataExposerConfigLoaded(object sender, ConfigFileEventArgs args)
 		{
-			OleMenuCommandService mcs = Package.GetService<IMenuCommandService, OleMenuCommandService>();
-			foreach (var menuCommand in MenuCommands)
+			if (args.ConfigFile.Type == typeof(CAutoDataExposerConfig))
 			{
-				mcs.RemoveCommand(menuCommand);
+				OleMenuCommandService mcs = Package.GetService<IMenuCommandService, OleMenuCommandService>();
+				foreach (var menuCommand in MenuCommands)
+				{
+					mcs.RemoveCommand(menuCommand);
+				}
+
+				Command.Enabled = false;
+				Command.Text = "No config loaded";
+
+				MenuCommands.Clear();
 			}
-
-			Command.Enabled = false;
-			Command.Text = "No config loaded";
-
-			MenuCommands.Clear();
 		}
 
 		protected override void BeforeQueryStatus(EventArgs e)
