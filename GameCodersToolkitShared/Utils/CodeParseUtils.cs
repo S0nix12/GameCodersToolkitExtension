@@ -19,6 +19,35 @@ namespace GameCodersToolkitShared.Utils
 			return str.ToUpper();
 		}
 
+		public static int FindMatchingBrace(string text, int startIndex)
+		{
+			int openBraceIndex = text.IndexOf('{', startIndex);
+			if (openBraceIndex == -1)
+			{
+				return -1;
+			}
+
+			int depth = 0;
+
+			for (int i = openBraceIndex; i < text.Length; i++)
+			{
+				if (text[i] == '{')
+				{
+					depth++;
+				}
+				else if (text[i] == '}')
+				{
+					depth--;
+					if (depth == 0)
+					{
+						return i;
+					}
+				}
+			}
+
+			return -1;
+		}
+
 		public static int CountLeadingTabs(string text, int index)
 		{
 			if (string.IsNullOrEmpty(text) || index <= 0)
@@ -70,10 +99,8 @@ namespace GameCodersToolkitShared.Utils
 
 				if (nsFound && (!braceFound || namespaceMatches[nsIndex].Index < braceMatches[braceIndex].Index))
 				{
-					// Found a namespace declaration
 					pendingNamespace = namespaceMatches[nsIndex].Groups[1].Value;
 
-					// If `{` is already present in the same match, track it immediately
 					if (namespaceMatches[nsIndex].Groups[2].Success)
 					{
 						namespaceStack.Push((pendingNamespace, braceDepth));
@@ -84,7 +111,6 @@ namespace GameCodersToolkitShared.Utils
 				}
 				else if (braceFound)
 				{
-					// Handle opening `{`
 					if (cppCode[braceMatches[braceIndex].Index] == '{')
 					{
 						if (pendingNamespace != null)
@@ -94,12 +120,10 @@ namespace GameCodersToolkitShared.Utils
 						}
 						braceDepth++;
 					}
-					// Handle closing `}`
 					else
 					{
 						braceDepth--;
 
-						// Only pop from namespace stack if the brace depth matches
 						if (namespaceStack.Count > 0 && namespaceStack.Peek().BraceDepth == braceDepth)
 						{
 							namespaceStack.Pop();
