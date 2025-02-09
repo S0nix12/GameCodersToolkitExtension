@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows;
-using GameCodersToolkit.AutoDataExposerModule.ViewModels;
 
-namespace GameCodersToolkitShared.AutoDataExposer.TemplateSelector
+namespace GameCodersToolkitShared.Utils
 {
 	public class VariableEditorTemplateSelector : DataTemplateSelector
 	{

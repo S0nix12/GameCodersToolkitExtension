@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace GameCodersToolkit.AutoDataExposerModule.Windows
+namespace GameCodersToolkitShared.Utils
 {
 	/// <summary>
 	/// Interaction logic for ConfigurationWindow.xaml
 	/// </summary>
-	public partial class AutoDataExposerConfigurationWindow : Window
+	public partial class ConfigurationWindow : Window
 	{
-		public AutoDataExposerConfigurationWindow()
+		public ConfigurationWindow()
 		{
 			InitializeComponent();
 		}

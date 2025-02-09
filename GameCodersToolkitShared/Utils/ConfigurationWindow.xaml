@@ -1,4 +1,4 @@
-﻿<Window x:Class="GameCodersToolkit.AutoDataExposerModule.Windows.AutoDataExposerConfigurationWindow"
+﻿<Window x:Class="GameCodersToolkitShared.Utils.ConfigurationWindow"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -10,17 +10,15 @@
 		xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
 		xmlns:platformUI="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
 		xmlns:vshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
-		xmlns:vm="clr-namespace:GameCodersToolkit.AutoDataExposerModule.ViewModels"
-		xmlns:templateselector="clr-namespace:GameCodersToolkitShared.AutoDataExposer.TemplateSelector"
-        xmlns:local="clr-namespace:GameCodersToolkit.AutoDataExposerModule.Windows"
-        d:DataContext="{d:DesignInstance Type=vm:AutoDataExposerConfigurationViewModel}"
+        xmlns:local="clr-namespace:GameCodersToolkitShared.Utils"
+        d:DataContext="{d:DesignInstance Type=local:ConfigurationViewModel}"
         mc:Ignorable="d" 
         WindowStartupLocation="CenterScreen"
         Height="360"
         Width="600"
 		toolkit:Themes.UseVsTheme="True"
         KeyDown="Window_KeyDown"
-        Title="Auto Data Exposer Configuration">
+        Title="{Binding WindowTitle}">
 
     <Window.Resources>
         <Style TargetType="{x:Type TextBlock}" x:Key="VSTextBlockStyle">
@@ -54,7 +52,7 @@
             </Grid>
         </DataTemplate>
 
-        <templateselector:VariableEditorTemplateSelector x:Key="VariableTemplateSelector"
+        <local:VariableEditorTemplateSelector x:Key="VariableTemplateSelector"
                                       StringTemplate="{StaticResource StringTemplate}"
                                       BoolTemplate="{StaticResource BoolTemplate}" />
     </Window.Resources>
@@ -84,8 +82,8 @@
             </ItemsControl.ItemsPanel>
         </ItemsControl>
 
-        <Button x:Name="ReloadButton" Grid.Row="3" Grid.Column="1" Command="{Binding ReloadCommand}" Click="ReloadButton_Click">
-            Reload Auto Data Exposer
+        <Button x:Name="ReloadButton" Grid.Row="3" Grid.Column="1" Command="{Binding ReloadCommand}" Click="ReloadButton_Click" >
+            Reload Config
         </Button>
 
         <Button x:Name="SaveButton" Grid.Row="5" Grid.Column="1" Command="{Binding SaveCommand}" Click="SaveButton_Click">

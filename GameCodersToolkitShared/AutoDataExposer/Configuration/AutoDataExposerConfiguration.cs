@@ -15,7 +15,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using System.Threading;
 using Microsoft.VisualStudio.RpcContracts.Commands;
 using System.ComponentModel.DataAnnotations;
-using GameCodersToolkitShared.ModuleUtils;
+using GameCodersToolkitShared.Utils;
 
 namespace GameCodersToolkit.Configuration
 {
@@ -70,6 +70,9 @@ namespace GameCodersToolkit.Configuration
 	{
 		public const string cConfigFilePath = "AutoDataExposer/AutoDataExposerConfig.json";
 		public const string cUserConfigFilePath = "AutoDataExposer/AutoDataExposerUserConfig.json";
+
+		public CAutoDataExposerConfig MainConfig { get { return GetConfig<CAutoDataExposerConfig>(); } }
+		public CAutoDataExposerUserConfig UserConfig { get { return GetConfig<CAutoDataExposerUserConfig>(); } }
 
 		public CAutoDataExposerConfiguration()
 		{

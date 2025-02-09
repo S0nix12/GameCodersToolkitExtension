@@ -1,8 +1,5 @@
-﻿using GameCodersToolkit.AutoDataExposerModule.ViewModels;
-using GameCodersToolkit.AutoDataExposerModule.Windows;
-using GameCodersToolkit.FileTemplateCreator.ViewModels;
-using GameCodersToolkit.FileTemplateCreator.Windows;
-using System.IO;
+﻿using GameCodersToolkit.Configuration;
+using GameCodersToolkitShared.Utils;
 using System.Windows;
 
 namespace GameCodersToolkit
@@ -12,9 +9,13 @@ namespace GameCodersToolkit
 	{
 		protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
 		{
-			AutoDataExposerConfigurationWindow window = new AutoDataExposerConfigurationWindow();
+			ConfigurationWindow window = new ConfigurationWindow();
 
-			window.DataContext = new AutoDataExposerConfigurationViewModel();
+			ConfigurationViewModel vm = new ConfigurationViewModel("AutoDataExposer - Configuration", GameCodersToolkitPackage.AutoDataExposerConfig.UserConfig);
+			vm.OnSaveRequested += (s, e) => GameCodersToolkitPackage.AutoDataExposerConfig.SaveConfig<CAutoDataExposerUserConfig>();
+			vm.OnReloadRequested += (s, e) => GameCodersToolkitPackage.AutoDataExposerConfig.Reload();
+
+			window.DataContext = vm;
 			await window.ShowDialogAsync();
 		}
 	}

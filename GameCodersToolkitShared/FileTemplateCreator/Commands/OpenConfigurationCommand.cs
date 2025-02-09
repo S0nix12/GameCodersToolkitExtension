@@ -1,6 +1,5 @@
-﻿using GameCodersToolkit.FileTemplateCreator.ViewModels;
-using GameCodersToolkit.FileTemplateCreator.Windows;
-using System.IO;
+﻿using GameCodersToolkit.Configuration;
+using GameCodersToolkitShared.Utils;
 using System.Windows;
 
 namespace GameCodersToolkit
@@ -12,7 +11,11 @@ namespace GameCodersToolkit
 		{
 			ConfigurationWindow window = new ConfigurationWindow();
 
-			window.DataContext = new ConfigurationViewModel();
+			ConfigurationViewModel vm = new ConfigurationViewModel("FileTemplateCreator - Configuration", GameCodersToolkitPackage.FileTemplateCreatorConfig.UserConfig);
+			vm.OnSaveRequested += (s, e) => GameCodersToolkitPackage.FileTemplateCreatorConfig.SaveConfig<CFileTemplateCreatorUserConfig>();
+			vm.OnReloadRequested += (s, e) => GameCodersToolkitPackage.FileTemplateCreatorConfig.Reload();
+
+			window.DataContext = vm;
 			await window.ShowDialogAsync();
 		}
 	}

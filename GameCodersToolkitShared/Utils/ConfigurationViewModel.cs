@@ -1,33 +1,32 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using GameCodersToolkit.Configuration;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace GameCodersToolkit.FileTemplateCreator.ViewModels
+namespace GameCodersToolkitShared.Utils
 {
 	public partial class VariableViewModel : ObservableObject
 	{
 		public string Name { get; set; }
-		public string Value { get; set; }
+		public object Value { get; set; }
 	}
 
 	public partial class ConfigurationViewModel : ObservableObject
 	{
-		public ConfigurationViewModel()
+		public ConfigurationViewModel(string windowTitle, object targetObject)
 		{
+			WindowTitle = windowTitle;
+			TargetObject = targetObject;
+			TargetType = TargetObject.GetType();
+
 			ReadConfigValues();
 		}
 
 		private void ReadConfigValues()
 		{
-			PropertyInfo[] properties = typeof(CFileTemplateCreatorUserConfig).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+			PropertyInfo[] properties = TargetType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 			foreach (PropertyInfo property in properties)
 			{
 				EditableAttribute attribute = property.GetCustomAttribute<EditableAttribute>();
@@ -35,11 +34,19 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 				{
 					if (attribute.AllowEdit)
 					{
-						string currentValue = property.GetValue(GameCodersToolkitPackage.FileTemplateCreatorConfig.UserConfig) as string;
-						
+						object currentValue = property.GetValue(TargetObject);
+
 						VariableViewModel variable = new VariableViewModel();
 						variable.Name = property.Name;
-						variable.Value = currentValue ?? "";
+
+						if (property.PropertyType == typeof(string))
+						{
+							variable.Value = currentValue ?? "";
+						}
+						else
+						{
+							variable.Value = currentValue;
+						}
 
 						Variables.Add(variable);
 					}
@@ -49,12 +56,12 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 		private void ApplyConfigValues()
 		{
-			Type configType = typeof(CFileTemplateCreatorUserConfig);
+			Type configType = typeof(CAutoDataExposerUserConfig);
 
 			foreach (VariableViewModel vm in Variables)
 			{
 				PropertyInfo propertyInfo = configType.GetProperty(vm.Name);
-				propertyInfo.SetValue(GameCodersToolkitPackage.FileTemplateCreatorConfig.UserConfig, vm.Value);
+				propertyInfo.SetValue(TargetObject, vm.Value);
 			}
 		}
 
@@ -69,22 +76,30 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 			if (IsConfigValid())
 			{
 				ApplyConfigValues();
-				await GameCodersToolkitPackage.FileTemplateCreatorConfig.SaveConfigAsync();
+				OnSaveRequested?.Invoke(this, EventArgs.Empty);
 			}
 			else
 			{
 				MessageBox errorMessageBox = new MessageBox();
 				await errorMessageBox.ShowErrorAsync("Unable to save due to invalid configuration");
 			}
-        }
+		}
 
-        [RelayCommand]
-        public void Reload()
-        {
-			GameCodersToolkitPackage.FileTemplateCreatorConfig.Reload();
-        }
+		[RelayCommand]
+		public void Reload()
+		{
+			OnReloadRequested?.Invoke(this, EventArgs.Empty);
+		}
 
-        private ObservableCollection<VariableViewModel> m_variables = new ObservableCollection<VariableViewModel>();
+		private ObservableCollection<VariableViewModel> m_variables = new ObservableCollection<VariableViewModel>();
 		public ObservableCollection<VariableViewModel> Variables { get => m_variables; set => SetProperty(ref m_variables, value); }
+
+		public string WindowTitle { get; set; }
+
+		public event EventHandler OnSaveRequested;
+		public event EventHandler OnReloadRequested;
+
+		private Type TargetType { get; set; }
+		private object TargetObject { get; set; }
 	}
 }

@@ -8,7 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace GameCodersToolkitShared.ModuleUtils
+namespace GameCodersToolkitShared.Utils
 {
 	public class ConfigFile
 	{
@@ -113,14 +113,18 @@ namespace GameCodersToolkitShared.ModuleUtils
 				string configFilePath = GetConfigFilePath(configFile);
 				string configDirectory = Path.GetDirectoryName(configFilePath);
 
-				configFile.FileSystemWatcher = new FileSystemWatcher(configDirectory)
+				if (!watchedDirectories.Contains(configDirectory))
 				{
-					EnableRaisingEvents = true
-				};
-				configFile.FileSystemWatcher.Changed += OnConfigFileChanged;
-				configFile.FileSystemWatcher.IncludeSubdirectories = false;
-				configFile.FileSystemWatcher.Filter = "*.json";
-				configFile.FileSystemWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastAccess;
+					configFile.FileSystemWatcher = new FileSystemWatcher(configDirectory)
+					{
+						EnableRaisingEvents = true
+					};
+					configFile.FileSystemWatcher.Changed += OnConfigFileChanged;
+					configFile.FileSystemWatcher.IncludeSubdirectories = false;
+					configFile.FileSystemWatcher.Filter = "*.json";
+					configFile.FileSystemWatcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastAccess;
+					watchedDirectories.Add(configDirectory);
+				}
 			}
 		}
 
@@ -141,7 +145,7 @@ namespace GameCodersToolkitShared.ModuleUtils
 			return result;
 		}
 
-		protected virtual void PostConfigLoad(string name, Type type, object configObject)
+		protected virtual async Task PostConfigLoad(string name, Type type, object configObject)
 		{
 
 		}
@@ -170,8 +174,7 @@ namespace GameCodersToolkitShared.ModuleUtils
 
 						configFile.ConfigObject = await JsonSerializer.DeserializeAsync(fileStream, configFile.Type);
 
-						PostConfigLoad(configFile.Name, configFile.Type, configFile.ConfigObject);
-
+						await PostConfigLoad(configFile.Name, configFile.Type, configFile.ConfigObject);
 						await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[AutoDataExposer] Finished loading config.");
 					}
 					else
@@ -239,7 +242,7 @@ namespace GameCodersToolkitShared.ModuleUtils
 		public event EventHandler OnConfigLoadSucceeded;
 
 		public string ModuleName { get; protected set; }
-		private string SolutionFolder { get; set; } = "";
+		protected string SolutionFolder { get; private set; } = "";
 		private List<ConfigFile> ConfigFiles { get; set; } = [];
 	}
 }

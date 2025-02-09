@@ -12,10 +12,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)autodataexposer\commands\ImplementRegistrationCodeCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AutoDataExposer\Commands\OpenAutoDataExposerConfigurationCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)autodataexposer\configuration\AutoDataExposerConfiguration.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AutoDataExposer\TemplateSelector\VariableEditorTemplateSelector.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AutoDataExposer\ViewModels\AutoDataExposerConfigurationViewModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)AutoDataExposer\Windows\AutoDataExposerConfigurationWindow.xaml.cs">
-      <DependentUpon>AutoDataExposerConfigurationWindow.xaml</DependentUpon>
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\VariableEditorTemplateSelector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\ConfigurationWindow.xaml.cs">
+      <DependentUpon>ConfigurationWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\CodeLens\CodeLensCustomDataView.xaml.cs">
       <DependentUpon>CodeLensCustomDataView.xaml</DependentUpon>
@@ -67,11 +66,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\MakeFileParser\MakeFileParserInterface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\MakeFileParser\SimpleMakeFileParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\UserControls\ExtendedTreeView.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\ViewModels\ConfigurationViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\ViewModels\FileTemplateDialogViewModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Windows\ConfigurationWindow.xaml.cs">
-      <DependentUpon>ConfigurationWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Windows\CreateFileFromTemplateWindow.xaml.cs">
       <DependentUpon>CreateFileFromTemplateWindow.xaml</DependentUpon>
     </Compile>
@@ -79,7 +74,8 @@
       <DependentUpon>NameDialogWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)GameCodersToolkitPackage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ModuleUtils\ModuleBaseConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\ConfigurationViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\ModuleBaseConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAttach\Commands\QuickAttachCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAttach\Commands\QuickAttachSelectionCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAttach\Options\QuickAttachOptions.cs" />
@@ -90,7 +86,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utils\SearchEntryUtils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="$(MSBuildThisFileDirectory)AutoDataExposer\Windows\AutoDataExposerConfigurationWindow.xaml">
+    <Page Include="$(MSBuildThisFileDirectory)Utils\ConfigurationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -103,10 +99,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="$(MSBuildThisFileDirectory)DataReferenceFinderModule\ToolWindows\ReferenceResultsWindowControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Windows\ConfigurationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

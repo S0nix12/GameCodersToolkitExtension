@@ -10,6 +10,7 @@ using GameCodersToolkit.SourceControl;
 using GameCodersToolkit.Utils;
 using EnvDTE80;
 using EnvDTE;
+using GameCodersToolkitShared.Utils;
 
 namespace GameCodersToolkit.Configuration
 {
@@ -33,7 +34,7 @@ namespace GameCodersToolkit.Configuration
 		public List<string> AbsolutePaths { get; set; } = [];
 	}
 
-	public class CFileTemplateCreatorConfig
+	public class CFileTemplateCreatorConfig : BaseConfig
 	{
 		public List<CMakeFileEntry> CMakeFileEntries { get; set; } = [];
 		public List<CTemplateEntry> FileTemplateEntries { get; set; } = [];
@@ -48,7 +49,7 @@ namespace GameCodersToolkit.Configuration
 		public JsonDocument ParserConfig { get; set; }
 	}
 
-	public class CFileTemplateCreatorUserConfig
+	public class CFileTemplateCreatorUserConfig : BaseConfig
     {
         public string PostChangeScriptPath { get; set; }
         [JsonIgnore]
@@ -68,92 +69,23 @@ namespace GameCodersToolkit.Configuration
     }
 
 
-    public class CFileTemplateCreatorConfiguration
+    public class CFileTemplateCreatorConfiguration : ModuleBaseConfiguration
 	{
 		// Relative to the Solution Directory
 		public const string cConfigFilePath = "FileTemplateCreator/FileTemplateCreatorConfig.json";
         public const string cUserConfigFilePath = "FileTemplateCreator/FileTemplateCreatorUserConfig.json";
 
-        public async Task InitAsync()
+		public CFileTemplateCreatorConfig CreatorConfig { get { return GetConfig<CFileTemplateCreatorConfig>(); } }
+		public CFileTemplateCreatorUserConfig UserConfig { get { return GetConfig<CFileTemplateCreatorUserConfig>(); } }
+
+		public CFileTemplateCreatorConfiguration()
 		{
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-			bool isSolutionOpen = await VS.Solutions.IsOpenAsync();
+			ModuleName = "FileTemplateCreator";
 
-			if (isSolutionOpen)
-			{
-				HandleOpenSolution(await VS.Solutions.GetCurrentSolutionAsync());
-			}
+			AddConfigFile<CFileTemplateCreatorConfig>("MainConfig", cConfigFilePath);
+			AddConfigFile<CFileTemplateCreatorUserConfig>("UserConfig", cUserConfigFilePath);
 
-			VS.Events.SolutionEvents.OnAfterOpenSolution += HandleOpenSolution;
-		}
-
-		public void Reload()
-        {
-            ThreadHelper.JoinableTaskFactory.Run(LoadSolutionConfigAsync);
-        }
-
-		private void HandleOpenSolution(Community.VisualStudio.Toolkit.Solution solution = null)
-		{
-			if (solution != null)
-			{
-				lock (SolutionFolder)
-				{
-					SolutionFolder = Path.GetDirectoryName(solution.FullPath);
-				}
-			}
-			ThreadHelper.JoinableTaskFactory.Run(LoadSolutionConfigAsync);
-		}
-
-		public async Task LoadSolutionConfigAsync()
-		{
-			string[] configFilePaths = GetConfigFilePaths();
-            await LoadConfigsAsync(configFilePaths[0], configFilePaths[1]);
-
-			string configDirectory = Path.GetDirectoryName(configFilePaths[0]);
-            string userConfigDirectory = Path.GetDirectoryName(configFilePaths[1]);
-            bool hasDifferentPaths = configDirectory != userConfigDirectory;
-
-            ConfigFileWatcher?.Dispose();
-			UserConfigFileWatcher?.Dispose();
-
-			ConfigFileWatcher = new FileSystemWatcher(configDirectory)
-			{
-				EnableRaisingEvents = true
-			};
-			ConfigFileWatcher.Changed += OnConfigFileChanged;
-			ConfigFileWatcher.IncludeSubdirectories = false;
-			ConfigFileWatcher.Filter = "*.json";
-			ConfigFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastAccess;
-
-			if (hasDifferentPaths)
-            {
-                UserConfigFileWatcher = new FileSystemWatcher(userConfigDirectory)
-                {
-                    EnableRaisingEvents = true
-                };
-                UserConfigFileWatcher.Changed += OnConfigFileChanged;
-                UserConfigFileWatcher.IncludeSubdirectories = false;
-                UserConfigFileWatcher.Filter = "*.json";
-                UserConfigFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastAccess;
-            }
-        }
-
-		private void OnConfigFileChanged(object sender, FileSystemEventArgs eventArgs)
-		{
-			ThreadHelper.JoinableTaskFactory.Run(async delegate 
-			{
-                string[] configFilePaths = GetConfigFilePaths();
-                await LoadConfigsAsync(configFilePaths[0], configFilePaths[1]);
-            });
-		}
-
-		public string[] GetConfigFilePaths()
-		{
-			lock (SolutionFolder)
-			{
-                string[] paths = [Path.Combine(SolutionFolder, cConfigFilePath), Path.Combine(SolutionFolder, cUserConfigFilePath)];
-				return paths;
-			}
+			OnConfigLoadSucceeded += (s, e) => EstablishPerforceConnectionAsync();
 		}
 
 		public IMakeFileParser CreateParser()
@@ -235,192 +167,131 @@ namespace GameCodersToolkit.Configuration
             });
 		}
 
-		private async Task LoadConfigsAsync(string creatorConfigFilePath, string userConfigFilePath)
+		protected override async Task PostConfigLoad(string name, Type type, object configObject)
 		{
-			try
+			if (type == typeof(CFileTemplateCreatorConfig))
 			{
-				if (CreatorConfig != null || UserConfig != null)
+				// Parser config path
 				{
-					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Reloading FileTemplateCreator config after change");
-				}
-				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Attempting to load FileTemplateCreator config at '{creatorConfigFilePath}' & user config at {userConfigFilePath}");
-
-				if (File.Exists(creatorConfigFilePath))
-				{
-					FileOptions combinedOption = FileOptions.Asynchronous | FileOptions.SequentialScan | FileOptions.None;
-					using var fileStream = new FileStream(
-                        creatorConfigFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, combinedOption);
-
-					CreatorConfig = await JsonSerializer.DeserializeAsync<CFileTemplateCreatorConfig>(fileStream);
-
-					// Parser config path
+					if (!string.IsNullOrWhiteSpace(CreatorConfig.ParserConfigPath))
 					{
-						if (!string.IsNullOrWhiteSpace(CreatorConfig.ParserConfigPath))
+						lock (SolutionFolder)
+						{
+							CreatorConfig.ParserConfigPathAbsolute = Path.Combine(SolutionFolder, CreatorConfig.ParserConfigPath);
+						}
+					}
+
+					bool exists = File.Exists(CreatorConfig.ParserConfigPathAbsolute);
+					if (exists)
+					{
+						try
+						{
+							string fileContent = File.ReadAllText(CreatorConfig.ParserConfigPathAbsolute);
+							CreatorConfig.ParserConfig = JsonDocument.Parse(fileContent);
+						}
+						catch (Exception ex)
+						{
+							await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+								"[FileTemplateCreator] Exception while retrieving parser configuration",
+								ex);
+						}
+					}
+
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] ParserConfig at '{CreatorConfig.ParserConfigPathAbsolute}' (File exists: {exists})");
+				}
+
+				// Makefiles
+				{
+					List<CMakeFileEntry> entries = CreatorConfig.CMakeFileEntries;
+
+					for (int i = entries.Count - 1; i >= 0; i--)
+					{
+						CMakeFileEntry cmakeFileEntry = entries[i];
+
+						if (!Path.IsPathRooted(cmakeFileEntry.Path))
 						{
 							lock (SolutionFolder)
 							{
-								CreatorConfig.ParserConfigPathAbsolute = Path.Combine(SolutionFolder, CreatorConfig.ParserConfigPath);
+								cmakeFileEntry.AbsolutePath = Path.Combine(SolutionFolder, cmakeFileEntry.Path);
 							}
 						}
 
-						bool exists = File.Exists(CreatorConfig.ParserConfigPathAbsolute);
-						if (exists)
+						cmakeFileEntry.AbsolutePath = Path.GetFullPath(cmakeFileEntry.AbsolutePath);
+
+						if (!File.Exists(cmakeFileEntry.AbsolutePath))
 						{
-							try
-							{
-								string fileContent = File.ReadAllText(CreatorConfig.ParserConfigPathAbsolute);
-								CreatorConfig.ParserConfig = JsonDocument.Parse(fileContent);
-							}
-							catch (Exception ex)
-							{
-								await DiagnosticUtils.ReportExceptionFromExtensionAsync(
-									"[FileTemplateCreator] Exception while retrieving parser configuration",
-									ex);
-							}
+							entries.RemoveAt(i);
+							await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Couldn't find MakeFile at path '{cmakeFileEntry.AbsolutePath}'");
 						}
-
-						await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] ParserConfig at '{CreatorConfig.ParserConfigPathAbsolute}' (File exists: {exists})");
 					}
 
-					// Makefiles
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Found {entries.Count} valid MakeFile entries");
+				}
+
+				// Templates
+				{
+					List<CTemplateEntry> entries = CreatorConfig.FileTemplateEntries;
+
+					for (int i = entries.Count - 1; i >= 0; i--)
 					{
-						List<CMakeFileEntry> entries = CreatorConfig.CMakeFileEntries;
-
-						for (int i = entries.Count - 1; i >= 0; i--)
+						bool isValid = true;
+						foreach (string path in entries[i].Paths)
 						{
-							CMakeFileEntry cmakeFileEntry = entries[i];
+							string absolutePath = path;
 
-							if (!Path.IsPathRooted(cmakeFileEntry.Path))
+							if (!Path.IsPathRooted(absolutePath))
 							{
 								lock (SolutionFolder)
 								{
-									cmakeFileEntry.AbsolutePath = Path.Combine(SolutionFolder, cmakeFileEntry.Path);
+									absolutePath = Path.Combine(SolutionFolder, absolutePath);
 								}
 							}
 
-							cmakeFileEntry.AbsolutePath = Path.GetFullPath(cmakeFileEntry.AbsolutePath);
+							absolutePath = Path.GetFullPath(absolutePath);
 
-							if (!File.Exists(cmakeFileEntry.AbsolutePath))
+							if (!File.Exists(absolutePath))
 							{
-								entries.RemoveAt(i);
-								await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Couldn't find MakeFile at path '{cmakeFileEntry.AbsolutePath}'");
+								isValid = false;
+								await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Couldn't locate file '{absolutePath}' in template '{entries[i].Name}'. Skipping.");
+								break;
 							}
+
+							entries[i].AbsolutePaths.Add(absolutePath);
 						}
 
-						await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Found {entries.Count} valid MakeFile entries");
-					}
-
-					// Templates
-					{
-						List<CTemplateEntry> entries = CreatorConfig.FileTemplateEntries;
-
-						for (int i = entries.Count - 1; i >= 0; i--)
+						if (!isValid)
 						{
-							bool isValid = true;
-							foreach (string path in entries[i].Paths)
-							{
-								string absolutePath = path;
-
-								if (!Path.IsPathRooted(absolutePath))
-								{
-									lock (SolutionFolder)
-									{
-										absolutePath = Path.Combine(SolutionFolder, absolutePath);
-									}
-								}
-
-								absolutePath = Path.GetFullPath(absolutePath);
-
-								if (!File.Exists(absolutePath))
-								{
-									isValid = false;
-									await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Couldn't locate file '{absolutePath}' in template '{entries[i].Name}'. Skipping.");
-									break;
-								}
-
-								entries[i].AbsolutePaths.Add(absolutePath);
-							}
-
-							if (!isValid)
-							{
-								entries.RemoveAt(i);
-							}
+							entries.RemoveAt(i);
 						}
-
-						await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Found {entries.Count} valid template entries");
 					}
 
-					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Finished loading config.");
-					await EstablishPerforceConnectionAsync();
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Found {entries.Count} valid template entries");
 				}
-				else
+			}
+			else if (type == typeof(CFileTemplateCreatorUserConfig))
+			{
+				// Post-Change Script
 				{
-					Directory.CreateDirectory(Path.GetDirectoryName(creatorConfigFilePath));
-					File.Create(creatorConfigFilePath).Dispose();
+					if (!string.IsNullOrWhiteSpace(UserConfig.PostChangeScriptPath) && !Path.IsPathRooted(UserConfig.PostChangeScriptPath))
+					{
+						lock (SolutionFolder)
+						{
+							UserConfig.PostChangeScriptAbsolutePath = Path.Combine(SolutionFolder, UserConfig.PostChangeScriptPath);
+						}
+
+						UserConfig.PostChangeScriptAbsolutePath = Path.GetFullPath(UserConfig.PostChangeScriptAbsolutePath);
+					}
+
+					bool exists = File.Exists(UserConfig.PostChangeScriptAbsolutePath);
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] PostChangeScript at '{UserConfig.PostChangeScriptAbsolutePath}' (File exists: {exists})");
 				}
 
-                if (File.Exists(userConfigFilePath))
-                {
-                    FileOptions combinedOption = FileOptions.Asynchronous | FileOptions.SequentialScan | FileOptions.None;
-                    using var fileStream = new FileStream(
-                        userConfigFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, combinedOption);
-
-                    UserConfig = await JsonSerializer.DeserializeAsync<CFileTemplateCreatorUserConfig>(fileStream);
-
-                    // Post-Change Script
-                    {
-                        if (!string.IsNullOrWhiteSpace(UserConfig.PostChangeScriptPath) && !Path.IsPathRooted(UserConfig.PostChangeScriptPath))
-                        {
-                            lock (SolutionFolder)
-                            {
-                                UserConfig.PostChangeScriptAbsolutePath = Path.Combine(SolutionFolder, UserConfig.PostChangeScriptPath);
-                            }
-
-                            UserConfig.PostChangeScriptAbsolutePath = Path.GetFullPath(UserConfig.PostChangeScriptAbsolutePath);
-                        }
-
-                        bool exists = File.Exists(UserConfig.PostChangeScriptAbsolutePath);
-                        await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] PostChangeScript at '{UserConfig.PostChangeScriptAbsolutePath}' (File exists: {exists})");
-                    }
-
-                    // Post-Change project to build
-                    {
-                        bool exists = (await VS.Solutions.FindProjectsAsync(UserConfig.PostChangeProjectToBuild)) != null;
-                        await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] PostChangeProjectToBuild is '{UserConfig.PostChangeProjectToBuild}' (Exists: {exists})");
-                    }
-
-                    await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] Finished loading user config.");
-                    await EstablishPerforceConnectionAsync();
-                }
-                else
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(userConfigFilePath));
-					await SaveConfigAsync();
-                }
-            }
-			catch (Exception ex)
-			{
-				await DiagnosticUtils.ReportExceptionFromExtensionAsync(
-					"Exception while loading File Template Creator Config File",
-					ex);
+				// Post-Change project to build
+				{
+					bool exists = (await VS.Solutions.FindProjectsAsync(UserConfig.PostChangeProjectToBuild)) != null;
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileTemplateCreator] PostChangeProjectToBuild is '{UserConfig.PostChangeProjectToBuild}' (Exists: {exists})");
+				}
 			}
-		}
-
-		public async Task<bool> SaveConfigAsync()
-		{
-			var options = new JsonSerializerOptions { WriteIndented = true };
-			string[] configFilePaths = GetConfigFilePaths();
-
-			await EstablishPerforceConnectionAsync();
-			bool isWritable = !File.Exists(configFilePaths[1]) || configFilePaths[1].IsFileWritable();
-
-			if (isWritable)
-			{
-				using FileStream fileStream = File.Create(configFilePaths[1]);
-				JsonSerializer.Serialize(fileStream, UserConfig, options);
-			}
-
-			return isWritable;
 		}
 
 		public async Task<bool> EstablishPerforceConnectionAsync()
@@ -433,12 +304,5 @@ namespace GameCodersToolkit.Configuration
 
 			return false;
 		}
-
-		public CFileTemplateCreatorConfig CreatorConfig { get; set; } = new CFileTemplateCreatorConfig();
-		public CFileTemplateCreatorUserConfig UserConfig { get; set; } = new CFileTemplateCreatorUserConfig();
-		private FileSystemWatcher ConfigFileWatcher { get; set; }
-        private FileSystemWatcher UserConfigFileWatcher { get; set; }
-
-        private string SolutionFolder { get; set; } = "";
 	}
 }
