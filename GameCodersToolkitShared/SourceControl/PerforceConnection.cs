@@ -1,6 +1,7 @@
 ﻿using GameCodersToolkit.Utils;
 using Perforce.P4;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -41,12 +42,19 @@ namespace GameCodersToolkit.SourceControl
 		{
 			get { return mClientSpec; }
 		}
+
+		public bool IsIdenticalTo(PerforceID other)
+		{
+			return ServerURI == other.ServerURI && UserName == other.UserName && ClientSpec == other.ClientSpec;
+		}
 	}
 
 	public class PerforceConnection
 	{
 		private static Connection s_perforceConnection;
 		private static Repository s_repository;
+		private static PerforceID s_currentId;
+
 		public static bool IsEnabled { get; set; } = true;
 
 		public static async Task<bool> InitAsync(PerforceID id)
@@ -54,11 +62,14 @@ namespace GameCodersToolkit.SourceControl
 			if (!IsEnabled)
 				return false;
 
-			return await Task.Run(async () =>
-			{
-				if (s_perforceConnection != null && s_perforceConnection.Status == ConnectionStatus.Connected)
-					return true;
+            bool hasConnection = s_perforceConnection != null && s_currentId != null && s_perforceConnection.Status == ConnectionStatus.Connected;
+            bool isConnectionDifferent = !hasConnection || !s_currentId.IsIdenticalTo(id);
 
+            if (hasConnection && !isConnectionDifferent)
+                return true;
+
+            return await Task.Run(async () =>
+			{
 				await ShutdownAsync();
 
 				Server server = new Server(new ServerAddress(id.ServerURI));
@@ -75,6 +86,10 @@ namespace GameCodersToolkit.SourceControl
 				try
 				{
 					bool result = s_perforceConnection.Connect(opconnect);
+					if (result)
+					{
+						s_currentId = id;
+					}
 					return result;
 				}
 				catch (Exception ex)
