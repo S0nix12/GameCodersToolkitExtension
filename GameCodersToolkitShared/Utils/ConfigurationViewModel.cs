@@ -56,11 +56,9 @@ namespace GameCodersToolkitShared.Utils
 
 		private void ApplyConfigValues()
 		{
-			Type configType = typeof(CAutoDataExposerUserConfig);
-
 			foreach (VariableViewModel vm in Variables)
 			{
-				PropertyInfo propertyInfo = configType.GetProperty(vm.Name);
+				PropertyInfo propertyInfo = TargetType.GetProperty(vm.Name);
 				propertyInfo.SetValue(TargetObject, vm.Value);
 			}
 		}

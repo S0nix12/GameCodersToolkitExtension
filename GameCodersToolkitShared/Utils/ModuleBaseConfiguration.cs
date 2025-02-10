@@ -154,6 +154,7 @@ namespace GameCodersToolkitShared.Utils
 		{
 			foreach (var configFile in ConfigFiles)
 			{
+				bool shouldSaveConfigAfterLoad = false;
 				string configFilePath = GetConfigFilePath(configFile);
 
 				OnPreConfigLoad?.Invoke(this, new ConfigFileEventArgs(configFile));
@@ -172,16 +173,24 @@ namespace GameCodersToolkitShared.Utils
 						using var fileStream = new FileStream(
 							configFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, combinedOption);
 
-						configFile.ConfigObject = await JsonSerializer.DeserializeAsync(fileStream, configFile.Type);
+						try
+						{
+							configFile.ConfigObject = await JsonSerializer.DeserializeAsync(fileStream, configFile.Type);
+						}
+						catch (JsonException e)
+                        {
+							// If the file couldn't be read, create a blank slate
+							configFile.ConfigObject = Activator.CreateInstance(configFile.Type);
+							shouldSaveConfigAfterLoad = true;
+                        }
 
 						await PostConfigLoad(configFile.Name, configFile.Type, configFile.ConfigObject);
 						await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[AutoDataExposer] Finished loading config.");
 					}
 					else
 					{
-						Directory.CreateDirectory(Path.GetDirectoryName(configFilePath));
-						SaveConfig(configFile);
-					}
+						shouldSaveConfigAfterLoad = true;
+                    }
 
 					OnConfigLoadSucceeded?.Invoke(this, new ConfigFileEventArgs(configFile));
 				}
@@ -193,6 +202,12 @@ namespace GameCodersToolkitShared.Utils
 
 					OnConfigLoadFailed?.Invoke(this, new ConfigFileEventArgs(configFile));
 				}
+
+				if (shouldSaveConfigAfterLoad)
+				{
+                    Directory.CreateDirectory(Path.GetDirectoryName(configFilePath));
+                    SaveConfig(configFile);
+                }
 			}
 		}
 
