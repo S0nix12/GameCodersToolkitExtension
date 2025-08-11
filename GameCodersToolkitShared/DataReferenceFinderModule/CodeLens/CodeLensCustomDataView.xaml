@@ -63,8 +63,9 @@
 				<Border MouseLeftButtonDown="DataReferenceDetails_MouseDown" PreviewMouseRightButtonDown="DataReferenceDetails_PreviewMouseRightButtonDown" Background="Transparent">
 					<Border.ContextMenu>
 						<ContextMenu>
-							<MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
-						</ContextMenu>
+                            <MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
+                            <MenuItem Header="Copy Data Path" Command="{Binding CopyDataPathCommand}" />
+                        </ContextMenu>
 					</Border.ContextMenu>
 					<Grid x:Name="DataReferenceDetailsPanel"
 							ToolTip="{Binding DataPath}" >

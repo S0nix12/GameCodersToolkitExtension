@@ -38,6 +38,7 @@ namespace GameCodersToolkit
 
 				AddService(typeof(ReferenceResultsWindowMessenger), (_, _, _) => Task.FromResult<object>(new ReferenceResultsWindowMessenger()));
 				AddService(typeof(QuickAttachService), (_, _, _) => Task.FromResult<object>(new QuickAttachService()));
+				AddService(typeof(QuickAutotestService), (_, _, _) => Task.FromResult<object>(new QuickAutotestService()));
 
 				await this.RegisterCommandsAsync();
 				this.RegisterToolWindows();
@@ -47,13 +48,15 @@ namespace GameCodersToolkit
 				DataLocationsConfig = new CDataLocationsConfiguration();
 				FileTemplateCreatorConfig = new CFileTemplateCreatorConfiguration();
                 AutoDataExposerConfig = new CAutoDataExposerConfiguration();
-                DataParsingEngine = new DataParsingEngine();
+				QuickAutotestConfig = new CQuickAutotestConfiguration();
+				DataParsingEngine = new DataParsingEngine();
 				ReferenceDatabase = new Database();
 				DataEditorConnection = new DataEditorConnection();
 
 				await DataLocationsConfig.InitAsync();
 				await FileTemplateCreatorConfig.InitAsync();
 				await AutoDataExposerConfig.InitAsync();
+				await QuickAutotestConfig.InitAsync();
 
 				IsLoaded = true;
 				PackageLoaded?.Invoke(this, new EventArgs());
@@ -77,6 +80,7 @@ namespace GameCodersToolkit
 		public static CDataLocationsConfiguration DataLocationsConfig { get; private set; }
 		public static CFileTemplateCreatorConfiguration FileTemplateCreatorConfig { get; private set; }
 		public static CAutoDataExposerConfiguration AutoDataExposerConfig { get; private set; }
+		public static CQuickAutotestConfiguration QuickAutotestConfig { get; private set; }
 		public static DataParsingEngine DataParsingEngine {  get; private set; }
 		public static DataReferenceFinderModule.ReferenceDatabase.Database ReferenceDatabase { get; private set; }
 		public static DataEditorConnection DataEditorConnection { get; private set; }

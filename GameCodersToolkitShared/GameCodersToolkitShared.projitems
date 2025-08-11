@@ -12,6 +12,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)autodataexposer\commands\ImplementRegistrationCodeCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AutoDataExposer\Commands\OpenAutoDataExposerConfigurationCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)autodataexposer\configuration\AutoDataExposerConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QuickAutotest\Commands\QuickAutotestSelectionCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QuickAutotest\Configuration\QuickAutotestConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QuickAutotest\QuickAutotestService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\VariableEditorTemplateSelector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\ConfigurationWindow.xaml.cs">
       <DependentUpon>ConfigurationWindow.xaml</DependentUpon>
@@ -117,5 +120,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)AutoDataExposer\Configuration\" />
+    <Folder Include="$(MSBuildThisFileDirectory)QuickAutotest\Commands\" />
   </ItemGroup>
 </Project>

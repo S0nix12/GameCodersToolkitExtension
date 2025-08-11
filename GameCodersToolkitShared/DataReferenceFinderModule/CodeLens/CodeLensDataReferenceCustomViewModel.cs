@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Data;
 using System.Xml.Linq;
 
@@ -29,6 +30,7 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 			DataEditorConnection dataEditorConnection = GameCodersToolkitPackage.DataEditorConnection;
 			dataEditorConnection.DataEditorConnectionStatusChanged += OnDataEditorConnectionStatusChanged;
 			openEntryInDataEditorCommand = new AsyncRelayCommand(OpenEntryInDataEditorAsync, CanExecuteOpenEntryInDataEditor);
+			copyDataPathCommand = new RelayCommand(CopyDataPath);
 			CanOpenInDataEditor = dataEditorConnection.IsConnectedToDataEditor;
 		}
 		public async Task OpenEntryInDataEditorAsync()
@@ -44,6 +46,11 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 				ParentIdentifierString = m_sourceDetails.ParentIdentifierString
 			};
 			await GameCodersToolkitPackage.DataEditorConnection.OpenInDataEditorAsync(message);
+		}
+
+		public void CopyDataPath()
+		{
+			Clipboard.SetText(DataPath);
 		}
 
 		public virtual async Task<bool> OpenInVisualStudioAsync()
@@ -83,6 +90,8 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 
 		private AsyncRelayCommand openEntryInDataEditorCommand;
 		public IAsyncRelayCommand OpenEntryInDataEditorCommand { get => openEntryInDataEditorCommand; }
+		private RelayCommand copyDataPathCommand;
+		public IRelayCommand CopyDataPathCommand { get => copyDataPathCommand; }
 
 		private bool m_canOpenInDataEditor = false;
 		public bool CanOpenInDataEditor { get => m_canOpenInDataEditor; set { SetProperty(ref m_canOpenInDataEditor, value); OpenEntryInDataEditorCommand.NotifyCanExecuteChanged(); } }

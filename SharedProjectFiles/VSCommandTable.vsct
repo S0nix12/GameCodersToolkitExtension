@@ -38,6 +38,9 @@
       <Group guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup" priority="0x0400">
         <Parent guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplateExtensionsMenu"/>
       </Group>
+      <Group guid="QuickAutotestCommandSet_Guid" id="QuickAutotestToolbarGroup" priority="0x0000">
+        <Parent guid="QuickAutotestCommandSet_Guid" id="QuickAutotestToolbar"/>
+      </Group>
 
       <Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerExtensionsMenuGroup" priority="0x0500">
         <Parent guid="AutoDataExposerSet_Guid" id="OpenAutoDataExposerCreatorConfigExtensionsMenu"/>
@@ -91,6 +94,12 @@
         <Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerContextMenuGroup" />
         <Strings>
           <ButtonText>Expose Function As</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="QuickAutotestCommandSet_Guid" id="QuickAutotestToolbar" type="Toolbar">
+        <CommandFlag>DefaultDocked</CommandFlag>
+        <Strings>
+          <ButtonText>Quick Autotest</ButtonText>
         </Strings>
       </Menu>
     </Menus>
@@ -322,6 +331,16 @@
           <LocCanonicalName>.GameCodersToolkit.QuickAttachSelector</LocCanonicalName>
         </Strings>
       </Combo>
+
+      <!-- Quick Autotest Toolbar-->
+      <Combo guid="QuickAutotestCommandSet_Guid" id="QuickAutotestSelector" type="IndexCombo" defaultWidth="300" idCommandList="QuickAutotestSelectorListCmd">
+        <CommandFlag>IconAndText</CommandFlag>
+        <Strings>
+          <ButtonText>Quick Autotest:</ButtonText>
+          <ToolTipText>Select Target to Quick Autotest</ToolTipText>
+          <LocCanonicalName>.GameCodersToolkit.QuickAutotestSelector</LocCanonicalName>
+        </Strings>
+      </Combo>
     </Combos>
   </Commands>
 
@@ -348,6 +367,11 @@
     <!-- Quick Attach Toolbar-->
     <CommandPlacement guid="QuickAttachCommandSet_Guid" id="QuickAttachSelector" priority="0x0010">
       <Parent guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbarGroup"/>
+    </CommandPlacement>
+
+    <!-- Quick Autotest Toolbar-->
+    <CommandPlacement guid="QuickAutotestCommandSet_Guid" id="QuickAutotestSelector" priority="0x0010">
+      <Parent guid="QuickAutotestCommandSet_Guid" id="QuickAutotestToolbarGroup"/>
     </CommandPlacement>
   </CommandPlacements>
 
@@ -413,6 +437,14 @@
       <IDSymbol name="AutoDataExposerExtensionsMenuGroup" value="0x0007" />
       <IDSymbol name="OpenAutoDataExposerCreatorConfigExtensionsMenu" value="0x0030"/>
       <IDSymbol name="OpenAutoDataExposerConfig" value="0x0040"/>
+    </GuidSymbol>
+
+    <GuidSymbol name="QuickAutotestCommandSet_Guid" value="{718FFD5B-45AB-462D-9469-FB5149818089}">
+      <IDSymbol name="QuickAutotestToolbar" value="0x0010"/>
+      <IDSymbol name="QuickAutotestToolbarGroup" value="0x0020"/>
+      <IDSymbol name="QuickAutotestCommand" value="0x0100"/>
+      <IDSymbol name="QuickAutotestSelector" value="0x0200"/>
+      <IDSymbol name="QuickAutotestSelectorListCmd" value="0x0300"/>
     </GuidSymbol>
   </Symbols>
 </CommandTable>

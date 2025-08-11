@@ -5,6 +5,7 @@ using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.Utils;
 using Microsoft.VisualStudio.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 {
@@ -29,6 +30,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			DataEditorConnection dataEditorConnection = GameCodersToolkitPackage.DataEditorConnection;
 			dataEditorConnection.DataEditorConnectionStatusChanged += OnDataEditorConnectionStatusChanged;
 			openEntryInDataEditorCommand = new AsyncRelayCommand(OpenEntryInDataEditorAsync, CanExecuteOpenEntryInDataEditor);
+			copyDataPathCommand = new RelayCommand(CopyDataPath);
 			CanOpenInDataEditor = dataEditorConnection.IsConnectedToDataEditor;
 		}
 
@@ -42,6 +44,12 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		{
 			await GameCodersToolkitPackage.DataEditorConnection.OpenInDataEditorAsync(SourceEntry);
 		}
+
+		public void CopyDataPath()
+		{
+			Clipboard.SetText(DataPath);
+		}
+
 		public virtual async Task<bool> OpenInVisualStudioAsync()
 		{
 			if (SourceEntry != null)
@@ -87,6 +95,8 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 		private AsyncRelayCommand openEntryInDataEditorCommand;
 		public IAsyncRelayCommand OpenEntryInDataEditorCommand { get => openEntryInDataEditorCommand; }
+		private RelayCommand copyDataPathCommand;
+		public IRelayCommand CopyDataPathCommand { get => copyDataPathCommand; }
 
 		private bool m_canOpenInDataEditor = false;
 		public bool CanOpenInDataEditor { get => m_canOpenInDataEditor; set { SetProperty(ref m_canOpenInDataEditor, value); OpenEntryInDataEditorCommand.NotifyCanExecuteChanged(); } }

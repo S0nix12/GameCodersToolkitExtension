@@ -49,8 +49,9 @@
 							<Border.ContextMenu>
 								<ContextMenu>
 									<MenuItem Header="Find References" Command="{Binding FindReferencesCommand}"/>
-									<MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
-								</ContextMenu>
+                                    <MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
+                                    <MenuItem Header="Copy Data Path" Command="{Binding CopyDataPathCommand}" />
+                                </ContextMenu>
 							</Border.ContextMenu>
 							<StackPanel Orientation="Horizontal">
 								<TextBlock Text="{Binding Name}" />

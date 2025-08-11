@@ -29,8 +29,9 @@
 					<Border Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MouseLeftButtonDown="Border_MouseDown" PreviewMouseRightButtonDown="Border_PreviewRightMouseDown">
 						<Border.ContextMenu>
 							<ContextMenu>
-								<MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
-							</ContextMenu>
+                                <MenuItem Header="Open In Data Editor" Command="{Binding OpenEntryInDataEditorCommand}" />
+                                <MenuItem Header="Copy Data Path" Command="{Binding CopyDataPathCommand}" />
+                            </ContextMenu>
 						</Border.ContextMenu>
 						<StackPanel Orientation="Horizontal">
 							<TextBlock Text="{Binding LineNumber, StringFormat=Line: {0}}" />

@@ -150,6 +150,11 @@ namespace GameCodersToolkitShared.Utils
 
 		}
 
+		protected virtual BaseConfig GetNewConfigObject(string name, Type type)
+		{
+			return null;
+		}
+
 		private async Task LoadConfigsAsync()
 		{
 			foreach (var configFile in ConfigFiles)
@@ -189,6 +194,11 @@ namespace GameCodersToolkitShared.Utils
 					}
 					else
 					{
+						BaseConfig newObject = GetNewConfigObject(configFile.Name, configFile.Type);
+						if (newObject != null )
+						{
+							configFile.ConfigObject = newObject;
+						}
 						shouldSaveConfigAfterLoad = true;
                     }
 
