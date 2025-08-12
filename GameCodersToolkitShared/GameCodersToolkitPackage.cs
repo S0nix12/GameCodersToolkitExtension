@@ -26,6 +26,7 @@ namespace GameCodersToolkit
 	[ProvideService(typeof(ReferenceResultsWindowMessenger), IsAsyncQueryable = true)]
 	[ProvideService(typeof(QuickAttachService), IsAsyncQueryable = true)]
 	[ProvideOptionPage(typeof(QuickAttach.OptionsProvider.QuickAttachOptionsOptions), "Game Coders Toolkit", "Quick Attach", 0, 0, true, SupportsProfiles = true)]
+    [ProvideOptionPage(typeof(QuickAutotest.OptionsProvider.QuickAutotestOptionsOptions), "Game Coders Toolkit", "Quick Autotest", 0, 0, true, SupportsProfiles = true)]
 	[ProvideOptionPage(typeof(DataReferenceFinderModule.OptionsProvider.DataReferenceFinderOptionsOptions), "Game Coders Toolkit", "Data Reference Finder", 0, 0, true, SupportsProfiles = true)]
 	public sealed class GameCodersToolkitPackage : ToolkitPackage
 	{

@@ -30,7 +30,7 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 			DataEditorConnection dataEditorConnection = GameCodersToolkitPackage.DataEditorConnection;
 			dataEditorConnection.DataEditorConnectionStatusChanged += OnDataEditorConnectionStatusChanged;
 			openEntryInDataEditorCommand = new AsyncRelayCommand(OpenEntryInDataEditorAsync, CanExecuteOpenEntryInDataEditor);
-			copyDataPathCommand = new RelayCommand(CopyDataPath);
+			copyDataPathCommand = new AsyncRelayCommand(CopyDataPathAsync);
 			CanOpenInDataEditor = dataEditorConnection.IsConnectedToDataEditor;
 		}
 		public async Task OpenEntryInDataEditorAsync()
@@ -48,9 +48,12 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 			await GameCodersToolkitPackage.DataEditorConnection.OpenInDataEditorAsync(message);
 		}
 
-		public void CopyDataPath()
+		public async Task CopyDataPathAsync()
 		{
-			Clipboard.SetText(DataPath);
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+			string copyString = $"File: {SourceFile}\nPath: {DataPath}";
+			ClipboardHelper.TrySetText(copyString);
 		}
 
 		public virtual async Task<bool> OpenInVisualStudioAsync()
@@ -90,8 +93,8 @@ namespace GameCodersToolkitShared.DataReferenceFinderModule.CodeLens
 
 		private AsyncRelayCommand openEntryInDataEditorCommand;
 		public IAsyncRelayCommand OpenEntryInDataEditorCommand { get => openEntryInDataEditorCommand; }
-		private RelayCommand copyDataPathCommand;
-		public IRelayCommand CopyDataPathCommand { get => copyDataPathCommand; }
+		private AsyncRelayCommand copyDataPathCommand;
+		public IAsyncRelayCommand CopyDataPathCommand { get => copyDataPathCommand; }
 
 		private bool m_canOpenInDataEditor = false;
 		public bool CanOpenInDataEditor { get => m_canOpenInDataEditor; set { SetProperty(ref m_canOpenInDataEditor, value); OpenEntryInDataEditorCommand.NotifyCanExecuteChanged(); } }

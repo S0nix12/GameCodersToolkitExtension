@@ -4,6 +4,7 @@ using GameCodersToolkit.DataReferenceFinderModule.DataEditorCommunication;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.Utils;
 using Microsoft.VisualStudio.Text;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -30,7 +31,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			DataEditorConnection dataEditorConnection = GameCodersToolkitPackage.DataEditorConnection;
 			dataEditorConnection.DataEditorConnectionStatusChanged += OnDataEditorConnectionStatusChanged;
 			openEntryInDataEditorCommand = new AsyncRelayCommand(OpenEntryInDataEditorAsync, CanExecuteOpenEntryInDataEditor);
-			copyDataPathCommand = new RelayCommand(CopyDataPath);
+			copyDataPathCommand = new AsyncRelayCommand(CopyDataPathAsync);
 			CanOpenInDataEditor = dataEditorConnection.IsConnectedToDataEditor;
 		}
 
@@ -45,10 +46,13 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			await GameCodersToolkitPackage.DataEditorConnection.OpenInDataEditorAsync(SourceEntry);
 		}
 
-		public void CopyDataPath()
+		public async Task CopyDataPathAsync()
 		{
-			Clipboard.SetText(DataPath);
-		}
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            string copyString = $"Name: {Name}\nPath: {DataPath}";
+            ClipboardHelper.TrySetText(copyString);
+        }
 
 		public virtual async Task<bool> OpenInVisualStudioAsync()
 		{
@@ -95,8 +99,8 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 
 		private AsyncRelayCommand openEntryInDataEditorCommand;
 		public IAsyncRelayCommand OpenEntryInDataEditorCommand { get => openEntryInDataEditorCommand; }
-		private RelayCommand copyDataPathCommand;
-		public IRelayCommand CopyDataPathCommand { get => copyDataPathCommand; }
+		private AsyncRelayCommand copyDataPathCommand;
+		public IAsyncRelayCommand CopyDataPathCommand { get => copyDataPathCommand; }
 
 		private bool m_canOpenInDataEditor = false;
 		public bool CanOpenInDataEditor { get => m_canOpenInDataEditor; set { SetProperty(ref m_canOpenInDataEditor, value); OpenEntryInDataEditorCommand.NotifyCanExecuteChanged(); } }

@@ -55,7 +55,7 @@ namespace GameCodersToolkit.SourceControl
 		private static Repository s_repository;
 		private static PerforceID s_currentId;
 
-		public static bool IsEnabled { get; set; } = true;
+		public static bool IsEnabled { get; set; } = false;
 
 		public static async Task<bool> InitAsync(PerforceID id)
 		{

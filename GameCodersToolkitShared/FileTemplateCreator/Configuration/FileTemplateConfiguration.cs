@@ -296,7 +296,7 @@ namespace GameCodersToolkit.Configuration
 
 		public async Task<bool> EstablishPerforceConnectionAsync()
 		{
-			if (!string.IsNullOrWhiteSpace(UserConfig.P4Server))
+			if (false && !string.IsNullOrWhiteSpace(UserConfig.P4Server))
 			{
 				PerforceID id = new PerforceID(UserConfig.P4Server, UserConfig.P4UserName, UserConfig.P4Workspace);
 				await PerforceConnection.InitAsync(id);

@@ -1,6 +1,7 @@
 ﻿using EnvDTE80;
 using EnvDTE90;
 using GameCodersToolkit.Configuration;
+using GameCodersToolkit.QuickAutotest;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -14,18 +15,43 @@ namespace GameCodersToolkit.QuickAttach
 		private string outSelectedChoice = "";
 
 		protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
-		{
-			QuickAutotestService service = await Package.GetServiceAsync<QuickAutotestService, QuickAutotestService>();
-			if (e.OutValue != IntPtr.Zero)
+        {
+            QuickAutotestService service = await Package.GetServiceAsync<QuickAutotestService, QuickAutotestService>();
+
+			if (QuickAutotestOptions.Instance.RunTestsOnSelect)
 			{
-				outSelectedChoice = "Select the Autotest to run...";
-				Marshal.GetNativeVariantForObject(outSelectedChoice, e.OutValue);
-			}
-			else if (e.InValue is int index)
+                service.SelectAutotestEntry(-1);
+
+                if (e.OutValue != IntPtr.Zero)
+                {
+                    outSelectedChoice = "Select the Autotest to run...";
+                    Marshal.GetNativeVariantForObject(outSelectedChoice, e.OutValue);
+                }
+                else if (e.InValue is int index)
+                {
+                    service.ExecuteAutotestEntry(index);
+                }
+            }
+			else
 			{
-				service.SelectAutotestEntry(index);
-			}
-		}
+                if (e.OutValue != IntPtr.Zero)
+                {
+                    if (service.SelectedAutotest != null)
+                    {
+                        outSelectedChoice = service.SelectedAutotest.GetFormatedEntryName();
+                        Marshal.GetNativeVariantForObject(outSelectedChoice, e.OutValue);
+                    }
+                    else
+                    {
+                        outSelectedChoice = "Select autotest...";
+                    }
+                }
+                else if (e.InValue is int index)
+                {
+                    service.SelectAutotestEntry(index);
+                }
+            }
+        }
 	}
 
 	[Command(PackageGuids.QuickAutotestCommandSet_GuidString, PackageIds.QuickAutotestSelectorListCmd)]
