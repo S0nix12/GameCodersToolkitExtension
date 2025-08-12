@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json.Serialization;
 using GameCodersToolkitShared.Utils;
 
@@ -9,6 +10,7 @@ namespace GameCodersToolkit.Configuration
 	{
 		public string DirectoryPath { get; set; }
 		public string FilePattern { get; set; } = "*.bat";
+		public bool IncludeSubfolders { get; set; } = false;
 		public Dictionary<string, int> HighPriorityFiles { get; set; } = [];
 
 		[JsonIgnore]
@@ -60,6 +62,7 @@ namespace GameCodersToolkit.Configuration
 				{
 					DirectoryPath = "OuterFolder/InnerFolder/AnotherFolder/",
 					FilePattern = "*.bat",
+					IncludeSubfolders = true,
 					HighPriorityFiles = new Dictionary<string, int>() 
 					{
 						{ "DoNothing.bat", 2 }
@@ -97,7 +100,12 @@ namespace GameCodersToolkit.Configuration
 						}
 					}
 
-					string[] files = Directory.GetFiles(entry.DirectoryPathAbsolute, entry.FilePattern, SearchOption.AllDirectories);
+					if (!Directory.Exists(entry.DirectoryPathAbsolute))
+					{
+						continue;
+					}
+
+					string[] files = Directory.GetFiles(entry.DirectoryPathAbsolute, entry.FilePattern, entry.IncludeSubfolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
 					foreach (string file in files)
 					{
@@ -116,12 +124,9 @@ namespace GameCodersToolkit.Configuration
 					}
 				}
 
-				sortingPairs.Sort((tuple1, tuple2) =>
-				{
-					return tuple1.Item1.CompareTo(tuple2.Item1);
-				});
+				var sortedFiles = sortingPairs.OrderBy(x => x.Item1).ThenBy(x => x.Item2.Name).ToList();
 
-				foreach (var pair in sortingPairs)
+				foreach (var pair in sortedFiles)
 				{
 					service.Autotests.Add(pair.Item2);
 				}
