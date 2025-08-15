@@ -50,7 +50,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		{
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            string copyString = $"Name: {Name}\nPath: {DataPath}";
+            string copyString = $"File: {SourceEntry.SourceFile}\nPath: {DataPath}";
             ClipboardHelper.TrySetText(copyString);
         }
 
