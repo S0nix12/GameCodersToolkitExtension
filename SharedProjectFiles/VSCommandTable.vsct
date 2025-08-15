@@ -309,6 +309,17 @@
           <LocCanonicalName>.AutoDataExposer.OpenAutoDataExposerConfig</LocCanonicalName>
         </Strings>
       </Button>
+
+		<!-- Quick Autotest -->
+      <Button guid="QuickAutotestCommandSet_Guid" id="QuickAutotestCommand" priority="0x0000">
+        <Parent guid="QuickAutotestCommandSet_Guid" id="QuickAutotestToolbarGroup"/>
+        <Icon guid="ImageCatalogGuid" id="RunFilter"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Quick Autotest</ButtonText>
+          <LocCanonicalName>.GameCodersToolkit.QuickAutotest</LocCanonicalName>
+        </Strings>
+      </Button>
     </Buttons>
 
     <Combos>
