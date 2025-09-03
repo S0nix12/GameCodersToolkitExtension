@@ -35,7 +35,7 @@ namespace GameCodersToolkit.Configuration
 		{
 			ModuleName = "DataReferenceFinder";
 
-			AddConfigFile<CFileTemplateCreatorConfig>("DataLocationsConfig", cConfigFilePath);
+			AddConfigFile<CDataLocationsConfig>("DataLocationsConfig", cConfigFilePath);
 		}
 
 		public List<CDataLocationEntry> GetLocationEntries()
