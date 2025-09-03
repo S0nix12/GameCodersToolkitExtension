@@ -218,6 +218,8 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			{
 				entryVM.SetSelectedTypeFilter(m_selectedTypeFilter);
 			}
+			// Make sure to apply search tokens again which include filtering individual entries for the selected type filter
+			OnSearchFilterUpdated();
 			FileEntriesView.Refresh();
 		}
 

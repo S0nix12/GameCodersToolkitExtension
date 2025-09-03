@@ -83,7 +83,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 				}
 				else
 				{
-					fileList = Directory.EnumerateFiles(dataLocation.Path, "*.xml", SearchOption.AllDirectories)
+					fileList = Directory.EnumerateFiles(dataLocation.Path, "*", SearchOption.AllDirectories)
 						.Where(path => dataLocation.ExtensionFilters.Contains(Path.GetExtension(path))).ToArray();
 				}
 				filesToParse.Add(new Tuple<string[], List<DataParsingDescription>>(fileList, parsingDescriptions));
