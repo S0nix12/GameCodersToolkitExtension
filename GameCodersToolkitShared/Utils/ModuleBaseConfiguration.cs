@@ -133,6 +133,19 @@ namespace GameCodersToolkitShared.Utils
 			ThreadHelper.JoinableTaskFactory.Run(LoadConfigsAsync);
 		}
 
+		public string GetConfigFilePath<T>() where T : BaseConfig
+		{
+			foreach (var config in ConfigFiles)
+			{
+				if (config.Type == typeof(T))
+				{
+					return GetConfigFilePath(config);
+				}
+			}
+
+			return "";
+		}
+
 		public string GetConfigFilePath(ConfigFile configFile)
 		{
 			string result = "";

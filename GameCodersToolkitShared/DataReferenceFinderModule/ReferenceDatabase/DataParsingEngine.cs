@@ -16,7 +16,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 
 		public DataParsingEngine()
 		{
-			GameCodersToolkitPackage.DataLocationsConfig.SolutionConfigLoaded += OnSolutionConfigLoaded;
+			GameCodersToolkitPackage.DataLocationsConfig.ConfigLoaded += OnSolutionConfigLoadedAsync;
 		}
 
 		public async Task ParseDataAsync()
@@ -240,12 +240,12 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 			}
 		}
 
-		private void OnSolutionConfigLoaded(object sender, EventArgs args)
+		private async Task OnSolutionConfigLoadedAsync(object sender, EventArgs args)
 		{
 			DataReferenceFinderOptions userOptions = DataReferenceFinderOptions.Instance;
 			if (userOptions.ReferenceDatabaseAutoParseOnSolutionLoad)
 			{
-				Task.Run(ParseDataAsync).FireAndForget();
+				await ParseDataAsync();
 			}
 		}
 

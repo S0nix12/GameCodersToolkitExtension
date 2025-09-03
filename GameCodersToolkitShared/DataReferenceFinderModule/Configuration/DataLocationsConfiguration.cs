@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase;
 using GameCodersToolkit.Utils;
 using Microsoft.VisualStudio.Threading;
+using GameCodersToolkitShared.Utils;
 
 namespace GameCodersToolkit.Configuration
 {
@@ -16,7 +17,7 @@ namespace GameCodersToolkit.Configuration
 		public List<string> UsedParsingDescriptions { get; set; } = new List<string>();
 	}
 
-	public class CDataLocationsConfig
+	public class CDataLocationsConfig : BaseConfig
 	{
 		public string DataProjectBasePath { get; set; } = "";
 		public List<CDataLocationEntry> DataLocationEntries { get; set; } = new List<CDataLocationEntry>();
@@ -25,22 +26,16 @@ namespace GameCodersToolkit.Configuration
 		public string DataEditorServerUri { get; set; } = "";
 	}
 
-	public class CDataLocationsConfiguration
+	public class CDataLocationsConfiguration : ModuleBaseConfiguration
 	{
 		// Relative to the Solution Directory
 		public const string cConfigFilePath = "DataReferenceFinder/DataReferenceFinderConfig.json";
 
-		public async Task InitAsync()
+		public CDataLocationsConfiguration()
 		{
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-			bool isSolutionOpen = await VS.Solutions.IsOpenAsync();
+			ModuleName = "DataReferenceFinder";
 
-			if (isSolutionOpen)
-			{
-				HandleOpenSolution(await VS.Solutions.GetCurrentSolutionAsync());
-			}
-
-			VS.Events.SolutionEvents.OnAfterOpenSolution += HandleOpenSolution;
+			AddConfigFile<CFileTemplateCreatorConfig>("DataLocationsConfig", cConfigFilePath);
 		}
 
 		public List<CDataLocationEntry> GetLocationEntries()
@@ -68,148 +63,52 @@ namespace GameCodersToolkit.Configuration
 			return DataLocationsConfig.DataProjectBasePath;
 		}
 
-		private void HandleOpenSolution(Solution solution = null)
-		{
-			if (solution != null)
-			{
-				lock (SolutionFolder)
-				{
-					SolutionFolder = Path.GetDirectoryName(solution.FullPath);
-				}
-			}
-
-			ThreadHelper.JoinableTaskFactory.Run(LoadSolutionConfigAsync);
-			SolutionConfigLoaded?.Invoke(this, new EventArgs());
-		}
-
-		public async Task LoadSolutionConfigAsync()
-		{
-			string configFilePath = GetConfigFilePath();
-			await LoadConfigAsync(configFilePath);
-
-			ConfigFileWatcher?.Dispose();
-			ConfigFileWatcher = new FileSystemWatcher(Path.GetDirectoryName(configFilePath));
-			ConfigFileWatcher.EnableRaisingEvents = true;
-			ConfigFileWatcher.Changed += OnConfigFileChanged;
-			ConfigFileWatcher.IncludeSubdirectories = false;
-			ConfigFileWatcher.Filter = "*.*";
-			ConfigFileWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.CreationTime | NotifyFilters.LastAccess;
-		}
-
-		private void OnConfigFileChanged(object sender, FileSystemEventArgs eventArgs)
-		{
-			if (eventArgs.FullPath == GetConfigFilePath())
-			{
-				ThreadHelper.JoinableTaskFactory.Run(async delegate { await LoadConfigAsync(eventArgs.FullPath); });
-			}
-		}
-
 		public string GetConfigFilePath()
 		{
-			lock (SolutionFolder)
-			{
-				string configFilePath = Path.Combine(SolutionFolder, cConfigFilePath);
-				return configFilePath;
-			}
+			return GetConfigFilePath<CDataLocationsConfig>();
 		}
 
-		private async Task LoadConfigAsync(string filePath)
+		protected override async Task PostConfigLoad(string name, Type type, object configObject)
 		{
-			try
+			if (type == typeof(CDataLocationsConfig))
 			{
-				if (File.Exists(filePath))
+				List<CDataLocationEntry> entries = DataLocationsConfig.DataLocationEntries;
+				if (!string.IsNullOrEmpty(DataLocationsConfig.DataProjectBasePath))
 				{
-					FileOptions combinedOption = FileOptions.Asynchronous | FileOptions.SequentialScan | FileOptions.None;
-					using var fileStream = new FileStream(
-						filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, combinedOption);
-
-					DataLocationsConfig = await JsonSerializer.DeserializeAsync<CDataLocationsConfig>(fileStream);
-					List<CDataLocationEntry> entries = DataLocationsConfig.DataLocationEntries;
-					if (!string.IsNullOrEmpty(DataLocationsConfig.DataProjectBasePath))
+					if (!Path.IsPathRooted(DataLocationsConfig.DataProjectBasePath))
 					{
-						if (!Path.IsPathRooted(DataLocationsConfig.DataProjectBasePath))
+						lock (SolutionFolder)
+						{
+							DataLocationsConfig.DataProjectBasePath = Path.Combine(SolutionFolder, DataLocationsConfig.DataProjectBasePath);
+						}
+					}
+					DataLocationsConfig.DataProjectBasePath = Path.GetFullPath(DataLocationsConfig.DataProjectBasePath);
+				}
+
+				foreach (CDataLocationEntry entry in entries)
+				{
+					if (!Path.IsPathRooted(entry.Path))
+					{
+						if (Directory.Exists(DataLocationsConfig.DataProjectBasePath))
+						{
+							entry.Path = Path.Combine(DataLocationsConfig.DataProjectBasePath, entry.Path);
+						}
+						else
 						{
 							lock (SolutionFolder)
 							{
-								DataLocationsConfig.DataProjectBasePath = Path.Combine(SolutionFolder, DataLocationsConfig.DataProjectBasePath);
+								entry.Path = Path.Combine(SolutionFolder, entry.Path);
 							}
 						}
-						DataLocationsConfig.DataProjectBasePath = Path.GetFullPath(DataLocationsConfig.DataProjectBasePath);
 					}
-
-					foreach (CDataLocationEntry entry in entries)
-					{
-						if (!Path.IsPathRooted(entry.Path))
-						{
-							if (Directory.Exists(DataLocationsConfig.DataProjectBasePath))
-							{
-								entry.Path = Path.Combine(DataLocationsConfig.DataProjectBasePath, entry.Path);
-							}
-							else
-							{
-								lock (SolutionFolder)
-								{
-									entry.Path = Path.Combine(SolutionFolder, entry.Path);
-								}
-							}
-						}
-						entry.Path = Path.GetFullPath(entry.Path);
-					}
+					entry.Path = Path.GetFullPath(entry.Path);
 				}
-				else
-				{
-					Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-					File.Create(filePath).Dispose();
-				}
-			}
-			catch (Exception ex)
-			{
-				await DiagnosticUtils.ReportExceptionFromExtensionAsync(
-					"Exception while loading Data Reference Finder Config File",
-					ex);
+				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync("[DataReferenceFinder] Parsed new DataLocationsConfig");
 			}
 			await ConfigLoaded?.InvokeAsync(this, new EventArgs());
 		}
 
-		public async Task SaveConfigAsync()
-		{
-			// Add mock data
-			DataLocationsConfig.DataLocationEntries.Clear();
-
-			CDataLocationEntry sampleConfigEntry = new CDataLocationEntry();
-			sampleConfigEntry.Path = "E:\\KlaxEngineProject_MockData";
-			sampleConfigEntry.Name = "Full Mock Data";
-			sampleConfigEntry.ExtensionFilters.Add("*");
-			sampleConfigEntry.ExtensionFilters.Add(".json");
-			sampleConfigEntry.ExtensionFilters.Add(".xml");
-
-			DataLocationsConfig.DataLocationEntries.Add(sampleConfigEntry);
-
-			CDataLocationEntry hddConfigEntry = new CDataLocationEntry();
-			hddConfigEntry.Path = "D:\\Documents\\KlaxEngineProject_MockData";
-			hddConfigEntry.Name = "Full HDD Mock Data";
-
-			DataLocationsConfig.DataLocationEntries.Add(hddConfigEntry);
-
-			CDataLocationEntry smallDataConfigEntry = new CDataLocationEntry();
-			smallDataConfigEntry.Path = "E:\\KlaxEngineProject_MockData\\ProjectData_1";
-			smallDataConfigEntry.Name = "Small Mock Data Subset";
-			smallDataConfigEntry.ExtensionFilters.Add(".json");
-
-			DataLocationsConfig.DataLocationEntries.Add(smallDataConfigEntry);
-			DataLocationsConfig.GuidFieldIdentifiers.Add("ExampleIdentifier");
-
-			var options = new JsonSerializerOptions { WriteIndented = true };
-			string configFilePath = GetConfigFilePath();
-
-			using FileStream fileStream = File.Create(configFilePath);
-			await JsonSerializer.SerializeAsync(fileStream, DataLocationsConfig, options);
-		}
-
 		public AsyncEventHandler ConfigLoaded { get; set; }
-		public EventHandler SolutionConfigLoaded { get; set; }
-		private CDataLocationsConfig DataLocationsConfig { get; set; } = new CDataLocationsConfig();
-		private FileSystemWatcher ConfigFileWatcher { get; set; }
-		private string SolutionFolder { get; set; } = "";
+		private CDataLocationsConfig DataLocationsConfig { get { return GetConfig<CDataLocationsConfig>(); } }
 	}
 }
