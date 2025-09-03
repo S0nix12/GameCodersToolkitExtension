@@ -43,6 +43,10 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 				await parseTask;
 				stopwatch.Stop();
 				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync("Finished Data Parsing. Took: " + stopwatch.ElapsedMilliseconds + "ms");
+				stopwatch.Restart();
+				GameCodersToolkitPackage.ReferenceDatabase.CollectReferenceCounts();
+				stopwatch.Stop();
+				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync("Finished Data Reference Counting. Took: " + stopwatch.ElapsedMilliseconds + "ms");
 			}
 			catch (Exception ex)
 			{

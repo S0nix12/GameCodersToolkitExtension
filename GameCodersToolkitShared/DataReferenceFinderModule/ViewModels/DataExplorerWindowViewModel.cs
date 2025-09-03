@@ -106,6 +106,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 						Entries.Add(subTypeVM);
 					}
 					subTypeVM.DataEntries.Add(new DataEntryViewModel(dataEntry));
+					ReferenceCount += dataEntry.NumReferences;
 				}
 			}
 
@@ -145,6 +146,9 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		private ListCollectionView m_entriesView;
 		public ICollectionView EntriesView { get => m_entriesView; }
 		public int DataEntryCount { get => Entries.Sum(e => e.DataEntries.Count); }
+
+		public int m_referenceCount;
+		public int ReferenceCount { get => m_referenceCount; set => SetProperty(ref m_referenceCount, value); }
 
 		private string m_selectedTypeFilter = "";
 		public bool HasAnyChildsMatchType { get; private set; } = true;
@@ -188,6 +192,23 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		void Refresh()
 		{
 			Task.Run(GameCodersToolkitPackage.DataParsingEngine.ParseDataAsync).FireAndForget();
+		}
+
+		[RelayCommand]
+		void DumpUnreferencedFiles()
+		{
+			GameCodersToolkitPackage.ExtensionOutput.WriteLine("Start logging all files without referenced entries of type: " + SelectedTypeFilter);
+			GameCodersToolkitPackage.ExtensionOutput.WriteLine("==================================================================");
+			foreach (var file in FileEntries)
+			{
+				if (file.HasAnyChildsMatchType && file.ReferenceCount == 0)
+				{
+					GameCodersToolkitPackage.ExtensionOutput.WriteLine(file.FullFilePath);
+				}
+			}
+			GameCodersToolkitPackage.ExtensionOutput.WriteLine("==================================================================");
+			GameCodersToolkitPackage.ExtensionOutput.WriteLine("End logging all files without referenced entries");
+			GameCodersToolkitPackage.ExtensionOutput.ActivateAsync().FireAndForget();
 		}
 
 		void PopulateEntries()
@@ -276,6 +297,21 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 									break;
 								case EDatabseUpdateEvent.DatabaseCleared:
 									FileEntries.Clear();
+									break;
+								case EDatabseUpdateEvent.ReferenceCountUpdated:
+									foreach (var fileEntry in FileEntries)
+									{
+										int totalFileReferences = 0;
+										foreach (var subTypeEntry in fileEntry.Entries)
+										{
+											foreach (var dataEntry in subTypeEntry.DataEntries)
+											{
+												dataEntry.NumReferences = dataEntry.SourceEntry.NumReferences;
+												totalFileReferences += dataEntry.SourceEntry.NumReferences;
+											}
+										}
+										fileEntry.ReferenceCount = totalFileReferences;
+									}
 									break;
 							}
 						}

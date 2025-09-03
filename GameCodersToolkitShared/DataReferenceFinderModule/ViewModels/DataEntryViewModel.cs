@@ -22,6 +22,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 			SourceEntry = sourceEntry;
 			LineNumber = SourceEntry.SourceLineNumber;
 			Name = SourceEntry.Name;
+			NumReferences = SourceEntry.NumReferences;
 			DataPath = ReferenceDatabaseUtils.CreateDataEntryPathString(sourceEntry);
 			Init();
 		}
@@ -120,5 +121,8 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ViewModels
 		private int m_lineNumber;
 
 		public int LineNumber { get => m_lineNumber; set => m_lineNumber = value; }
+
+		private int m_numReferences;
+		public int NumReferences { get => m_numReferences; set => m_numReferences = value; }
 	}
 }

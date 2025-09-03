@@ -11,7 +11,8 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 	{
 		EntriesAdded,
 		EntriesRemoved,
-		DatabaseCleared
+		DatabaseCleared,
+		ReferenceCountUpdated
 	}
 
 	public class DatabaseUpdatedEventArgs
@@ -48,6 +49,27 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 					DatabaseUpdated?.Invoke(this, updateEventArgs);
 				}).FireAndForget();
 			}
+		}
+
+		public void CollectReferenceCounts()
+		{
+			foreach (var fileEntry in EntriesPerFile)
+			{
+				foreach (var dataEntry in fileEntry.Value)
+				{
+					if (ReferencedByEntries.TryGetValue(dataEntry.Identifier, out HashSet<DataEntry> references))
+					{
+						dataEntry.NumReferences = references.Count;
+					}
+					else
+					{
+						dataEntry.NumReferences = 0;
+					}
+				}
+			}
+			DatabaseUpdatedEventArgs updateEventArgs = new DatabaseUpdatedEventArgs();
+			updateEventArgs.UpdateType = EDatabseUpdateEvent.ReferenceCountUpdated;
+			DatabaseUpdated?.Invoke(this, updateEventArgs);
 		}
 
 		public void TrimDatabaseExcess()

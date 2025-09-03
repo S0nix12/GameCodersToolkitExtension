@@ -100,6 +100,7 @@ namespace GameCodersToolkit.DataReferenceFinderModule.ReferenceDatabase
 		public string SubType { get; set; } = "NoSubType";
 		public string SourceFile { get; set; }
 		public int SourceLineNumber { get; set; }
+		public int NumReferences { get; set; }
 
 
 		public DataEntry Parent { get; set; }
