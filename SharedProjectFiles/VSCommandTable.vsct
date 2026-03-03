@@ -48,6 +48,9 @@
       <Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerContextMenuGroup" priority="0x0100">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
       </Group>
+      <Group guid="FileRenamerSet_Guid" id="FileRenamerExtensionsMenuGroup" priority="0x0400">
+        <Parent guid="FileRenamerSet_Guid" id="FileRenamerExtensionsMenu"/>
+      </Group>
       <Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenuGroup" priority="0x0602">
         <Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenu" />
       </Group>
@@ -100,6 +103,12 @@
         <CommandFlag>DefaultDocked</CommandFlag>
         <Strings>
           <ButtonText>Quick Autotest</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="FileRenamerSet_Guid" id="FileRenamerExtensionsMenu" type="Menu" priority="0x0950">
+        <Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
+        <Strings>
+          <ButtonText>File Renamer</ButtonText>
         </Strings>
       </Menu>
     </Menus>
@@ -310,6 +319,17 @@
         </Strings>
       </Button>
 
+      <!-- File Renamer -->
+      <Button guid="FileRenamerSet_Guid" id="RenameFile" priority="0x0100" type="Button">
+        <Parent guid="FileRenamerSet_Guid" id="FileRenamerExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="Rename"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Rename File</ButtonText>
+          <LocCanonicalName>.FileRenamer.RenameFile</LocCanonicalName>
+        </Strings>
+      </Button>
+
 		<!-- Quick Autotest -->
       <Button guid="QuickAutotestCommandSet_Guid" id="QuickAutotestCommand" priority="0x0000">
         <Parent guid="QuickAutotestCommandSet_Guid" id="QuickAutotestToolbarGroup"/>
@@ -456,6 +476,12 @@
       <IDSymbol name="QuickAutotestCommand" value="0x0100"/>
       <IDSymbol name="QuickAutotestSelector" value="0x0200"/>
       <IDSymbol name="QuickAutotestSelectorListCmd" value="0x0300"/>
+    </GuidSymbol>
+
+    <GuidSymbol name="FileRenamerSet_Guid" value="{B4ABC14D-63F7-4B59-9135-F97A04402205}">
+      <IDSymbol name="FileRenamerExtensionsMenu" value="0x0010"/>
+      <IDSymbol name="RenameFile" value="0x0020"/>
+      <IDSymbol name="FileRenamerExtensionsMenuGroup" value="0x0007"/>
     </GuidSymbol>
   </Symbols>
 </CommandTable>

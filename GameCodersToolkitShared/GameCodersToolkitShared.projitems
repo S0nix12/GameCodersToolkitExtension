@@ -12,12 +12,15 @@
     <Compile Include="$(MSBuildThisFileDirectory)autodataexposer\commands\ImplementRegistrationCodeCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AutoDataExposer\Commands\OpenAutoDataExposerConfigurationCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)autodataexposer\configuration\AutoDataExposerConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Converters\BoolToResultColorConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Converters\InverseBooleanConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)quickautotest\commands\QuickAutotestCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAutotest\Commands\QuickAutotestSelectionCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAutotest\Configuration\QuickAutotestConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)quickautotest\options\QuickAutotestOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAutotest\QuickAutotestService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)utils\ClipboardHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utils\ModernFolderPicker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\VariableEditorTemplateSelector.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\ConfigurationWindow.xaml.cs">
       <DependentUpon>ConfigurationWindow.xaml</DependentUpon>
@@ -79,6 +82,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Windows\NameDialogWindow.xaml.cs">
       <DependentUpon>NameDialogWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Commands\RenameFileCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\ViewModels\RenameFileDialogViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Windows\RenameFileWindow.xaml.cs">
+      <DependentUpon>RenameFileWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)GameCodersToolkitPackage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\ConfigurationViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\ModuleBaseConfiguration.cs" />
@@ -113,6 +121,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Windows\NameDialogWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)FileRenamer\Windows\RenameFileWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

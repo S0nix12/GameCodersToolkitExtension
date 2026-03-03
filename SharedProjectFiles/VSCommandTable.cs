@@ -33,6 +33,9 @@ namespace GameCodersToolkit
 
         public const string QuickAutotestCommandSet_GuidString = "718ffd5b-45ab-462d-9469-fb5149818089";
         public static Guid QuickAutotestCommandSet_Guid = new Guid(QuickAutotestCommandSet_GuidString);
+
+        public const string FileRenamerSet_GuidString = "b4abc14d-63f7-4b59-9135-f97a04402205";
+        public static Guid FileRenamerSet_Guid = new Guid(FileRenamerSet_GuidString);
     }
 
     /// <summary>
@@ -90,5 +93,8 @@ namespace GameCodersToolkit
         public const int QuickAutotestCommand = 0x0100;
         public const int QuickAutotestSelector = 0x0200;
         public const int QuickAutotestSelectorListCmd = 0x0300;
+        public const int FileRenamerExtensionsMenu = 0x0010;
+        public const int RenameFile = 0x0020;
+        public const int FileRenamerExtensionsMenuGroup = 0x0007;
     }
 }

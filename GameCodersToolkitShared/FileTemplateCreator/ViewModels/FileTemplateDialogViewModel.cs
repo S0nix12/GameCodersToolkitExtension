@@ -139,6 +139,11 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 	public partial class CFileTemplateDialogViewModel : ObservableObject
 	{
+		// Auto-detection state: stores the cmake file / uber / group found from the active file
+		private string m_autoSelectedCMakeFileID;
+		private string m_autoSelectedUberFileName;
+		private string m_autoSelectedGroupName;
+
 		public CFileTemplateDialogViewModel()
 		{
 			CreateTemplateList();
@@ -250,7 +255,9 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 			if (SelectedTemplate != null)
 			{
-				CreateMakeFiles(SelectedTemplate.MakeFileID);
+				// If auto-detection found a cmake file, prefer it over the template's default
+				string makeFileId = m_autoSelectedCMakeFileID ?? SelectedTemplate.MakeFileID;
+				CreateMakeFiles(makeFileId);
             }
 
             UpdateWindowTitleIndex();
@@ -661,7 +668,15 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 				var expandedElementsList = GetExpandedElementsList();
 				m_currentMakeFile = value;
 				CreateMakeFileContent();
-				ApplyExpandedElementsList(expandedElementsList);
+
+				if (m_autoSelectedUberFileName != null)
+				{
+					ApplyAutoSelectedExpansion();
+				}
+				else
+				{
+					ApplyExpandedElementsList(expandedElementsList);
+				}
 			}
 		}
 
@@ -697,5 +712,130 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 		public event EventHandler OnRequestClose;
 		public event Func<object, Microsoft.Win32.SaveFileDialog, bool?> OnSaveFileDialogCreated;
+
+		[RelayCommand]
+		private async Task AutoSelectFromActiveFileAsync()
+		{
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+			DocumentView activeDoc = await VS.Documents.GetActiveDocumentViewAsync();
+			if (activeDoc?.FilePath == null)
+			{
+				Community.VisualStudio.Toolkit.MessageBox msgBox = new Community.VisualStudio.Toolkit.MessageBox();
+				await msgBox.ShowWarningAsync("No active document found.");
+				return;
+			}
+
+			string activeFilePath = Path.GetFullPath(activeDoc.FilePath);
+
+			CFileTemplateCreatorConfiguration config = GameCodersToolkitPackage.FileTemplateCreatorConfig;
+			IMakeFileParser parser = config.CreateParser();
+			if (parser == null)
+				return;
+
+			// Reset auto-selection
+			m_autoSelectedCMakeFileID = null;
+			m_autoSelectedUberFileName = null;
+			m_autoSelectedGroupName = null;
+
+			// Search through all CMake files to find the active file
+			foreach (CMakeFileEntry cmakeEntry in config.CreatorConfig.CMakeFileEntries)
+			{
+				string cmakePath = cmakeEntry.AbsolutePath;
+				if (!File.Exists(cmakePath))
+					continue;
+
+				IMakeFile makeFile = parser.Parse(cmakePath);
+				string cmakeDir = Path.GetDirectoryName(cmakePath);
+
+				foreach (IUberFileNode uberFile in makeFile.GetUberFiles())
+				{
+					foreach (IGroupNode group in uberFile.GetGroups())
+					{
+						foreach (IFileNode file in group.GetFiles())
+						{
+							string fileEntry = file.GetName().Trim();
+							try
+							{
+								string fileAbsPath = Path.GetFullPath(Path.Combine(cmakeDir, fileEntry));
+								if (string.Equals(fileAbsPath, activeFilePath, StringComparison.OrdinalIgnoreCase))
+								{
+									m_autoSelectedCMakeFileID = cmakeEntry.ID;
+									m_autoSelectedUberFileName = uberFile.GetName();
+									m_autoSelectedGroupName = group.GetName();
+
+									// Populate MakeFiles list if needed and select the matching entry
+									if (MakeFiles.Count == 0)
+									{
+										CreateMakeFiles(cmakeEntry.ID);
+									}
+									else
+									{
+										CMakeFileViewModel matchVm = MakeFiles.FirstOrDefault(mf => mf.ID == cmakeEntry.ID);
+										if (matchVm != null)
+										{
+											matchVm.IsSelected = true;
+										}
+									}
+
+									// If OnMakeFileSelected didn't parse (no template selected yet), parse manually
+									if (CurrentMakeFile == null)
+									{
+										CurrentMakeFile = makeFile;
+									}
+
+									return;
+								}
+							}
+							catch (Exception)
+							{
+								// Skip malformed paths
+							}
+						}
+					}
+				}
+			}
+
+			// Not found in any CMake file
+			Community.VisualStudio.Toolkit.MessageBox notFoundBox = new Community.VisualStudio.Toolkit.MessageBox();
+			await notFoundBox.ShowWarningAsync($"Could not find '{Path.GetFileName(activeFilePath)}' in any configured CMake file.");
+		}
+
+		private void ApplyAutoSelectedExpansion()
+		{
+			if (m_autoSelectedUberFileName == null)
+				return;
+
+			bool found = false;
+			foreach (object obj in MakeFileContent)
+			{
+				if (obj is CMakeFileUberFileViewModel uberVm)
+				{
+					if (uberVm.Name == m_autoSelectedUberFileName)
+					{
+						found = true;
+						uberVm.IsExpanded = true;
+						foreach (object child in uberVm.Children)
+						{
+							if (child is CMakeFileGroupViewModel groupVm)
+							{
+								groupVm.IsExpanded = (groupVm.Name == m_autoSelectedGroupName);
+							}
+						}
+					}
+					else
+					{
+						uberVm.IsExpanded = false;
+					}
+				}
+			}
+
+			// If the uber file wasn't found (user changed cmake file), clear auto-selection
+			if (!found)
+			{
+				m_autoSelectedCMakeFileID = null;
+				m_autoSelectedUberFileName = null;
+				m_autoSelectedGroupName = null;
+			}
+		}
 	}
 }

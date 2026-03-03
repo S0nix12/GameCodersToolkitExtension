@@ -55,7 +55,7 @@ namespace GameCodersToolkit.SourceControl
 		private static Repository s_repository;
 		private static PerforceID s_currentId;
 
-		public static bool IsEnabled { get; set; } = true;
+		public static bool IsEnabled { get; set; } = false;
 
 		public static async Task<bool> InitAsync(PerforceID id)
 		{
@@ -183,6 +183,36 @@ namespace GameCodersToolkit.SourceControl
 				{
 					await DiagnosticUtils.ReportExceptionFromExtensionAsync(
 						"Exception checking out file from Perforce",
+						ex);
+
+					return false;
+				}
+			});
+		}
+
+		public static async Task<bool> TryMoveFilesAsync(string oldPath, string newPath)
+		{
+			if (!IsEnabled)
+				return false;
+
+			return await Task.Run(async () =>
+			{
+				if (s_perforceConnection == null || s_perforceConnection.Status == ConnectionStatus.Disconnected)
+					return false;
+
+				try
+				{
+					FileSpec fromFile = new FileSpec(new ClientPath(oldPath));
+					FileSpec toFile = new FileSpec(new ClientPath(newPath));
+
+					Options options = new Options();
+					IList<FileSpec> movedFiles = s_perforceConnection.Client.MoveFiles(fromFile, toFile, options);
+					return movedFiles != null && movedFiles.Count > 0;
+				}
+				catch (Exception ex)
+				{
+					await DiagnosticUtils.ReportExceptionFromExtensionAsync(
+						"Exception moving/renaming file in Perforce",
 						ex);
 
 					return false;

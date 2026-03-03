@@ -139,8 +139,15 @@
             </TreeView>
         </ScrollViewer>
 
-        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"  Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="5" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"  Grid.Column="1" Grid.Row="5" Grid.ColumnSpan="3" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
             <TextBlock FontSize="18" TextWrapping="WrapWithOverflow" Text="{Binding SelectedTemplate.Description}" />
         </ScrollViewer>
+
+        <Button Grid.Column="5" Grid.Row="5"
+                Content="From Active File"
+                Command="{Binding AutoSelectFromActiveFileCommand}"
+                Padding="12,6" FontSize="16"
+                VerticalAlignment="Center" HorizontalAlignment="Right"
+                ToolTip="Detect which CMake file, uber file and group the currently open file belongs to and pre-select them" />
     </Grid>
 </Window>
