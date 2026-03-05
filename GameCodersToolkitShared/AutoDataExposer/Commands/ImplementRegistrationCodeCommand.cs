@@ -235,7 +235,7 @@ namespace GameCodersToolkit.AutoDataExposerModule
 
 		private string GetTokenizedString(string str, CAutoDataExposerEntry entry, ExposedFunctionInfo info)
 		{
-			string authorName = GameCodersToolkitPackage.AutoDataExposerConfig.UserConfig.AuthorName;
+			string authorName = GameCodersToolkitPackage.SharedConfig?.UserConfig?.AuthorName;
 			if (string.IsNullOrWhiteSpace(authorName))
 			{
 				authorName = "AuthorName";

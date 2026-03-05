@@ -68,9 +68,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)ExtensionMethods\ExtensionMethodsCollections.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ExtensionMethods\TreeViewExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ExtensionMethods\XmlExtensionMethods.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\SharedConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\OpenSharedConfigurationCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Configuration\BuildPostChangeProjectCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\AddFileTemplateCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Commands\CreateFileFromTemplateCommand.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Commands\OpenConfigurationCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\Configuration\FileTemplateConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\MakeFileParser\MakeFileParserInterface.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileTemplateCreator\MakeFileParser\SimpleMakeFileParser.cs" />

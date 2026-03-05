@@ -62,8 +62,6 @@ namespace GameCodersToolkit.Configuration
 	public class CAutoDataExposerUserConfig : BaseConfig
 	{
 		[Editable(allowEdit: true)]
-		public string AuthorName { get; set; }
-		[Editable(allowEdit: true)]
 		public bool JumpToGeneratedCode { get; set; }
 	}
 

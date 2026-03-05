@@ -120,29 +120,30 @@
 
 		<TextBlock Grid.Row="23" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource VSTextBlockStyle}">Results</TextBlock>
 
-		<!-- Progress indicator (visible while renaming) -->
-		<StackPanel Grid.Row="25" Grid.Column="1" Grid.ColumnSpan="3" Margin="0,0,0,8"
-					Visibility="{Binding IsRenaming, Converter={StaticResource BoolToVisibilityConverter}}">
-			<ProgressBar IsIndeterminate="True" Height="4" />
-			<TextBlock Text="{Binding ProgressMessage}" Style="{StaticResource VSTextBlockStyle}"
-					   Opacity="0.8" Margin="0,4,0,0" />
-		</StackPanel>
+		<DockPanel Grid.Row="25" Grid.Column="1" Grid.ColumnSpan="3">
+			<!-- Progress indicator (visible while renaming) -->
+			<StackPanel DockPanel.Dock="Top" Margin="0,0,0,8"
+						Visibility="{Binding IsRenaming, Converter={StaticResource BoolToVisibilityConverter}}">
+				<ProgressBar IsIndeterminate="True" Height="4" />
+				<TextBlock Text="{Binding ProgressMessage}" Style="{StaticResource VSTextBlockStyle}"
+						   Opacity="0.8" Margin="0,4,0,0" />
+			</StackPanel>
 
-		<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
-					  Grid.Row="25" Grid.Column="1" Grid.ColumnSpan="3"
-					  PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
-			<ItemsControl ItemsSource="{Binding RenameResults}">
-				<ItemsControl.ItemTemplate>
-					<DataTemplate DataType="{x:Type vm:CRenameResultViewModel}">
-						<StackPanel Orientation="Horizontal" Margin="0,2">
-							<TextBlock Text="{Binding Description}"
-									   Foreground="{Binding IsSuccess, Converter={StaticResource BoolToResultColorConverter}}"
-									   Style="{StaticResource VSTextBlockStyle}" TextWrapping="WrapWithOverflow" />
-						</StackPanel>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
-		</ScrollViewer>
+			<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
+						  PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+				<ItemsControl ItemsSource="{Binding RenameResults}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate DataType="{x:Type vm:CRenameResultViewModel}">
+							<StackPanel Orientation="Horizontal" Margin="0,2">
+								<TextBlock Text="{Binding Description}"
+										   Foreground="{Binding IsSuccess, Converter={StaticResource BoolToResultColorConverter}}"
+										   Style="{StaticResource VSTextBlockStyle}" TextWrapping="WrapWithOverflow" />
+							</StackPanel>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
+		</DockPanel>
 
 		<Grid Grid.Row="27" Grid.Column="1" Grid.ColumnSpan="3">
 			<Grid.ColumnDefinitions>

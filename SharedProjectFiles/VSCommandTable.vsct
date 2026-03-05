@@ -51,6 +51,9 @@
       <Group guid="FileRenamerSet_Guid" id="FileRenamerExtensionsMenuGroup" priority="0x0400">
         <Parent guid="FileRenamerSet_Guid" id="FileRenamerExtensionsMenu"/>
       </Group>
+      <Group guid="ConfigurationSet_Guid" id="ConfigurationExtensionsMenuGroup" priority="0x0400">
+        <Parent guid="ConfigurationSet_Guid" id="ConfigurationExtensionsMenu"/>
+      </Group>
       <Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenuGroup" priority="0x0602">
         <Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerSubMenu" />
       </Group>
@@ -109,6 +112,12 @@
         <Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
         <Strings>
           <ButtonText>File Renamer</ButtonText>
+        </Strings>
+      </Menu>
+      <Menu guid="ConfigurationSet_Guid" id="ConfigurationExtensionsMenu" type="Menu" priority="0x0960">
+        <Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
+        <Strings>
+          <ButtonText>Game Coders Toolkit</ButtonText>
         </Strings>
       </Menu>
     </Menus>
@@ -298,16 +307,6 @@
         </Strings>
       </Button>
 
-      <Button guid="FileTemplateCreatorSet_Guid" id="OpenTemplateFileCreatorConfig" priority="0x0200" type="Button">
-        <Parent guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup"/>
-        <Icon guid="ImageCatalogGuid" id="ConfigurationEditor"/>
-        <CommandFlag>IconIsMoniker</CommandFlag>
-        <Strings>
-          <ButtonText>Open Config</ButtonText>
-          <LocCanonicalName>.FileTemplateCreator.OpenTemplateFileCreatorConfig</LocCanonicalName>
-        </Strings>
-      </Button>
-
       <!-- Auto Data Exposer -->
       <Button guid="AutoDataExposerSet_Guid" id="OpenAutoDataExposerConfig" priority="0x0200" type="Button">
         <Parent guid="AutoDataExposerSet_Guid" id="AutoDataExposerExtensionsMenuGroup"/>
@@ -327,6 +326,27 @@
         <Strings>
           <ButtonText>Rename File</ButtonText>
           <LocCanonicalName>.FileRenamer.RenameFile</LocCanonicalName>
+        </Strings>
+      </Button>
+
+      <!-- Shared Configuration -->
+      <Button guid="ConfigurationSet_Guid" id="OpenSharedConfig" priority="0x0100" type="Button">
+        <Parent guid="ConfigurationSet_Guid" id="ConfigurationExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="ConfigurationEditor"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Configuration</ButtonText>
+          <LocCanonicalName>.GameCodersToolkit.OpenSharedConfig</LocCanonicalName>
+        </Strings>
+      </Button>
+
+      <Button guid="ConfigurationSet_Guid" id="BuildPostChangeProject" priority="0x0200" type="Button">
+        <Parent guid="ConfigurationSet_Guid" id="ConfigurationExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="BuildSelection"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Run CMake on Solution</ButtonText>
+          <LocCanonicalName>.GameCodersToolkit.BuildPostChangeProject</LocCanonicalName>
         </Strings>
       </Button>
 
@@ -482,6 +502,13 @@
       <IDSymbol name="FileRenamerExtensionsMenu" value="0x0010"/>
       <IDSymbol name="RenameFile" value="0x0020"/>
       <IDSymbol name="FileRenamerExtensionsMenuGroup" value="0x0007"/>
+    </GuidSymbol>
+
+    <GuidSymbol name="ConfigurationSet_Guid" value="{A3D1F2B4-5E6C-4A7D-8B9E-1C2D3F4A5B6C}">
+      <IDSymbol name="ConfigurationExtensionsMenu" value="0x0010"/>
+      <IDSymbol name="OpenSharedConfig" value="0x0020"/>
+      <IDSymbol name="BuildPostChangeProject" value="0x0030"/>
+      <IDSymbol name="ConfigurationExtensionsMenuGroup" value="0x0007"/>
     </GuidSymbol>
   </Symbols>
 </CommandTable>

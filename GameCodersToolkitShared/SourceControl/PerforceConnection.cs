@@ -55,7 +55,12 @@ namespace GameCodersToolkit.SourceControl
 		private static Repository s_repository;
 		private static PerforceID s_currentId;
 
-		public static bool IsEnabled { get; set; } = false;
+		public static bool IsEnabled { get; set; } = true;
+
+		public static bool IsConnected
+		{
+			get { return IsEnabled && s_perforceConnection != null && s_perforceConnection.Status == ConnectionStatus.Connected; }
+		}
 
 		public static async Task<bool> InitAsync(PerforceID id)
 		{

@@ -50,6 +50,7 @@ namespace GameCodersToolkit
 				FileTemplateCreatorConfig = new CFileTemplateCreatorConfiguration();
                 AutoDataExposerConfig = new CAutoDataExposerConfiguration();
 				QuickAutotestConfig = new CQuickAutotestConfiguration();
+				SharedConfig = new CSharedConfiguration();
 				DataParsingEngine = new DataParsingEngine();
 				ReferenceDatabase = new Database();
 				DataEditorConnection = new DataEditorConnection();
@@ -58,6 +59,7 @@ namespace GameCodersToolkit
 				await FileTemplateCreatorConfig.InitAsync();
 				await AutoDataExposerConfig.InitAsync();
 				await QuickAutotestConfig.InitAsync();
+				await SharedConfig.InitAsync();
 
 				IsLoaded = true;
 				PackageLoaded?.Invoke(this, new EventArgs());
@@ -82,6 +84,7 @@ namespace GameCodersToolkit
 		public static CFileTemplateCreatorConfiguration FileTemplateCreatorConfig { get; private set; }
 		public static CAutoDataExposerConfiguration AutoDataExposerConfig { get; private set; }
 		public static CQuickAutotestConfiguration QuickAutotestConfig { get; private set; }
+		public static CSharedConfiguration SharedConfig { get; private set; }
 		public static DataParsingEngine DataParsingEngine {  get; private set; }
 		public static DataReferenceFinderModule.ReferenceDatabase.Database ReferenceDatabase { get; private set; }
 		public static DataEditorConnection DataEditorConnection { get; private set; }

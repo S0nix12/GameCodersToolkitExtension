@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using GameCodersToolkit.Utils;
+using System.Threading.Tasks;
 
 namespace GameCodersToolkit.FileRenamer.ViewModels
 {
@@ -216,6 +217,10 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 				return;
 			}
 
+			// Pre-check: warn if Perforce is not available
+			if (!await CheckPerforceAndConfirmAsync(filesToRename))
+				return;
+
 			IsRenaming = true;
 			RenameResults.Clear();
 			ProgressMessage = "Preparing...";
@@ -269,6 +274,46 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 				IsRenaming = false;
 				ProgressMessage = string.Empty;
 			}
+		}
+
+		private async Task<bool> CheckPerforceAndConfirmAsync(List<CRelatedFileViewModel> filesToRename)
+		{
+			List<string> warnings = new List<string>();
+
+			if (!PerforceConnection.IsEnabled)
+			{
+				warnings.Add("Perforce integration is disabled. Files will only be renamed on disk.");
+			}
+			else if (!PerforceConnection.IsConnected)
+			{
+				warnings.Add("There is no active Perforce connection. Files will only be renamed on disk and Perforce state will be out of sync.");
+			}
+			else
+			{
+				// Connection is active — try to check out each file as a pre-flight test
+				foreach (var file in filesToRename)
+				{
+					bool checkoutOk = await PerforceConnection.TryCheckoutFilesAsync(new string[] { file.FilePath });
+					if (!checkoutOk)
+					{
+						warnings.Add($"Failed to check out '{file.FileName}' from Perforce.");
+					}
+				}
+			}
+
+			if (warnings.Count == 0)
+				return true;
+
+			string warningMessage = string.Join("\n", warnings)
+				+ "\n\nDo you want to continue with the rename anyway?";
+
+			var result = System.Windows.MessageBox.Show(
+				warningMessage,
+				"Perforce Warning",
+				MessageBoxButton.YesNo,
+				MessageBoxImage.Warning);
+
+			return result == MessageBoxResult.Yes;
 		}
 
 		private async Task UpdateCMakeFilesAsync(Dictionary<string, string> renameMap)
@@ -388,84 +433,164 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 				includeReplacements.Add((pattern, pair.Key, pair.Value));
 			}
 
-			// Search through all source files in the project
-			string[] sourceExtensions = new[] { "*.cpp", "*.h", "*.inl", "*.hpp", "*.cxx", "*.c" };
-			List<string> sourceFiles = new List<string>();
-
-			foreach (string ext in sourceExtensions)
+			// Run the heavy file scanning on a background thread so the UI stays responsive
+			var scanResults = await Task.Run(() =>
 			{
-				sourceFiles.AddRange(Directory.GetFiles(searchRoot, ext, SearchOption.AllDirectories));
+				// Enumerate all source files in the project
+				string[] sourceExtensions = new[] { "*.cpp", "*.h", "*.inl", "*.hpp", "*.cxx", "*.c" };
+				List<string> sourceFiles = new List<string>();
+
+				foreach (string ext in sourceExtensions)
+				{
+					sourceFiles.AddRange(Directory.GetFiles(searchRoot, ext, SearchOption.AllDirectories));
+				}
+
+				ProgressMessage = $"Scanning 0 / {sourceFiles.Count} files for #include references...";
+
+				var changedFiles = new List<(string SourceFile, string ModifiedContent)>();
+				var changeLog = new List<(string FilePath, int LineNumber, string OldInclude, string NewInclude)>();
+				var failedFiles = new List<string>();
+
+				for (int i = 0; i < sourceFiles.Count; i++)
+				{
+					if (i % 50 == 0)
+					{
+						ProgressMessage = $"Scanning {i} / {sourceFiles.Count} files for #include references...";
+					}
+
+					string sourceFile = sourceFiles[i];
+					string content = File.ReadAllText(sourceFile);
+					string modifiedContent = content;
+					bool hasChanges = false;
+
+					// Determine the effective location of this source file after renaming.
+					// If this source file is itself being moved, use its new path as the
+					// reference point when computing relative include paths.
+					string effectiveSourcePath = sourceFile;
+					foreach (var pair in renameMap)
+					{
+						if (string.Equals(Path.GetFullPath(pair.Key), Path.GetFullPath(sourceFile), StringComparison.OrdinalIgnoreCase))
+						{
+							effectiveSourcePath = pair.Value;
+							break;
+						}
+					}
+
+					foreach (var (pattern, oldFilePath, newFilePath) in includeReplacements)
+					{
+						if (pattern.IsMatch(modifiedContent))
+						{
+							string newFileName = Path.GetFileName(newFilePath);
+
+							// Check if the file was moved to a different directory
+							string oldDir = Path.GetFullPath(Path.GetDirectoryName(oldFilePath)).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+							string newDir = Path.GetFullPath(Path.GetDirectoryName(newFilePath)).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+							bool directoryChanged = !string.Equals(oldDir, newDir, StringComparison.OrdinalIgnoreCase);
+
+							// Collect match details before replacing (line numbers are based on original content positions)
+							foreach (Match match in pattern.Matches(modifiedContent))
+							{
+								int lineNumber = modifiedContent.Substring(0, match.Index).Count(c => c == '\n') + 1;
+								string oldIncludeText = match.Value.Trim();
+								string newIncludeText;
+
+								if (directoryChanged)
+								{
+									string newRelativePath = effectiveSourcePath.MakeRelativePath(newFilePath).Replace('\\', '/');
+									string prefix = match.Groups[1].Value;
+									string suffix = match.Groups[4].Value;
+									newIncludeText = $"{prefix}{newRelativePath}{suffix}";
+								}
+								else
+								{
+									string prefix = match.Groups[1].Value;
+									string pathPart = match.Groups[2].Value;
+									string suffix = match.Groups[4].Value;
+									newIncludeText = $"{prefix}{pathPart}{newFileName}{suffix}";
+								}
+
+								changeLog.Add((sourceFile, lineNumber, oldIncludeText, newIncludeText.Trim()));
+							}
+
+							if (directoryChanged)
+							{
+								// When directory changed, recompute the relative path from the including file to the new location.
+								// Use effectiveSourcePath so that if this file is also being moved,
+								// the relative path is computed from its NEW location, not the old one.
+								modifiedContent = pattern.Replace(modifiedContent, match =>
+								{
+									string prefix = match.Groups[1].Value;  // #include " or #include <
+									string suffix = match.Groups[4].Value;  // " or >
+
+									// Compute new relative path from this source file's effective location to the new file location
+									string newRelativePath = effectiveSourcePath.MakeRelativePath(newFilePath);
+									// Normalize to forward slashes (standard for includes)
+									newRelativePath = newRelativePath.Replace('\\', '/');
+
+									return $"{prefix}{newRelativePath}{suffix}";
+								});
+							}
+							else
+							{
+								// Same directory: just replace the filename, keep existing path prefix
+								modifiedContent = pattern.Replace(modifiedContent, $"${{1}}${{2}}{newFileName}${{4}}");
+							}
+							hasChanges = true;
+						}
+					}
+
+					if (hasChanges)
+					{
+						changedFiles.Add((sourceFile, modifiedContent));
+					}
+				}
+
+				ProgressMessage = $"Scanned {sourceFiles.Count} files. Applying changes to {changedFiles.Count} file(s)...";
+				return (changedFiles, changeLog);
+			});
+
+			// Back on UI thread: write changed files (needs Perforce checkout)
+			int updatedFileCount = 0;
+			for (int i = 0; i < scanResults.changedFiles.Count; i++)
+			{
+				var (sourceFile, modifiedContent) = scanResults.changedFiles[i];
+				ProgressMessage = $"Writing changes to file {i + 1} / {scanResults.changedFiles.Count}...";
+
+				// Try checking out via Perforce
+				await PerforceConnection.TryCheckoutFilesAsync(new string[] { sourceFile });
+
+				// Fallback: make writable
+				if (!sourceFile.IsFileWritable())
+				{
+					sourceFile.MakeFileWritable();
+				}
+
+				if (sourceFile.IsFileWritable())
+				{
+					File.WriteAllText(sourceFile, modifiedContent);
+					updatedFileCount++;
+				}
+				else
+				{
+					RenameResults.Add(new CRenameResultViewModel
+					{
+						Description = $"Failed to update includes in (not writable): {Path.GetFileName(sourceFile)}",
+						IsSuccess = false
+					});
+				}
 			}
 
-			int updatedFileCount = 0;
-
-			foreach (string sourceFile in sourceFiles)
+			// Write detailed change log to the VS Output window
+			// Using "filepath(line):" format so entries are clickable in VS
+			if (scanResults.changeLog.Count > 0)
 			{
-				string content = File.ReadAllText(sourceFile);
-				string modifiedContent = content;
-				bool hasChanges = false;
-
-				foreach (var (pattern, oldFilePath, newFilePath) in includeReplacements)
+				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync("[FileRenamer] === #include reference changes ===");
+				foreach (var (filePath, lineNumber, oldInclude, newInclude) in scanResults.changeLog)
 				{
-					if (pattern.IsMatch(modifiedContent))
-					{
-						string newFileName = Path.GetFileName(newFilePath);
-
-						// Check if the file was moved to a different directory
-						string oldDir = Path.GetFullPath(Path.GetDirectoryName(oldFilePath)).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-						string newDir = Path.GetFullPath(Path.GetDirectoryName(newFilePath)).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-						bool directoryChanged = !string.Equals(oldDir, newDir, StringComparison.OrdinalIgnoreCase);
-
-						if (directoryChanged)
-						{
-							// When directory changed, recompute the relative path from the including file to the new location
-							modifiedContent = pattern.Replace(modifiedContent, match =>
-							{
-								string prefix = match.Groups[1].Value;  // #include " or #include <
-								string suffix = match.Groups[4].Value;  // " or >
-
-								// Compute new relative path from this source file to the new file location
-								string newRelativePath = sourceFile.MakeRelativePath(newFilePath);
-								// Normalize to forward slashes (standard for includes)
-								newRelativePath = newRelativePath.Replace('\\', '/');
-
-								return $"{prefix}{newRelativePath}{suffix}";
-							});
-						}
-						else
-						{
-							// Same directory: just replace the filename, keep existing path prefix
-							modifiedContent = pattern.Replace(modifiedContent, $"${{1}}${{2}}{newFileName}${{4}}");
-						}
-						hasChanges = true;
-					}
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(
+						$"{filePath}({lineNumber}): Changed '{oldInclude}' -> '{newInclude}'");
 				}
-
-				if (hasChanges)
-				{
-					// Try checking out via Perforce
-					await PerforceConnection.TryCheckoutFilesAsync(new string[] { sourceFile });
-
-					// Fallback: make writable
-					if (!sourceFile.IsFileWritable())
-					{
-						sourceFile.MakeFileWritable();
-					}
-
-					if (sourceFile.IsFileWritable())
-					{
-						File.WriteAllText(sourceFile, modifiedContent);
-						updatedFileCount++;
-					}
-					else
-					{
-						RenameResults.Add(new CRenameResultViewModel
-						{
-							Description = $"Failed to update includes in (not writable): {Path.GetFileName(sourceFile)}",
-							IsSuccess = false
-						});
-					}
-				}
+				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileRenamer] === Total: {scanResults.changeLog.Count} include(s) changed in {updatedFileCount} file(s) ===");
 			}
 
 			if (updatedFileCount > 0)

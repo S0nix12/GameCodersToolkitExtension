@@ -36,6 +36,9 @@ namespace GameCodersToolkit
 
         public const string FileRenamerSet_GuidString = "b4abc14d-63f7-4b59-9135-f97a04402205";
         public static Guid FileRenamerSet_Guid = new Guid(FileRenamerSet_GuidString);
+
+        public const string ConfigurationSet_GuidString = "a3d1f2b4-5e6c-4a7d-8b9e-1c2d3f4a5b6c";
+        public static Guid ConfigurationSet_Guid = new Guid(ConfigurationSet_GuidString);
     }
 
     /// <summary>
@@ -96,5 +99,9 @@ namespace GameCodersToolkit
         public const int FileRenamerExtensionsMenu = 0x0010;
         public const int RenameFile = 0x0020;
         public const int FileRenamerExtensionsMenuGroup = 0x0007;
+        public const int ConfigurationExtensionsMenu = 0x0010;
+        public const int OpenSharedConfig = 0x0020;
+        public const int BuildPostChangeProject = 0x0030;
+        public const int ConfigurationExtensionsMenuGroup = 0x0007;
     }
 }
