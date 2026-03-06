@@ -35,8 +35,8 @@
       <Group guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbarGroup" priority="0x0000">
         <Parent guid="QuickAttachCommandSet_Guid" id="QuickAttachToolbar"/>
       </Group>
-      <Group guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup" priority="0x0400">
-        <Parent guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplateExtensionsMenu"/>
+      <Group guid="FileToolsSet_Guid" id="FileToolsExtensionsMenuGroup" priority="0x0400">
+        <Parent guid="FileToolsSet_Guid" id="FileToolsExtensionsMenu"/>
       </Group>
       <Group guid="QuickAutotestCommandSet_Guid" id="QuickAutotestToolbarGroup" priority="0x0000">
         <Parent guid="QuickAutotestCommandSet_Guid" id="QuickAutotestToolbar"/>
@@ -48,9 +48,7 @@
       <Group guid="AutoDataExposerSet_Guid" id="AutoDataExposerContextMenuGroup" priority="0x0100">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
       </Group>
-      <Group guid="FileRenamerSet_Guid" id="FileRenamerExtensionsMenuGroup" priority="0x0400">
-        <Parent guid="FileRenamerSet_Guid" id="FileRenamerExtensionsMenu"/>
-      </Group>
+
       <Group guid="ConfigurationSet_Guid" id="ConfigurationExtensionsMenuGroup" priority="0x0400">
         <Parent guid="ConfigurationSet_Guid" id="ConfigurationExtensionsMenu"/>
       </Group>
@@ -84,10 +82,10 @@
           <ButtonText>Quick Attach</ButtonText>
         </Strings>
       </Menu>
-      <Menu guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplateExtensionsMenu" type="Menu" priority="0x0900">
+      <Menu guid="FileToolsSet_Guid" id="FileToolsExtensionsMenu" type="Menu" priority="0x0900">
         <Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
         <Strings>
-          <ButtonText>File Template Creator</ButtonText>
+          <ButtonText>File Tools</ButtonText>
         </Strings>
       </Menu>
       <Menu guid="AutoDataExposerSet_Guid" id="OpenAutoDataExposerCreatorConfigExtensionsMenu" priority="0x1000" type="Menu">
@@ -108,12 +106,7 @@
           <ButtonText>Quick Autotest</ButtonText>
         </Strings>
       </Menu>
-      <Menu guid="FileRenamerSet_Guid" id="FileRenamerExtensionsMenu" type="Menu" priority="0x0950">
-        <Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
-        <Strings>
-          <ButtonText>File Renamer</ButtonText>
-        </Strings>
-      </Menu>
+
       <Menu guid="ConfigurationSet_Guid" id="ConfigurationExtensionsMenu" type="Menu" priority="0x0960">
         <Parent guid="VSMainMenu" id="Extensions.DefaultGroup"/>
         <Strings>
@@ -296,14 +289,14 @@
         </Strings>
       </Button>
 
-      <!-- File Template Creator -->
-      <Button guid="FileTemplateCreatorSet_Guid" id="CreateFileFromTemplate" priority="0x0100" type="Button">
-        <Parent guid="FileTemplateCreatorSet_Guid" id="FileTemplateCreatorExtensionsMenuGroup"/>
+      <!-- File Tools -->
+      <Button guid="FileToolsSet_Guid" id="CreateFileFromTemplate" priority="0x0100" type="Button">
+        <Parent guid="FileToolsSet_Guid" id="FileToolsExtensionsMenuGroup"/>
         <Icon guid="ImageCatalogGuid" id="AddDocument"/>
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
           <ButtonText>Create File From Template</ButtonText>
-          <LocCanonicalName>.FileTemplateCreator.CreateFileFromTemplate</LocCanonicalName>
+          <LocCanonicalName>.FileTools.CreateFileFromTemplate</LocCanonicalName>
         </Strings>
       </Button>
 
@@ -318,14 +311,33 @@
         </Strings>
       </Button>
 
-      <!-- File Renamer -->
-      <Button guid="FileRenamerSet_Guid" id="RenameFile" priority="0x0100" type="Button">
-        <Parent guid="FileRenamerSet_Guid" id="FileRenamerExtensionsMenuGroup"/>
+      <Button guid="FileToolsSet_Guid" id="RenameFile" priority="0x0200" type="Button">
+        <Parent guid="FileToolsSet_Guid" id="FileToolsExtensionsMenuGroup"/>
         <Icon guid="ImageCatalogGuid" id="Rename"/>
         <CommandFlag>IconIsMoniker</CommandFlag>
         <Strings>
-          <ButtonText>Rename File</ButtonText>
-          <LocCanonicalName>.FileRenamer.RenameFile</LocCanonicalName>
+          <ButtonText>Rename/Move File</ButtonText>
+          <LocCanonicalName>.FileTools.RenameFile</LocCanonicalName>
+        </Strings>
+      </Button>
+
+      <Button guid="FileToolsSet_Guid" id="MoveFiles" priority="0x0300" type="Button">
+        <Parent guid="FileToolsSet_Guid" id="FileToolsExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="MoveToFolder"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Move File(s)</ButtonText>
+          <LocCanonicalName>.FileTools.MoveFiles</LocCanonicalName>
+        </Strings>
+      </Button>
+
+      <Button guid="FileToolsSet_Guid" id="MoveFolder" priority="0x0400" type="Button">
+        <Parent guid="FileToolsSet_Guid" id="FileToolsExtensionsMenuGroup"/>
+        <Icon guid="ImageCatalogGuid" id="FolderOpened"/>
+        <CommandFlag>IconIsMoniker</CommandFlag>
+        <Strings>
+          <ButtonText>Move Folder</ButtonText>
+          <LocCanonicalName>.FileTools.MoveFolder</LocCanonicalName>
         </Strings>
       </Button>
 
@@ -472,12 +484,13 @@
     </GuidSymbol>
 
 
-    <GuidSymbol name="FileTemplateCreatorSet_Guid" value="{C614691E-88DF-43E1-9D6E-28CA3A32FB57}">
-      <IDSymbol name="CreateFileFromTemplateExtensionsMenu" value="0x0010"/>
+    <GuidSymbol name="FileToolsSet_Guid" value="{C614691E-88DF-43E1-9D6E-28CA3A32FB57}">
+      <IDSymbol name="FileToolsExtensionsMenu" value="0x0010"/>
       <IDSymbol name="CreateFileFromTemplate" value="0x0020"/>
-      <IDSymbol name="OpenTemplateFileCreatorConfigExtensionsMenu" value="0x0030"/>
-      <IDSymbol name="OpenTemplateFileCreatorConfig" value="0x0040"/>
-      <IDSymbol name="FileTemplateCreatorExtensionsMenuGroup" value="0x0007" />
+      <IDSymbol name="RenameFile" value="0x0030"/>
+      <IDSymbol name="MoveFiles" value="0x0040"/>
+      <IDSymbol name="MoveFolder" value="0x0050"/>
+      <IDSymbol name="FileToolsExtensionsMenuGroup" value="0x0007" />
     </GuidSymbol>
 
     <GuidSymbol name="AutoDataExposerSet_Guid" value="{E7B95C06-F8A5-4C4C-BA8D-D727F865CEA6}">
@@ -498,11 +511,7 @@
       <IDSymbol name="QuickAutotestSelectorListCmd" value="0x0300"/>
     </GuidSymbol>
 
-    <GuidSymbol name="FileRenamerSet_Guid" value="{B4ABC14D-63F7-4B59-9135-F97A04402205}">
-      <IDSymbol name="FileRenamerExtensionsMenu" value="0x0010"/>
-      <IDSymbol name="RenameFile" value="0x0020"/>
-      <IDSymbol name="FileRenamerExtensionsMenuGroup" value="0x0007"/>
-    </GuidSymbol>
+
 
     <GuidSymbol name="ConfigurationSet_Guid" value="{A3D1F2B4-5E6C-4A7D-8B9E-1C2D3F4A5B6C}">
       <IDSymbol name="ConfigurationExtensionsMenu" value="0x0010"/>

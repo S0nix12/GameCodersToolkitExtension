@@ -14,9 +14,9 @@ namespace GameCodersToolkit
 				return;
 			}
 
-			if (string.IsNullOrWhiteSpace(sharedConfig.UserConfig.PostChangeProjectToBuild))
+			if (string.IsNullOrWhiteSpace(sharedConfig.UserConfig.CMakeUpdateProject))
 			{
-				await VS.MessageBox.ShowAsync("Game Coders Toolkit", "No PostChangeProjectToBuild is configured. Set it in the Configuration.");
+				await VS.MessageBox.ShowAsync("Game Coders Toolkit", "No CMake update project is configured. Set it in the Configuration.");
 				return;
 			}
 

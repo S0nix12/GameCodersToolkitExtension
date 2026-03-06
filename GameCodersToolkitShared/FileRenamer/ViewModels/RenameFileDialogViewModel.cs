@@ -35,8 +35,6 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 
 	public partial class CRenameFileDialogViewModel : ObservableObject
 	{
-		private static readonly string[] RelatedExtensions = new[] { ".h", ".cpp", ".inl", ".hpp", ".cxx", ".c" };
-
 		private readonly string m_activeFilePath;
 		private readonly string m_originalBaseName;
 		private readonly string m_originalDirectory;
@@ -66,7 +64,7 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 			// Find all files in the same directory with the same base name but different extensions
 			if (Directory.Exists(m_originalDirectory))
 			{
-				foreach (string extension in RelatedExtensions)
+				foreach (string extension in FileOperationHelper.SourceExtensions)
 				{
 					string candidatePath = Path.Combine(m_originalDirectory, m_originalBaseName + extension);
 					if (File.Exists(candidatePath))
@@ -437,10 +435,9 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 			var scanResults = await Task.Run(() =>
 			{
 				// Enumerate all source files in the project
-				string[] sourceExtensions = new[] { "*.cpp", "*.h", "*.inl", "*.hpp", "*.cxx", "*.c" };
 				List<string> sourceFiles = new List<string>();
 
-				foreach (string ext in sourceExtensions)
+				foreach (string ext in FileOperationHelper.SourceGlobPatterns)
 				{
 					sourceFiles.AddRange(Directory.GetFiles(searchRoot, ext, SearchOption.AllDirectories));
 				}

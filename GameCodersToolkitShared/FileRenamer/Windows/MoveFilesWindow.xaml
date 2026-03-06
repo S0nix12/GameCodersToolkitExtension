@@ -1,0 +1,230 @@
+<Window x:Class="GameCodersToolkit.FileRenamer.Windows.MoveFilesWindow"
+		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
+		xmlns:vshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+		xmlns:vm="clr-namespace:GameCodersToolkit.FileRenamer.ViewModels"
+		xmlns:ftvm="clr-namespace:GameCodersToolkit.FileTemplateCreator.ViewModels"
+		xmlns:converters="clr-namespace:GameCodersToolkitShared.FileRenamer.Converters"
+		d:DataContext="{d:DesignInstance Type=vm:CMoveFilesDialogViewModel}"
+		mc:Ignorable="d"
+		Height="850"
+		Width="1000"
+		toolkit:Themes.UseVsTheme="True"
+		WindowStartupLocation="CenterOwner"
+		Title="{Binding WindowTitle}">
+
+	<Window.Resources>
+		<GridLength x:Key="WindowContentMargin">15</GridLength>
+		<converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+		<converters:BoolToResultColorConverter x:Key="BoolToResultColorConverter" />
+		<BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+		<Style TargetType="{x:Type TextBlock}" x:Key="VSTextBlockStyle">
+			<Setter Property="Foreground" Value="{DynamicResource {x:Static vshell:VsBrushes.WindowTextKey}}"/>
+			<Setter Property="FontSize" Value="16" />
+		</Style>
+	</Window.Resources>
+
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="{StaticResource WindowContentMargin}" />
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="{StaticResource WindowContentMargin}" />
+			<ColumnDefinition Width="Auto" />
+			<ColumnDefinition Width="{StaticResource WindowContentMargin}" />
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="25" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="25" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="200" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="25" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="*" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+		</Grid.RowDefinitions>
+
+		<StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Orientation="Horizontal">
+			<TextBlock Style="{StaticResource VSTextBlockStyle}" VerticalAlignment="Center">Files to move</TextBlock>
+			<Button Content="Add Files..." Command="{Binding AddFilesCommand}"
+					Padding="8,2" FontSize="14" Margin="15,0,0,0"
+					IsEnabled="{Binding IsMoving, Converter={StaticResource InverseBooleanConverter}}" />
+			<Button Content="Clear" Command="{Binding ClearFilesCommand}"
+					Padding="8,2" FontSize="14" Margin="8,0,0,0"
+					IsEnabled="{Binding IsMoving, Converter={StaticResource InverseBooleanConverter}}" />
+		</StackPanel>
+
+		<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+					  Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3"
+					  MaxHeight="150"
+					  PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+			<ItemsControl ItemsSource="{Binding SelectedFiles}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate DataType="{x:Type vm:CRelatedFileViewModel}">
+						<CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}" Margin="0,2">
+							<StackPanel Orientation="Horizontal">
+								<TextBlock Text="{Binding FilePath}" Style="{StaticResource VSTextBlockStyle}" FontSize="14"
+										   ToolTip="{Binding FilePath}" />
+							</StackPanel>
+						</CheckBox>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+
+		<Separator Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3" />
+
+		<TextBlock Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource VSTextBlockStyle}">Target directory</TextBlock>
+		<TextBox Grid.Row="9" Grid.Column="1"
+				 Text="{Binding TargetDirectory, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+				 FontSize="16" Padding="4"
+				 IsEnabled="{Binding IsMoving, Converter={StaticResource InverseBooleanConverter}}"
+				 ToolTip="{Binding TargetDirectory}" />
+		<Button Grid.Row="9" Grid.Column="3"
+				Content="Browse..."
+				Command="{Binding BrowseForTargetFolderCommand}"
+				Padding="12,4" FontSize="16"
+				IsEnabled="{Binding IsMoving, Converter={StaticResource InverseBooleanConverter}}" />
+
+		<Separator Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="3" />
+
+		<TextBlock Grid.Row="13" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource VSTextBlockStyle}">New CMake location (optional)</TextBlock>
+
+		<Grid Grid.Row="15" Grid.Column="1" Grid.ColumnSpan="3">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="15" />
+				<ColumnDefinition Width="2*" />
+			</Grid.ColumnDefinitions>
+
+			<Border Grid.Column="0" BorderBrush="{DynamicResource {x:Static vshell:VsBrushes.ActiveBorderKey}}" BorderThickness="1">
+				<DockPanel>
+					<TextBlock DockPanel.Dock="Top" Text="CMake File" Style="{StaticResource VSTextBlockStyle}"
+							   FontSize="14" Margin="4,2" Opacity="0.7" />
+					<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+								  PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+						<TreeView ItemsSource="{Binding CMakeFiles}" toolkit:Themes.UseVsTheme="True">
+							<TreeView.Resources>
+								<Style TargetType="{x:Type TreeViewItem}">
+									<Setter Property="Focusable" Value="{Binding IsFocusable, Mode=TwoWay}"/>
+									<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
+									<Style.Resources>
+										<SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>
+									</Style.Resources>
+								</Style>
+								<DataTemplate DataType="{x:Type ftvm:CMakeFileViewModel}">
+									<StackPanel Orientation="Horizontal">
+										<TextBlock Text="{Binding ID}" Style="{StaticResource VSTextBlockStyle}" />
+									</StackPanel>
+								</DataTemplate>
+							</TreeView.Resources>
+						</TreeView>
+					</ScrollViewer>
+				</DockPanel>
+			</Border>
+
+			<Border Grid.Column="2" BorderBrush="{DynamicResource {x:Static vshell:VsBrushes.ActiveBorderKey}}" BorderThickness="1">
+				<DockPanel>
+					<TextBlock DockPanel.Dock="Top" Text="Uber File / Group" Style="{StaticResource VSTextBlockStyle}"
+							   FontSize="14" Margin="4,2" Opacity="0.7" />
+					<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+								  PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+						<TreeView ItemsSource="{Binding MakeFileContent}" toolkit:Themes.UseVsTheme="True"
+								  SelectedItemChanged="MakeFileTree_SelectedItemChanged">
+							<TreeView.Resources>
+								<Style TargetType="{x:Type TreeViewItem}">
+									<Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+									<Setter Property="Focusable" Value="{Binding IsFocusable, Mode=TwoWay}"/>
+									<Style.Resources>
+										<SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>
+									</Style.Resources>
+								</Style>
+								<HierarchicalDataTemplate DataType="{x:Type ftvm:CMakeFileUberFileViewModel}" ItemsSource="{Binding Children}">
+									<StackPanel Orientation="Horizontal">
+										<TextBlock Text="{Binding DisplayName}" Style="{StaticResource VSTextBlockStyle}" Foreground="Red" />
+									</StackPanel>
+								</HierarchicalDataTemplate>
+								<HierarchicalDataTemplate DataType="{x:Type ftvm:CMakeFileGroupViewModel}" ItemsSource="{Binding Children}">
+									<StackPanel Orientation="Horizontal">
+										<TextBlock Text="{Binding DisplayName}" Style="{StaticResource VSTextBlockStyle}" Foreground="Green" />
+									</StackPanel>
+								</HierarchicalDataTemplate>
+								<DataTemplate DataType="{x:Type ftvm:CMakeFileFileViewModel}">
+									<StackPanel Orientation="Horizontal">
+										<TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
+									</StackPanel>
+								</DataTemplate>
+							</TreeView.Resources>
+						</TreeView>
+					</ScrollViewer>
+				</DockPanel>
+			</Border>
+		</Grid>
+
+		<Separator Grid.Row="17" Grid.Column="1" Grid.ColumnSpan="3" />
+
+		<TextBlock Grid.Row="19" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource VSTextBlockStyle}">Results</TextBlock>
+
+		<DockPanel Grid.Row="21" Grid.Column="1" Grid.ColumnSpan="3">
+			<StackPanel DockPanel.Dock="Top" Margin="0,0,0,8"
+						Visibility="{Binding IsMoving, Converter={StaticResource BoolToVisibilityConverter}}">
+				<ProgressBar IsIndeterminate="True" Height="4" />
+				<TextBlock Text="{Binding ProgressMessage}" Style="{StaticResource VSTextBlockStyle}"
+						   Opacity="0.8" Margin="0,4,0,0" />
+			</StackPanel>
+
+			<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
+						  PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
+				<ItemsControl ItemsSource="{Binding MoveResults}">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate DataType="{x:Type vm:CRenameResultViewModel}">
+							<StackPanel Orientation="Horizontal" Margin="0,2">
+								<TextBlock Text="{Binding Description}"
+										   Foreground="{Binding IsSuccess, Converter={StaticResource BoolToResultColorConverter}}"
+										   Style="{StaticResource VSTextBlockStyle}" TextWrapping="WrapWithOverflow" />
+							</StackPanel>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
+		</DockPanel>
+
+		<Grid Grid.Row="23" Grid.Column="1" Grid.ColumnSpan="3">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="10" />
+				<ColumnDefinition Width="Auto" />
+			</Grid.ColumnDefinitions>
+
+			<TextBlock Grid.Column="0" Text="{Binding ErrorMessage}"
+					   Foreground="Red" Style="{StaticResource VSTextBlockStyle}"
+					   TextWrapping="WrapWithOverflow" VerticalAlignment="Center" />
+
+			<Button Grid.Column="1" Content="Move Files" Command="{Binding MoveCommand}"
+					Padding="12,6" MinWidth="120" FontSize="16"
+					IsEnabled="{Binding IsMoving, Converter={StaticResource InverseBooleanConverter}}" />
+			<Button Grid.Column="3" Content="Close" Command="{Binding CloseCommand}"
+					Padding="12,6" MinWidth="100" FontSize="16" />
+		</Grid>
+	</Grid>
+</Window>

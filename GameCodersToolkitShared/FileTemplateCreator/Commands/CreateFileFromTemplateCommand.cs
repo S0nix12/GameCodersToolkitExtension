@@ -4,7 +4,7 @@ using System.Windows;
 
 namespace GameCodersToolkit
 {
-	[Command(PackageGuids.FileTemplateCreatorSet_GuidString, PackageIds.CreateFileFromTemplate)]
+	[Command(PackageGuids.FileToolsSet_GuidString, PackageIds.CreateFileFromTemplate)]
 	internal sealed class CreateFileFromTemplateCommand : BaseCommand<CreateFileFromTemplateCommand>
 	{
 		protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)

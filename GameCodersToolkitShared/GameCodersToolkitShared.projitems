@@ -85,9 +85,20 @@
       <DependentUpon>NameDialogWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Commands\RenameFileCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Commands\MoveFilesCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Commands\MoveFolderCommand.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\FileOperationHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\ViewModels\RenameFileDialogViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\ViewModels\MoveFilesDialogViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\ViewModels\MoveFolderDialogViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Windows\RenameFileWindow.xaml.cs">
       <DependentUpon>RenameFileWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Windows\MoveFilesWindow.xaml.cs">
+      <DependentUpon>MoveFilesWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Windows\MoveFolderWindow.xaml.cs">
+      <DependentUpon>MoveFolderWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)GameCodersToolkitPackage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utils\ConfigurationViewModel.cs" />
@@ -127,6 +138,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="$(MSBuildThisFileDirectory)FileRenamer\Windows\RenameFileWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)FileRenamer\Windows\MoveFilesWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)FileRenamer\Windows\MoveFolderWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

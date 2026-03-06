@@ -25,8 +25,8 @@ namespace GameCodersToolkit
         public const string QuickAttachCommandSet_GuidString = "ffea98d0-3d8b-4f5c-be66-0df1926b700a";
         public static Guid QuickAttachCommandSet_Guid = new Guid(QuickAttachCommandSet_GuidString);
 
-        public const string FileTemplateCreatorSet_GuidString = "c614691e-88df-43e1-9d6e-28ca3a32fb57";
-        public static Guid FileTemplateCreatorSet_Guid = new Guid(FileTemplateCreatorSet_GuidString);
+        public const string FileToolsSet_GuidString = "c614691e-88df-43e1-9d6e-28ca3a32fb57";
+        public static Guid FileToolsSet_Guid = new Guid(FileToolsSet_GuidString);
 
         public const string AutoDataExposerSet_GuidString = "e7b95c06-f8a5-4c4c-ba8d-d727f865cea6";
         public static Guid AutoDataExposerSet_Guid = new Guid(AutoDataExposerSet_GuidString);
@@ -34,8 +34,6 @@ namespace GameCodersToolkit
         public const string QuickAutotestCommandSet_GuidString = "718ffd5b-45ab-462d-9469-fb5149818089";
         public static Guid QuickAutotestCommandSet_Guid = new Guid(QuickAutotestCommandSet_GuidString);
 
-        public const string FileRenamerSet_GuidString = "b4abc14d-63f7-4b59-9135-f97a04402205";
-        public static Guid FileRenamerSet_Guid = new Guid(FileRenamerSet_GuidString);
 
         public const string ConfigurationSet_GuidString = "a3d1f2b4-5e6c-4a7d-8b9e-1c2d3f4a5b6c";
         public static Guid ConfigurationSet_Guid = new Guid(ConfigurationSet_GuidString);
@@ -79,11 +77,12 @@ namespace GameCodersToolkit
         public const int QuickAttachCommand = 0x0100;
         public const int QuickAttachSelector = 0x0200;
         public const int QuickAttachSelectorListCmd = 0x0300;
-        public const int CreateFileFromTemplateExtensionsMenu = 0x0010;
+        public const int FileToolsExtensionsMenu = 0x0010;
         public const int CreateFileFromTemplate = 0x0020;
-        public const int OpenTemplateFileCreatorConfigExtensionsMenu = 0x0030;
-        public const int OpenTemplateFileCreatorConfig = 0x0040;
-        public const int FileTemplateCreatorExtensionsMenuGroup = 0x0007;
+        public const int RenameFile = 0x0030;
+        public const int MoveFiles = 0x0040;
+        public const int MoveFolder = 0x0050;
+        public const int FileToolsExtensionsMenuGroup = 0x0007;
         public const int AutoDataExposerSubMenu = 0x1001;
         public const int AutoDataExposerSubMenuGroup = 0x1000;
         public const int AutoDataExposerContextMenuGroup = 0x1020;
@@ -96,9 +95,6 @@ namespace GameCodersToolkit
         public const int QuickAutotestCommand = 0x0100;
         public const int QuickAutotestSelector = 0x0200;
         public const int QuickAutotestSelectorListCmd = 0x0300;
-        public const int FileRenamerExtensionsMenu = 0x0010;
-        public const int RenameFile = 0x0020;
-        public const int FileRenamerExtensionsMenuGroup = 0x0007;
         public const int ConfigurationExtensionsMenu = 0x0010;
         public const int OpenSharedConfig = 0x0020;
         public const int BuildPostChangeProject = 0x0030;

@@ -4,7 +4,7 @@ using System.Windows;
 
 namespace GameCodersToolkit
 {
-	[Command(PackageGuids.FileRenamerSet_GuidString, PackageIds.RenameFile)]
+	[Command(PackageGuids.FileToolsSet_GuidString, PackageIds.RenameFile)]
 	internal sealed class RenameFileCommand : BaseCommand<RenameFileCommand>
 	{
 		protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)

@@ -25,7 +25,10 @@ namespace GameCodersToolkit.Configuration
 		public string PostChangeScriptAbsolutePath { get; set; }
 
 		[Editable(allowEdit: true)]
-		public string PostChangeProjectToBuild { get; set; }
+		public string CMakeUpdateProject { get; set; } = "ZERO_CHECK";
+
+		[Editable(allowEdit: true)]
+		public bool UpdateCMakeAfterChange { get; set; }
 	}
 
 	public class CSharedConfiguration : ModuleBaseConfiguration
@@ -61,7 +64,10 @@ namespace GameCodersToolkit.Configuration
 				System.Diagnostics.Process.Start(UserConfig.PostChangeScriptAbsolutePath);
 			}
 
-			await BuildPostChangeProjectAsync();
+			if (UserConfig.UpdateCMakeAfterChange)
+			{
+				await BuildPostChangeProjectAsync();
+			}
 		}
 
 		public async Task BuildPostChangeProjectAsync()
@@ -75,9 +81,9 @@ namespace GameCodersToolkit.Configuration
 				{
 					bool isBuildingAlready = dte.Solution.SolutionBuild.BuildState == EnvDTE.vsBuildState.vsBuildStateInProgress;
 
-					if (!isBuildingAlready && !string.IsNullOrWhiteSpace(UserConfig.PostChangeProjectToBuild))
+					if (!isBuildingAlready && !string.IsNullOrWhiteSpace(UserConfig.CMakeUpdateProject))
 					{
-						var project = await VS.Solutions.FindProjectsAsync(UserConfig.PostChangeProjectToBuild);
+						var project = await VS.Solutions.FindProjectsAsync(UserConfig.CMakeUpdateProject);
 						if (project != null)
 						{
 							await project.BuildAsync(BuildAction.Build);
@@ -107,10 +113,10 @@ namespace GameCodersToolkit.Configuration
 					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[GameCodersToolkit] PostChangeScript at '{UserConfig.PostChangeScriptAbsolutePath}' (File exists: {exists})");
 				}
 
-				// Post-Change project to build
+				// CMake update project
 				{
-					bool exists = (await VS.Solutions.FindProjectsAsync(UserConfig.PostChangeProjectToBuild)) != null;
-					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[GameCodersToolkit] PostChangeProjectToBuild is '{UserConfig.PostChangeProjectToBuild}' (Exists: {exists})");
+					bool exists = (await VS.Solutions.FindProjectsAsync(UserConfig.CMakeUpdateProject)) != null;
+					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[GameCodersToolkit] CMakeUpdateProject is '{UserConfig.CMakeUpdateProject}' (Exists: {exists}), UpdateCMakeAfterChange: {UserConfig.UpdateCMakeAfterChange}");
 				}
 			}
 		}
