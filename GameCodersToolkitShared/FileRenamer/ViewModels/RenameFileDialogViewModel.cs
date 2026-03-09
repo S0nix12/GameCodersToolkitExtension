@@ -3,11 +3,14 @@ using CommunityToolkit.Mvvm.Input;
 using GameCodersToolkit.Configuration;
 using GameCodersToolkit.FileTemplateCreator.MakeFileParser;
 using GameCodersToolkit.SourceControl;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows;
 using GameCodersToolkit.Utils;
 using System.Threading.Tasks;
@@ -54,6 +57,7 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 			m_owningCMakeRoot = FindOwningCMakeRoot(m_originalDirectory);
 			OwningCMakeFileDisplay = m_owningCMakeRoot ?? "(none found)";
 
+			CMakeSelection.InitializeCMakeFileList();
 			DiscoverRelatedFiles();
 		}
 
@@ -168,8 +172,24 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 
 			if (!Directory.Exists(normalizedNewDir))
 			{
-				ErrorMessage = $"Directory does not exist: {normalizedNewDir}";
-				return false;
+				var result = System.Windows.MessageBox.Show(
+					$"Directory does not exist:\n{normalizedNewDir}\n\nDo you want to create it?",
+					"Create Directory?",
+					MessageBoxButton.YesNo,
+					MessageBoxImage.Question);
+
+				if (result != MessageBoxResult.Yes)
+					return false;
+
+				try
+				{
+					Directory.CreateDirectory(normalizedNewDir);
+				}
+				catch (Exception ex)
+				{
+					ErrorMessage = $"Failed to create directory: {ex.Message}";
+					return false;
+				}
 			}
 
 			// Check if any of the new file paths already exist
@@ -240,7 +260,14 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 				ProgressMessage = "Updating CMakeLists.txt files...";
 				await UpdateCMakeFilesAsync(renameMap);
 
-				// Step 2: Update #include references in the project
+				// Step 2: If user selected a new CMake file + uber + group, add entries there
+				if (CMakeSelection.HasValidSelection)
+				{
+					ProgressMessage = "Adding files to new CMake location...";
+					await CMakeSelection.AddFilesToCMakeLocationAsync(renameMap, RenameResults);
+				}
+
+				// Step 3: Update #include references in the project
 				ProgressMessage = "Searching for #include references...";
 				await UpdateIncludeReferencesAsync(renameMap);
 
@@ -444,18 +471,18 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 
 				ProgressMessage = $"Scanning 0 / {sourceFiles.Count} files for #include references...";
 
-				var changedFiles = new List<(string SourceFile, string ModifiedContent)>();
-				var changeLog = new List<(string FilePath, int LineNumber, string OldInclude, string NewInclude)>();
-				var failedFiles = new List<string>();
+				var changedFiles = new ConcurrentBag<(string SourceFile, string ModifiedContent)>();
+				var changeLog = new ConcurrentBag<(string FilePath, int LineNumber, string OldInclude, string NewInclude)>();
+				int filesProcessed = 0;
 
-				for (int i = 0; i < sourceFiles.Count; i++)
+				Parallel.ForEach(sourceFiles, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, sourceFile =>
 				{
-					if (i % 50 == 0)
+					int current = Interlocked.Increment(ref filesProcessed);
+					if (current % 200 == 0)
 					{
-						ProgressMessage = $"Scanning {i} / {sourceFiles.Count} files for #include references...";
+						ProgressMessage = $"Scanning {current} / {sourceFiles.Count} files for #include references...";
 					}
 
-					string sourceFile = sourceFiles[i];
 					string content = File.ReadAllText(sourceFile);
 					string modifiedContent = content;
 					bool hasChanges = false;
@@ -493,7 +520,7 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 
 								if (directoryChanged)
 								{
-									string newRelativePath = effectiveSourcePath.MakeRelativePath(newFilePath).Replace('\\', '/');
+									string newRelativePath = FileOperationHelper.ComputeNewIncludePath(searchRoot, effectiveSourcePath, newFilePath);
 									string prefix = match.Groups[1].Value;
 									string suffix = match.Groups[4].Value;
 									newIncludeText = $"{prefix}{newRelativePath}{suffix}";
@@ -511,19 +538,13 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 
 							if (directoryChanged)
 							{
-								// When directory changed, recompute the relative path from the including file to the new location.
-								// Use effectiveSourcePath so that if this file is also being moved,
-								// the relative path is computed from its NEW location, not the old one.
+								// Compute the include path relative to the CMake root directory.
+								// Co-located same-name files (e.g. MyFile.cpp / MyFile.h) keep a simple filename include.
+								string newRelativePath = FileOperationHelper.ComputeNewIncludePath(searchRoot, effectiveSourcePath, newFilePath);
 								modifiedContent = pattern.Replace(modifiedContent, match =>
 								{
-									string prefix = match.Groups[1].Value;  // #include " or #include <
-									string suffix = match.Groups[4].Value;  // " or >
-
-									// Compute new relative path from this source file's effective location to the new file location
-									string newRelativePath = effectiveSourcePath.MakeRelativePath(newFilePath);
-									// Normalize to forward slashes (standard for includes)
-									newRelativePath = newRelativePath.Replace('\\', '/');
-
+									string prefix = match.Groups[1].Value;
+									string suffix = match.Groups[4].Value;
 									return $"{prefix}{newRelativePath}{suffix}";
 								});
 							}
@@ -540,10 +561,10 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 					{
 						changedFiles.Add((sourceFile, modifiedContent));
 					}
-				}
+				});
 
 				ProgressMessage = $"Scanned {sourceFiles.Count} files. Applying changes to {changedFiles.Count} file(s)...";
-				return (changedFiles, changeLog);
+				return (changedFiles: changedFiles.ToList(), changeLog: changeLog.ToList());
 			});
 
 			// Back on UI thread: write changed files (needs Perforce checkout)
@@ -786,6 +807,9 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 
 		private ObservableCollection<CRenameResultViewModel> m_renameResults = new ObservableCollection<CRenameResultViewModel>();
 		public ObservableCollection<CRenameResultViewModel> RenameResults { get => m_renameResults; set => SetProperty(ref m_renameResults, value); }
+
+		// CMake selection helper (shared across all commands)
+		public CCMakeSelectionHelper CMakeSelection { get; } = new CCMakeSelectionHelper();
 
 		public event EventHandler OnRequestClose;
 	}

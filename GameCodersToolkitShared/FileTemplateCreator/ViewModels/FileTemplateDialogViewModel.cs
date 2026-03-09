@@ -91,6 +91,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 		public IUberFileNode Node { get; set; }
 		public string DisplayName { get; set; }
 		public string Name { get; set; }
+		public bool IsNewEntry { get; set; }
 		public ObservableCollection<object> Children { get; set; } = new ObservableCollection<object>();
 
 		private bool m_isExpanded = true;
@@ -98,6 +99,9 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 		private bool m_isFocusable = false;
 		public bool IsFocusable { get => m_isFocusable; set => SetProperty(ref m_isFocusable, value); }
+
+		private bool m_isSelected = false;
+		public bool IsSelected { get => m_isSelected; set => SetProperty(ref m_isSelected, value); }
 	}
 
 	public partial class CMakeFileGroupViewModel : ObservableObject
@@ -105,6 +109,8 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 		public IGroupNode Node { get; set; }
 		public string DisplayName { get; set; }
 		public string Name { get; set; }
+		public bool IsNewEntry { get; set; }
+		public CMakeFileUberFileViewModel ParentUberFile { get; set; }
 		public ObservableCollection<object> Children { get; set; } = new ObservableCollection<object>();
 
 		private bool m_isExpanded;
@@ -112,6 +118,9 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 		private bool m_isFocusable = false;
 		public bool IsFocusable { get => m_isFocusable; set => SetProperty(ref m_isFocusable, value); }
+
+		private bool m_isSelected = false;
+		public bool IsSelected { get => m_isSelected; set => SetProperty(ref m_isSelected, value); }
 	}
 
 	public partial class CMakeFileFileViewModel : ObservableObject

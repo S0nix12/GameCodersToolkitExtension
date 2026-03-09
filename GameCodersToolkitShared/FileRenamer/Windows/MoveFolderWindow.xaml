@@ -6,11 +6,12 @@
 		xmlns:toolkit="clr-namespace:Community.VisualStudio.Toolkit;assembly=Community.VisualStudio.Toolkit"
 		xmlns:vshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
 		xmlns:vm="clr-namespace:GameCodersToolkit.FileRenamer.ViewModels"
+		xmlns:controls="clr-namespace:GameCodersToolkit.FileRenamer.Controls"
 		xmlns:converters="clr-namespace:GameCodersToolkitShared.FileRenamer.Converters"
 		d:DataContext="{d:DesignInstance Type=vm:CMoveFolderDialogViewModel}"
 		mc:Ignorable="d"
-		Height="750"
-		Width="800"
+		Height="900"
+		Width="1000"
 		toolkit:Themes.UseVsTheme="True"
 		WindowStartupLocation="CenterOwner"
 		Title="{Binding WindowTitle}">
@@ -49,6 +50,12 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="{StaticResource WindowContentMargin}" />
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="25" />
 			<RowDefinition Height="{StaticResource WindowContentMargin}" />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="{StaticResource WindowContentMargin}" />
@@ -117,9 +124,16 @@
 
 		<Separator Grid.Row="17" Grid.Column="1" Grid.ColumnSpan="3" />
 
-		<TextBlock Grid.Row="19" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource VSTextBlockStyle}">Results</TextBlock>
+		<TextBlock Grid.Row="19" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource VSTextBlockStyle}">New CMake location (optional)</TextBlock>
 
-		<DockPanel Grid.Row="21" Grid.Column="1" Grid.ColumnSpan="3">
+		<controls:CMakeSelectionControl Grid.Row="21" Grid.Column="1" Grid.ColumnSpan="3"
+										DataContext="{Binding CMakeSelection}" />
+
+		<Separator Grid.Row="23" Grid.Column="1" Grid.ColumnSpan="3" />
+
+		<TextBlock Grid.Row="25" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource VSTextBlockStyle}">Results</TextBlock>
+
+		<DockPanel Grid.Row="27" Grid.Column="1" Grid.ColumnSpan="3">
 			<StackPanel DockPanel.Dock="Top" Margin="0,0,0,8"
 						Visibility="{Binding IsMoving, Converter={StaticResource BoolToVisibilityConverter}}">
 				<ProgressBar IsIndeterminate="True" Height="4" />
@@ -143,7 +157,7 @@
 			</ScrollViewer>
 		</DockPanel>
 
-		<Grid Grid.Row="23" Grid.Column="1" Grid.ColumnSpan="3">
+		<Grid Grid.Row="29" Grid.Column="1" Grid.ColumnSpan="3">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="Auto" />

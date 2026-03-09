@@ -7,10 +7,11 @@
 		xmlns:vshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
 		xmlns:vm="clr-namespace:GameCodersToolkit.FileRenamer.ViewModels"
 		xmlns:ftvm="clr-namespace:GameCodersToolkit.FileTemplateCreator.ViewModels"
+		xmlns:controls="clr-namespace:GameCodersToolkit.FileRenamer.Controls"
 		xmlns:converters="clr-namespace:GameCodersToolkitShared.FileRenamer.Converters"
 		d:DataContext="{d:DesignInstance Type=vm:CMoveFilesDialogViewModel}"
 		mc:Ignorable="d"
-		Height="850"
+		Height="900"
 		Width="1000"
 		toolkit:Themes.UseVsTheme="True"
 		WindowStartupLocation="CenterOwner"
@@ -109,76 +110,8 @@
 
 		<TextBlock Grid.Row="13" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource VSTextBlockStyle}">New CMake location (optional)</TextBlock>
 
-		<Grid Grid.Row="15" Grid.Column="1" Grid.ColumnSpan="3">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="*" />
-				<ColumnDefinition Width="15" />
-				<ColumnDefinition Width="2*" />
-			</Grid.ColumnDefinitions>
-
-			<Border Grid.Column="0" BorderBrush="{DynamicResource {x:Static vshell:VsBrushes.ActiveBorderKey}}" BorderThickness="1">
-				<DockPanel>
-					<TextBlock DockPanel.Dock="Top" Text="CMake File" Style="{StaticResource VSTextBlockStyle}"
-							   FontSize="14" Margin="4,2" Opacity="0.7" />
-					<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-								  PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
-						<TreeView ItemsSource="{Binding CMakeFiles}" toolkit:Themes.UseVsTheme="True">
-							<TreeView.Resources>
-								<Style TargetType="{x:Type TreeViewItem}">
-									<Setter Property="Focusable" Value="{Binding IsFocusable, Mode=TwoWay}"/>
-									<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
-									<Style.Resources>
-										<SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>
-									</Style.Resources>
-								</Style>
-								<DataTemplate DataType="{x:Type ftvm:CMakeFileViewModel}">
-									<StackPanel Orientation="Horizontal">
-										<TextBlock Text="{Binding ID}" Style="{StaticResource VSTextBlockStyle}" />
-									</StackPanel>
-								</DataTemplate>
-							</TreeView.Resources>
-						</TreeView>
-					</ScrollViewer>
-				</DockPanel>
-			</Border>
-
-			<Border Grid.Column="2" BorderBrush="{DynamicResource {x:Static vshell:VsBrushes.ActiveBorderKey}}" BorderThickness="1">
-				<DockPanel>
-					<TextBlock DockPanel.Dock="Top" Text="Uber File / Group" Style="{StaticResource VSTextBlockStyle}"
-							   FontSize="14" Margin="4,2" Opacity="0.7" />
-					<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-								  PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
-						<TreeView ItemsSource="{Binding MakeFileContent}" toolkit:Themes.UseVsTheme="True"
-								  SelectedItemChanged="MakeFileTree_SelectedItemChanged">
-							<TreeView.Resources>
-								<Style TargetType="{x:Type TreeViewItem}">
-									<Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
-									<Setter Property="Focusable" Value="{Binding IsFocusable, Mode=TwoWay}"/>
-									<Style.Resources>
-										<SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="{x:Static SystemColors.HighlightColor}"/>
-									</Style.Resources>
-								</Style>
-								<HierarchicalDataTemplate DataType="{x:Type ftvm:CMakeFileUberFileViewModel}" ItemsSource="{Binding Children}">
-									<StackPanel Orientation="Horizontal">
-										<TextBlock Text="{Binding DisplayName}" Style="{StaticResource VSTextBlockStyle}" Foreground="Red" />
-									</StackPanel>
-								</HierarchicalDataTemplate>
-								<HierarchicalDataTemplate DataType="{x:Type ftvm:CMakeFileGroupViewModel}" ItemsSource="{Binding Children}">
-									<StackPanel Orientation="Horizontal">
-										<TextBlock Text="{Binding DisplayName}" Style="{StaticResource VSTextBlockStyle}" Foreground="Green" />
-									</StackPanel>
-								</HierarchicalDataTemplate>
-								<DataTemplate DataType="{x:Type ftvm:CMakeFileFileViewModel}">
-									<StackPanel Orientation="Horizontal">
-										<TextBlock Text="{Binding Name}" Style="{StaticResource VSTextBlockStyle}" />
-									</StackPanel>
-								</DataTemplate>
-							</TreeView.Resources>
-						</TreeView>
-					</ScrollViewer>
-				</DockPanel>
-			</Border>
-		</Grid>
+		<controls:CMakeSelectionControl Grid.Row="15" Grid.Column="1" Grid.ColumnSpan="3"
+										DataContext="{Binding CMakeSelection}" />
 
 		<Separator Grid.Row="17" Grid.Column="1" Grid.ColumnSpan="3" />
 

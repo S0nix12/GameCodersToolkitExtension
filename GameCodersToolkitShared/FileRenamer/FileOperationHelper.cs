@@ -3,11 +3,14 @@ using GameCodersToolkit.FileTemplateCreator.MakeFileParser;
 using GameCodersToolkit.SourceControl;
 using GameCodersToolkit.Utils;
 using GameCodersToolkit.Configuration;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -33,6 +36,30 @@ namespace GameCodersToolkit.FileRenamer
 		/// Open-file-dialog filter string for source files.
 		/// </summary>
 		public const string SourceFileDialogFilter = "Source Files (*.h;*.cpp;*.inl;*.hpp;*.cxx;*.c)|*.h;*.cpp;*.inl;*.hpp;*.cxx;*.c|All Files (*.*)|*.*";
+
+		/// <summary>
+		/// Computes the new #include path for a moved file.
+		/// For co-located same-name files (e.g. MyFile.cpp including MyFile.h in the same directory),
+		/// returns just the filename. For all other files, returns a path relative to the CMake root directory.
+		/// </summary>
+		public static string ComputeNewIncludePath(string cmakeRoot, string effectiveSourcePath, string newFilePath)
+		{
+			string sourceDir = Path.GetFullPath(Path.GetDirectoryName(effectiveSourcePath)).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+			string targetDir = Path.GetFullPath(Path.GetDirectoryName(newFilePath)).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+			// Co-located same-name files use simple filename includes (e.g. #include "MyFile.h")
+			if (string.Equals(sourceDir, targetDir, StringComparison.OrdinalIgnoreCase) &&
+				string.Equals(Path.GetFileNameWithoutExtension(effectiveSourcePath), Path.GetFileNameWithoutExtension(newFilePath), StringComparison.OrdinalIgnoreCase))
+			{
+				return Path.GetFileName(newFilePath);
+			}
+
+			// All other includes are relative to the CMakeLists.txt directory
+			string rootDir = Path.GetFullPath(cmakeRoot).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+			Uri rootUri = new Uri(rootDir);
+			Uri targetUri = new Uri(Path.GetFullPath(newFilePath));
+			return Uri.UnescapeDataString(rootUri.MakeRelativeUri(targetUri).ToString()).Replace('\\', '/');
+		}
 
 		public static string FindOwningCMakeRoot(string directory)
 		{
@@ -270,17 +297,18 @@ namespace GameCodersToolkit.FileRenamer
 
 				setProgressMessage?.Invoke($"Scanning 0 / {sourceFiles.Count} files for #include references...");
 
-				var changedFiles = new List<(string SourceFile, string ModifiedContent)>();
-				var changeLog = new List<(string FilePath, int LineNumber, string OldInclude, string NewInclude)>();
+				var changedFiles = new ConcurrentBag<(string SourceFile, string ModifiedContent)>();
+				var changeLog = new ConcurrentBag<(string FilePath, int LineNumber, string OldInclude, string NewInclude)>();
+				int filesProcessed = 0;
 
-				for (int i = 0; i < sourceFiles.Count; i++)
+				Parallel.ForEach(sourceFiles, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, sourceFile =>
 				{
-					if (i % 50 == 0)
+					int current = Interlocked.Increment(ref filesProcessed);
+					if (current % 200 == 0)
 					{
-						setProgressMessage?.Invoke($"Scanning {i} / {sourceFiles.Count} files for #include references...");
+						setProgressMessage?.Invoke($"Scanning {current} / {sourceFiles.Count} files for #include references...");
 					}
 
-					string sourceFile = sourceFiles[i];
 					string content = File.ReadAllText(sourceFile);
 					string modifiedContent = content;
 					bool hasChanges = false;
@@ -313,7 +341,7 @@ namespace GameCodersToolkit.FileRenamer
 
 								if (directoryChanged)
 								{
-									string newRelativePath = effectiveSourcePath.MakeRelativePath(newFilePath).Replace('\\', '/');
+									string newRelativePath = ComputeNewIncludePath(searchRoot, effectiveSourcePath, newFilePath);
 									string prefix = match.Groups[1].Value;
 									string suffix = match.Groups[4].Value;
 									newIncludeText = $"{prefix}{newRelativePath}{suffix}";
@@ -331,12 +359,11 @@ namespace GameCodersToolkit.FileRenamer
 
 							if (directoryChanged)
 							{
+								string newRelativePath = ComputeNewIncludePath(searchRoot, effectiveSourcePath, newFilePath);
 								modifiedContent = pattern.Replace(modifiedContent, match =>
 								{
 									string prefix = match.Groups[1].Value;
 									string suffix = match.Groups[4].Value;
-									string newRelativePath = effectiveSourcePath.MakeRelativePath(newFilePath);
-									newRelativePath = newRelativePath.Replace('\\', '/');
 									return $"{prefix}{newRelativePath}{suffix}";
 								});
 							}
@@ -352,10 +379,10 @@ namespace GameCodersToolkit.FileRenamer
 					{
 						changedFiles.Add((sourceFile, modifiedContent));
 					}
-				}
+				});
 
 				setProgressMessage?.Invoke($"Scanned {sourceFiles.Count} files. Applying changes to {changedFiles.Count} file(s)...");
-				return (changedFiles, changeLog);
+				return (changedFiles: changedFiles.ToList(), changeLog: changeLog.ToList());
 			});
 
 			int updatedFileCount = 0;

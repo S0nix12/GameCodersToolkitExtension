@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GameCodersToolkit.Configuration;
 using GameCodersToolkit.SourceControl;
 using GameCodersToolkit.Utils;
 using System;
@@ -18,6 +17,7 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 		public CMoveFolderDialogViewModel()
 		{
 			WindowTitle = "Move Folder";
+			CMakeSelection.InitializeCMakeFileList();
 		}
 
 		[RelayCommand]
@@ -90,6 +90,28 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 			{
 				ErrorMessage = "Target directory is not set.";
 				return false;
+			}
+
+			if (!Directory.Exists(TargetDirectory))
+			{
+				var result = System.Windows.MessageBox.Show(
+					$"Target directory does not exist:\n{TargetDirectory}\n\nDo you want to create it?",
+					"Create Directory?",
+					MessageBoxButton.YesNo,
+					MessageBoxImage.Question);
+
+				if (result != MessageBoxResult.Yes)
+					return false;
+
+				try
+				{
+					Directory.CreateDirectory(TargetDirectory);
+				}
+				catch (Exception ex)
+				{
+					ErrorMessage = $"Failed to create directory: {ex.Message}";
+					return false;
+				}
 			}
 
 			string normalizedSource = Path.GetFullPath(SourceDirectory).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
@@ -180,7 +202,14 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 				ProgressMessage = "Updating CMakeLists.txt files...";
 				await FileOperationHelper.UpdateCMakeFilesAsync(moveMap, MoveResults);
 
-				// Step 2: Update #include references
+				// Step 2: If user selected a new CMake file + uber + group, add entries there
+				if (CMakeSelection.HasValidSelection)
+				{
+					ProgressMessage = "Adding files to new CMake location...";
+					await CMakeSelection.AddFilesToCMakeLocationAsync(moveMap, MoveResults);
+				}
+
+				// Step 3: Update #include references
 				ProgressMessage = "Searching for #include references...";
 				await FileOperationHelper.UpdateIncludeReferencesAsync(
 					moveMap, sourceDir, MoveResults, msg => ProgressMessage = msg);
@@ -248,6 +277,9 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 
 		private ObservableCollection<CRenameResultViewModel> m_moveResults = new ObservableCollection<CRenameResultViewModel>();
 		public ObservableCollection<CRenameResultViewModel> MoveResults { get => m_moveResults; set => SetProperty(ref m_moveResults, value); }
+
+		// CMake selection helper (shared across all commands)
+		public CCMakeSelectionHelper CMakeSelection { get; } = new CCMakeSelectionHelper();
 
 		public event EventHandler OnRequestClose;
 	}

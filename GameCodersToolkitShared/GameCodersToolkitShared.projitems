@@ -12,8 +12,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)autodataexposer\commands\ImplementRegistrationCodeCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)AutoDataExposer\Commands\OpenAutoDataExposerConfigurationCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)autodataexposer\configuration\AutoDataExposerConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Controls\CMakeSelectionControl.xaml.cs">
+      <DependentUpon>CMakeSelectionControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Converters\BoolToResultColorConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Converters\InverseBooleanConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\ViewModels\CMakeSelectionHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)quickautotest\commands\QuickAutotestCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAutotest\Commands\QuickAutotestSelectionCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAutotest\Configuration\QuickAutotestConfiguration.cs" />
@@ -113,6 +117,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utils\SearchEntryUtils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)FileRenamer\Controls\CMakeSelectionControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="$(MSBuildThisFileDirectory)Utils\ConfigurationWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

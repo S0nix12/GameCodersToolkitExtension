@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GameCodersToolkit.Configuration;
-using GameCodersToolkit.FileTemplateCreator.MakeFileParser;
-using GameCodersToolkit.FileTemplateCreator.ViewModels;
+using GameCodersToolkit.FileRenamer.ViewModels;
 using GameCodersToolkit.SourceControl;
 using GameCodersToolkit.Utils;
 using Microsoft.Win32;
@@ -110,8 +108,24 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 
 			if (!Directory.Exists(TargetDirectory))
 			{
-				ErrorMessage = $"Target directory does not exist: {TargetDirectory}";
-				return false;
+				var result = System.Windows.MessageBox.Show(
+					$"Target directory does not exist:\n{TargetDirectory}\n\nDo you want to create it?",
+					"Create Directory?",
+					MessageBoxButton.YesNo,
+					MessageBoxImage.Question);
+
+				if (result != MessageBoxResult.Yes)
+					return false;
+
+				try
+				{
+					Directory.CreateDirectory(TargetDirectory);
+				}
+				catch (Exception ex)
+				{
+					ErrorMessage = $"Failed to create directory: {ex.Message}";
+					return false;
+				}
 			}
 
 			// Check if all files are already in the target directory
@@ -181,10 +195,10 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 				await FileOperationHelper.UpdateCMakeFilesAsync(moveMap, MoveResults);
 
 				// Step 2: If user selected a new CMake file + uber + group, add entries there
-				if (SelectedMakeFile != null && SelectedUberFile != null && SelectedGroup != null)
+				if (CMakeSelection.HasValidSelection)
 				{
 					ProgressMessage = "Adding files to new CMake location...";
-					await AddFilesToNewCMakeLocationAsync(moveMap);
+					await CMakeSelection.AddFilesToCMakeLocationAsync(moveMap, MoveResults);
 				}
 
 				// Step 3: Update #include references
@@ -225,130 +239,11 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 			}
 		}
 
-		private async Task AddFilesToNewCMakeLocationAsync(Dictionary<string, string> moveMap)
-		{
-			try
-			{
-				if (CurrentMakeFile == null || SelectedUberFile == null || SelectedGroup == null)
-					return;
-
-				List<string> newRelativePaths = new List<string>();
-				string makeFilePath = CurrentMakeFile.GetOriginalFilePath();
-
-				foreach (var pair in moveMap)
-				{
-					string relativePath = makeFilePath.MakeRelativePath(pair.Value);
-					newRelativePaths.Add(relativePath);
-				}
-
-				// Find the last file in the group to insert after
-				IFileNode lastFile = SelectedGroup.Node.GetFiles().LastOrDefault();
-
-				await PerforceConnection.TryCheckoutFilesAsync(new string[] { makeFilePath });
-				CurrentMakeFile = await CurrentMakeFile.AddFilesAsync(SelectedUberFile.Node, SelectedGroup.Node, lastFile, newRelativePaths);
-				await CurrentMakeFile.SaveAsync();
-
-				MoveResults.Add(new CRenameResultViewModel
-				{
-					Description = $"Added {newRelativePaths.Count} file(s) to {SelectedUberFile.Name} / {SelectedGroup.Name}",
-					IsSuccess = true
-				});
-			}
-			catch (Exception ex)
-			{
-				MoveResults.Add(new CRenameResultViewModel
-				{
-					Description = $"Failed to add files to CMake location: {ex.Message}",
-					IsSuccess = false
-				});
-			}
-		}
-
 		#region CMake / Uber / Group Selection
 
 		public void InitializeCMakeFileList()
 		{
-			CFileTemplateCreatorConfiguration config = GameCodersToolkitPackage.FileTemplateCreatorConfig;
-			if (config?.CreatorConfig?.CMakeFileEntries == null)
-				return;
-
-			CMakeFiles.Clear();
-
-			foreach (var fileEntry in config.CreatorConfig.CMakeFileEntries)
-			{
-				CMakeFileViewModel makeFileViewModel = new CMakeFileViewModel();
-				makeFileViewModel.ID = fileEntry.ID;
-				makeFileViewModel.Name = fileEntry.ID;
-				makeFileViewModel.OnSelect += OnCMakeFileSelected;
-				CMakeFiles.Add(makeFileViewModel);
-			}
-		}
-
-		private void OnCMakeFileSelected(CMakeFileViewModel selected)
-		{
-			foreach (var vm in CMakeFiles)
-			{
-				if (vm != selected)
-				{
-					vm.IsSelected = false;
-				}
-			}
-
-			SelectedMakeFile = selected;
-			LoadMakeFileContent();
-		}
-
-		private void LoadMakeFileContent()
-		{
-			MakeFileContent.Clear();
-			SelectedUberFile = null;
-			SelectedGroup = null;
-			CurrentMakeFile = null;
-
-			if (SelectedMakeFile == null)
-				return;
-
-			CFileTemplateCreatorConfiguration config = GameCodersToolkitPackage.FileTemplateCreatorConfig;
-			string makeFilePath = config?.FindMakeFilePathByID(SelectedMakeFile.ID);
-
-			if (string.IsNullOrEmpty(makeFilePath) || !File.Exists(makeFilePath))
-				return;
-
-			IMakeFileParser parser = config.CreateParser();
-			if (parser == null)
-				return;
-
-			CurrentMakeFile = parser.Parse(makeFilePath);
-			if (CurrentMakeFile == null)
-				return;
-
-			foreach (IUberFileNode uberFile in CurrentMakeFile.GetUberFiles())
-			{
-				CMakeFileUberFileViewModel uberFileVm = new CMakeFileUberFileViewModel();
-				uberFileVm.Node = uberFile;
-				uberFileVm.Name = uberFile.GetName();
-				uberFileVm.DisplayName = uberFileVm.Name + $" ({uberFile.GetGroups().Count()} Groups)";
-
-				foreach (IGroupNode group in uberFile.GetGroups())
-				{
-					CMakeFileGroupViewModel groupVm = new CMakeFileGroupViewModel();
-					groupVm.Node = group;
-					groupVm.Name = group.GetName();
-					groupVm.DisplayName = group.GetName() + $" ({group.GetFiles().Count()} Files)";
-
-					foreach (IFileNode file in group.GetFiles())
-					{
-						CMakeFileFileViewModel fileVm = new CMakeFileFileViewModel();
-						fileVm.Node = file;
-						fileVm.Name = file.GetName();
-						groupVm.Children.Add(fileVm);
-					}
-
-					uberFileVm.Children.Add(groupVm);
-				}
-
-				MakeFileContent.Add(uberFileVm);
-			}
+			CMakeSelection.InitializeCMakeFileList();
 		}
 
 		#endregion
@@ -384,23 +279,8 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 		private ObservableCollection<CRenameResultViewModel> m_moveResults = new ObservableCollection<CRenameResultViewModel>();
 		public ObservableCollection<CRenameResultViewModel> MoveResults { get => m_moveResults; set => SetProperty(ref m_moveResults, value); }
 
-		// CMake selection properties
-		private ObservableCollection<CMakeFileViewModel> m_cmakeFiles = new ObservableCollection<CMakeFileViewModel>();
-		public ObservableCollection<CMakeFileViewModel> CMakeFiles { get => m_cmakeFiles; set => SetProperty(ref m_cmakeFiles, value); }
-
-		private ObservableCollection<object> m_makeFileContent = new ObservableCollection<object>();
-		public ObservableCollection<object> MakeFileContent { get => m_makeFileContent; set => SetProperty(ref m_makeFileContent, value); }
-
-		private CMakeFileViewModel m_selectedMakeFile;
-		public CMakeFileViewModel SelectedMakeFile { get => m_selectedMakeFile; set => SetProperty(ref m_selectedMakeFile, value); }
-
-		private CMakeFileUberFileViewModel m_selectedUberFile;
-		public CMakeFileUberFileViewModel SelectedUberFile { get => m_selectedUberFile; set => SetProperty(ref m_selectedUberFile, value); }
-
-		private CMakeFileGroupViewModel m_selectedGroup;
-		public CMakeFileGroupViewModel SelectedGroup { get => m_selectedGroup; set => SetProperty(ref m_selectedGroup, value); }
-
-		private IMakeFile CurrentMakeFile { get; set; }
+		// CMake selection helper (shared across all commands)
+		public CCMakeSelectionHelper CMakeSelection { get; } = new CCMakeSelectionHelper();
 
 		public event EventHandler OnRequestClose;
 	}

@@ -10,11 +10,12 @@
 		xmlns:vshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
 		xmlns:vm="clr-namespace:GameCodersToolkit.FileRenamer.ViewModels"
 		xmlns:local="clr-namespace:GameCodersToolkit.FileRenamer.Windows"
+		xmlns:controls="clr-namespace:GameCodersToolkit.FileRenamer.Controls"
 		xmlns:converters="clr-namespace:GameCodersToolkitShared.FileRenamer.Converters"
 		d:DataContext="{d:DesignInstance Type=vm:CRenameFileDialogViewModel}"
 		mc:Ignorable="d"
-		Height="700"
-		Width="800"
+		Height="900"
+		Width="1000"
 		toolkit:Themes.UseVsTheme="True"
 		WindowStartupLocation="CenterOwner"
 		Title="{Binding WindowTitle}">
@@ -59,6 +60,12 @@
 			<RowDefinition Height="25" />
 			<RowDefinition Height="{StaticResource WindowContentMargin}" />
 			<RowDefinition Height="Auto" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="25" />
+			<RowDefinition Height="{StaticResource WindowContentMargin}" />
+			<RowDefinition Height="200" />
 			<RowDefinition Height="{StaticResource WindowContentMargin}" />
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="{StaticResource WindowContentMargin}" />
@@ -118,9 +125,14 @@
 
 		<Separator Grid.Row="21" Grid.Column="1" Grid.ColumnSpan="3" />
 
-		<TextBlock Grid.Row="23" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource VSTextBlockStyle}">Results</TextBlock>
+		<TextBlock Grid.Row="23" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource VSTextBlockStyle}">CMake file selection (optional)</TextBlock>
+		<controls:CMakeSelectionControl Grid.Row="25" Grid.Column="1" Grid.ColumnSpan="3" DataContext="{Binding CMakeSelection}" />
 
-		<DockPanel Grid.Row="25" Grid.Column="1" Grid.ColumnSpan="3">
+		<Separator Grid.Row="27" Grid.Column="1" Grid.ColumnSpan="3" />
+
+		<TextBlock Grid.Row="29" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource VSTextBlockStyle}">Results</TextBlock>
+
+		<DockPanel Grid.Row="31" Grid.Column="1" Grid.ColumnSpan="3">
 			<!-- Progress indicator (visible while renaming) -->
 			<StackPanel DockPanel.Dock="Top" Margin="0,0,0,8"
 						Visibility="{Binding IsRenaming, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -145,7 +157,7 @@
 			</ScrollViewer>
 		</DockPanel>
 
-		<Grid Grid.Row="27" Grid.Column="1" Grid.ColumnSpan="3">
+		<Grid Grid.Row="33" Grid.Column="1" Grid.ColumnSpan="3">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="Auto" />
