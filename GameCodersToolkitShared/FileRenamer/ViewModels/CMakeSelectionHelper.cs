@@ -300,16 +300,19 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 
 			Predicate<string> predicate = (result) =>
 			{
-				return result.IsValidFileName()
+				return !string.IsNullOrWhiteSpace(result)
 					&& !MakeFileContent.OfType<CMakeFileUberFileViewModel>().Any(u => u.Name == result);
 			};
 
 			Action<string> errorAction = (result) =>
 			{
-				System.Windows.MessageBox.Show($"There already is an uber file named {result}!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				if (string.IsNullOrWhiteSpace(result))
+					System.Windows.MessageBox.Show("Uber file name cannot be empty.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				else
+					System.Windows.MessageBox.Show($"There already is an uber file named {result}!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			};
 
-			if (NameDialogWindow.ShowNameDialog("Enter Uber File name", out string newName, predicate, errorAction, previousVm?.Name))
+			if (NameDialogWindow.ShowNameDialog("Enter Uber File name", out string newName, predicate, errorAction))
 			{
 				InsertNewUberFile(newName);
 			}
@@ -328,16 +331,19 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 
 			Predicate<string> predicate = (result) =>
 			{
-				return result.IsValidFileName()
+				return !string.IsNullOrWhiteSpace(result)
 					&& !uberFileVm.Children.OfType<CMakeFileGroupViewModel>().Any(g => g.Name == result);
 			};
 
 			Action<string> errorAction = (result) =>
 			{
-				System.Windows.MessageBox.Show($"There already is a group named {result}!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				if (string.IsNullOrWhiteSpace(result))
+					System.Windows.MessageBox.Show("Group name cannot be empty.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				else
+					System.Windows.MessageBox.Show($"There already is a group named {result}!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 			};
 
-			if (NameDialogWindow.ShowNameDialog("Enter Group name", out string newName, predicate, errorAction, previousVm?.Name))
+			if (NameDialogWindow.ShowNameDialog("Enter Group name", out string newName, predicate, errorAction))
 			{
 				InsertNewGroup(uberFileVm, newName);
 			}
@@ -379,6 +385,34 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 			try
 			{
 				string makeFilePath = CurrentMakeFile.GetOriginalFilePath();
+
+				// Re-parse the CMake file from disk to pick up any changes made by
+				// prior operations (e.g. RemoveFilesFromOldCMakeLocationsAsync).
+				// Without this, we'd overwrite removal changes with stale data.
+				// Run on a background thread to avoid blocking the UI.
+				CFileTemplateCreatorConfiguration config = GameCodersToolkitPackage.FileTemplateCreatorConfig;
+				IMakeFileParser parser = config?.CreateParser();
+				if (parser != null)
+				{
+					IMakeFile freshMakeFile = await Task.Run(() => parser.Parse(makeFilePath));
+					if (freshMakeFile != null)
+					{
+						CurrentMakeFile = freshMakeFile;
+
+						// Re-find the selected uber file and group nodes in the fresh parse
+						if (!SelectedUberFile.IsNewEntry && SelectedUberFile.Node != null)
+						{
+							SelectedUberFile.Node = CurrentMakeFile.GetUberFiles()
+								.FirstOrDefault(u => u.GetName() == SelectedUberFile.Name);
+						}
+
+						if (!SelectedGroup.IsNewEntry && SelectedGroup.Node != null && SelectedUberFile.Node != null)
+						{
+							SelectedGroup.Node = SelectedUberFile.Node.GetGroups()
+								.FirstOrDefault(g => g.GetName() == SelectedGroup.Name);
+						}
+					}
+				}
 
 				// Step 1: If the uber file is new, add it first
 				if (SelectedUberFile.IsNewEntry)

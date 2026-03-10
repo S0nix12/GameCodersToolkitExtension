@@ -1,16 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using GameCodersToolkit.Configuration;
-using GameCodersToolkit.FileTemplateCreator.MakeFileParser;
 using GameCodersToolkit.SourceControl;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows;
 using GameCodersToolkit.Utils;
 using System.Threading.Tasks;
@@ -54,7 +49,7 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 			WindowTitle = $"Rename / Move File: {m_originalBaseName}";
 
 			// Determine the owning CMake file for folder constraint validation
-			m_owningCMakeRoot = FindOwningCMakeRoot(m_originalDirectory);
+			m_owningCMakeRoot = FileOperationHelper.FindOwningCMakeRoot(m_originalDirectory);
 			OwningCMakeFileDisplay = m_owningCMakeRoot ?? "(none found)";
 
 			CMakeSelection.InitializeCMakeFileList();
@@ -92,44 +87,6 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 					});
 				}
 			}
-		}
-
-		private string FindOwningCMakeRoot(string directory)
-		{
-			CFileTemplateCreatorConfiguration config = GameCodersToolkitPackage.FileTemplateCreatorConfig;
-			if (config?.CreatorConfig?.CMakeFileEntries != null)
-			{
-				string bestMatch = null;
-				int bestMatchLength = 0;
-
-				foreach (CMakeFileEntry entry in config.CreatorConfig.CMakeFileEntries)
-				{
-					string cmakeDir = Path.GetDirectoryName(entry.AbsolutePath);
-					if (directory.StartsWith(cmakeDir, StringComparison.OrdinalIgnoreCase) && cmakeDir.Length > bestMatchLength)
-					{
-						bestMatch = cmakeDir;
-						bestMatchLength = cmakeDir.Length;
-					}
-				}
-
-				if (bestMatch != null)
-					return bestMatch;
-			}
-
-			// Walk up looking for CMakeLists.txt
-			string current = directory;
-			while (!string.IsNullOrEmpty(current))
-			{
-				if (File.Exists(Path.Combine(current, "CMakeLists.txt")))
-					return current;
-
-				string parent = Path.GetDirectoryName(current);
-				if (parent == current)
-					break;
-				current = parent;
-			}
-
-			return directory;
 		}
 
 		private bool ValidateNewName()
@@ -236,7 +193,7 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 			}
 
 			// Pre-check: warn if Perforce is not available
-			if (!await CheckPerforceAndConfirmAsync(filesToRename))
+			if (!await FileOperationHelper.CheckPerforceAndConfirmAsync(filesToRename.Select(f => f.FilePath)))
 				return;
 
 			IsRenaming = true;
@@ -269,12 +226,13 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 				{
 					// No new CMake location selected: update paths in-place via string replacement
 					ProgressMessage = "Updating CMakeLists.txt files...";
-					await UpdateCMakeFilesAsync(renameMap);
+					await FileOperationHelper.UpdateCMakeFilesAsync(renameMap, RenameResults);
 				}
 
 				// Step 3: Update #include references in the project
 				ProgressMessage = "Searching for #include references...";
-				await UpdateIncludeReferencesAsync(renameMap);
+				await FileOperationHelper.UpdateIncludeReferencesAsync(
+					renameMap, m_originalDirectory, RenameResults, msg => ProgressMessage = msg);
 
 				// Step 3: Rename the actual files on disk
 				ProgressMessage = "Renaming/moving files on disk...";
@@ -306,376 +264,6 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 			}
 		}
 
-		private async Task<bool> CheckPerforceAndConfirmAsync(List<CRelatedFileViewModel> filesToRename)
-		{
-			List<string> warnings = new List<string>();
-
-			if (!PerforceConnection.IsEnabled)
-			{
-				warnings.Add("Perforce integration is disabled. Files will only be renamed on disk.");
-			}
-			else if (!PerforceConnection.IsConnected)
-			{
-				warnings.Add("There is no active Perforce connection. Files will only be renamed on disk and Perforce state will be out of sync.");
-			}
-			else
-			{
-				// Connection is active — try to check out each file as a pre-flight test
-				foreach (var file in filesToRename)
-				{
-					bool checkoutOk = await PerforceConnection.TryCheckoutFilesAsync(new string[] { file.FilePath });
-					if (!checkoutOk)
-					{
-						warnings.Add($"Failed to check out '{file.FileName}' from Perforce.");
-					}
-				}
-			}
-
-			if (warnings.Count == 0)
-				return true;
-
-			string warningMessage = string.Join("\n", warnings)
-				+ "\n\nDo you want to continue with the rename anyway?";
-
-			var result = System.Windows.MessageBox.Show(
-				warningMessage,
-				"Perforce Warning",
-				MessageBoxButton.YesNo,
-				MessageBoxImage.Warning);
-
-			return result == MessageBoxResult.Yes;
-		}
-
-		private async Task UpdateCMakeFilesAsync(Dictionary<string, string> renameMap)
-		{
-			CFileTemplateCreatorConfiguration config = GameCodersToolkitPackage.FileTemplateCreatorConfig;
-			if (config?.CreatorConfig?.CMakeFileEntries == null)
-			{
-				RenameResults.Add(new CRenameResultViewModel
-				{
-					Description = "No CMakeLists configuration found - skipping CMake updates.",
-					IsSuccess = true
-				});
-				return;
-			}
-
-			foreach (CMakeFileEntry cmakeEntry in config.CreatorConfig.CMakeFileEntries)
-			{
-				string cmakePath = cmakeEntry.AbsolutePath;
-				if (!File.Exists(cmakePath))
-					continue;
-
-				string cmakeContent = File.ReadAllText(cmakePath);
-				string modifiedContent = cmakeContent;
-				bool hasChanges = false;
-
-				foreach (var pair in renameMap)
-				{
-					string oldRelative = cmakePath.MakeRelativePath(pair.Key);
-					string newRelative = cmakePath.MakeRelativePath(pair.Value);
-
-					// Also try with backslashes replaced to forward slashes (common in CMake)
-					string oldRelativeForward = oldRelative.Replace('\\', '/');
-					string newRelativeForward = newRelative.Replace('\\', '/');
-
-					// Try the old file name only (without directory relative path) as well
-					string oldFileName = Path.GetFileName(pair.Key);
-					string newFileName = Path.GetFileName(pair.Value);
-
-					if (modifiedContent.Contains(oldRelativeForward))
-					{
-						modifiedContent = modifiedContent.Replace(oldRelativeForward, newRelativeForward);
-						hasChanges = true;
-					}
-					else if (modifiedContent.Contains(oldRelative))
-					{
-						modifiedContent = modifiedContent.Replace(oldRelative, newRelative);
-						hasChanges = true;
-					}
-					else if (modifiedContent.Contains(oldFileName))
-					{
-						modifiedContent = modifiedContent.Replace(oldFileName, newFileName);
-						hasChanges = true;
-					}
-				}
-
-				if (hasChanges)
-				{
-					// Try checking out via Perforce
-					await PerforceConnection.TryCheckoutFilesAsync(new string[] { cmakePath });
-
-					// Fallback: make writable
-					if (!cmakePath.IsFileWritable())
-					{
-						cmakePath.MakeFileWritable();
-					}
-
-					if (cmakePath.IsFileWritable())
-					{
-						File.WriteAllText(cmakePath, modifiedContent);
-						RenameResults.Add(new CRenameResultViewModel
-						{
-							Description = $"Updated CMake file: {Path.GetFileName(cmakePath)}",
-							IsSuccess = true
-						});
-					}
-					else
-					{
-						RenameResults.Add(new CRenameResultViewModel
-						{
-							Description = $"Failed to write to CMake file (not writable): {Path.GetFileName(cmakePath)}",
-							IsSuccess = false
-						});
-					}
-				}
-			}
-		}
-
-		private async Task UpdateIncludeReferencesAsync(Dictionary<string, string> renameMap)
-		{
-			// Find the project directory: walk up from the file directory looking for a CMakeLists.txt
-			string searchRoot = FindProjectRoot(m_originalDirectory);
-
-			if (string.IsNullOrEmpty(searchRoot))
-			{
-				RenameResults.Add(new CRenameResultViewModel
-				{
-					Description = "Could not determine project root - skipping include reference updates.",
-					IsSuccess = true
-				});
-				return;
-			}
-
-			// Build a list of (regex, old path, new path) for each old -> new mapping
-			// When the file is being moved (directory changed), we need to recompute the full include path
-			// relative to each including file, not just swap the filename.
-			var includeReplacements = new List<(Regex Pattern, string OldFilePath, string NewFilePath)>();
-			foreach (var pair in renameMap)
-			{
-				string oldFileName = Path.GetFileName(pair.Key);
-				string escapedOldName = Regex.Escape(oldFileName);
-
-				// Match #include "...oldFileName" or #include <...oldFileName>
-				Regex pattern = new Regex(
-					$@"(#\s*include\s*[""<])([^"">\r\n]*[/\\])?({escapedOldName})(\s*["">])",
-					RegexOptions.Compiled);
-
-				includeReplacements.Add((pattern, pair.Key, pair.Value));
-			}
-
-			// Run the heavy file scanning on a background thread so the UI stays responsive
-			var scanResults = await Task.Run(() =>
-			{
-				// Enumerate all source files in the project
-				List<string> sourceFiles = new List<string>();
-
-				foreach (string ext in FileOperationHelper.SourceGlobPatterns)
-				{
-					sourceFiles.AddRange(Directory.GetFiles(searchRoot, ext, SearchOption.AllDirectories));
-				}
-
-				ProgressMessage = $"Scanning 0 / {sourceFiles.Count} files for #include references...";
-
-				var changedFiles = new ConcurrentBag<(string SourceFile, string ModifiedContent)>();
-				var changeLog = new ConcurrentBag<(string FilePath, int LineNumber, string OldInclude, string NewInclude)>();
-				int filesProcessed = 0;
-
-				Parallel.ForEach(sourceFiles, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, sourceFile =>
-				{
-					int current = Interlocked.Increment(ref filesProcessed);
-					if (current % 200 == 0)
-					{
-						ProgressMessage = $"Scanning {current} / {sourceFiles.Count} files for #include references...";
-					}
-
-					string content = File.ReadAllText(sourceFile);
-					string modifiedContent = content;
-					bool hasChanges = false;
-
-					// Determine the effective location of this source file after renaming.
-					// If this source file is itself being moved, use its new path as the
-					// reference point when computing relative include paths.
-					string effectiveSourcePath = sourceFile;
-					foreach (var pair in renameMap)
-					{
-						if (string.Equals(Path.GetFullPath(pair.Key), Path.GetFullPath(sourceFile), StringComparison.OrdinalIgnoreCase))
-						{
-							effectiveSourcePath = pair.Value;
-							break;
-						}
-					}
-
-					foreach (var (pattern, oldFilePath, newFilePath) in includeReplacements)
-					{
-						if (pattern.IsMatch(modifiedContent))
-						{
-							string newFileName = Path.GetFileName(newFilePath);
-
-							// Check if the file was moved to a different directory
-							string oldDir = Path.GetFullPath(Path.GetDirectoryName(oldFilePath)).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-							string newDir = Path.GetFullPath(Path.GetDirectoryName(newFilePath)).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-							bool directoryChanged = !string.Equals(oldDir, newDir, StringComparison.OrdinalIgnoreCase);
-
-							// Collect match details before replacing (line numbers are based on original content positions)
-							foreach (Match match in pattern.Matches(modifiedContent))
-							{
-								int lineNumber = modifiedContent.Substring(0, match.Index).Count(c => c == '\n') + 1;
-								string oldIncludeText = match.Value.Trim();
-								string newIncludeText;
-
-								if (directoryChanged)
-								{
-									string newRelativePath = FileOperationHelper.ComputeNewIncludePath(searchRoot, effectiveSourcePath, newFilePath);
-									string prefix = match.Groups[1].Value;
-									string suffix = match.Groups[4].Value;
-									newIncludeText = $"{prefix}{newRelativePath}{suffix}";
-								}
-								else
-								{
-									string prefix = match.Groups[1].Value;
-									string pathPart = match.Groups[2].Value;
-									string suffix = match.Groups[4].Value;
-									newIncludeText = $"{prefix}{pathPart}{newFileName}{suffix}";
-								}
-
-								changeLog.Add((sourceFile, lineNumber, oldIncludeText, newIncludeText.Trim()));
-							}
-
-							if (directoryChanged)
-							{
-								// Compute the include path relative to the CMake root directory.
-								// Co-located same-name files (e.g. MyFile.cpp / MyFile.h) keep a simple filename include.
-								string newRelativePath = FileOperationHelper.ComputeNewIncludePath(searchRoot, effectiveSourcePath, newFilePath);
-								modifiedContent = pattern.Replace(modifiedContent, match =>
-								{
-									string prefix = match.Groups[1].Value;
-									string suffix = match.Groups[4].Value;
-									return $"{prefix}{newRelativePath}{suffix}";
-								});
-							}
-							else
-							{
-								// Same directory: just replace the filename, keep existing path prefix
-								modifiedContent = pattern.Replace(modifiedContent, $"${{1}}${{2}}{newFileName}${{4}}");
-							}
-							hasChanges = true;
-						}
-					}
-
-					if (hasChanges)
-					{
-						changedFiles.Add((sourceFile, modifiedContent));
-					}
-				});
-
-				ProgressMessage = $"Scanned {sourceFiles.Count} files. Applying changes to {changedFiles.Count} file(s)...";
-				return (changedFiles: changedFiles.ToList(), changeLog: changeLog.ToList());
-			});
-
-			// Back on UI thread: write changed files (needs Perforce checkout)
-			int updatedFileCount = 0;
-			for (int i = 0; i < scanResults.changedFiles.Count; i++)
-			{
-				var (sourceFile, modifiedContent) = scanResults.changedFiles[i];
-				ProgressMessage = $"Writing changes to file {i + 1} / {scanResults.changedFiles.Count}...";
-
-				// Try checking out via Perforce
-				await PerforceConnection.TryCheckoutFilesAsync(new string[] { sourceFile });
-
-				// Fallback: make writable
-				if (!sourceFile.IsFileWritable())
-				{
-					sourceFile.MakeFileWritable();
-				}
-
-				if (sourceFile.IsFileWritable())
-				{
-					File.WriteAllText(sourceFile, modifiedContent);
-					updatedFileCount++;
-				}
-				else
-				{
-					RenameResults.Add(new CRenameResultViewModel
-					{
-						Description = $"Failed to update includes in (not writable): {Path.GetFileName(sourceFile)}",
-						IsSuccess = false
-					});
-				}
-			}
-
-			// Write detailed change log to the VS Output window
-			// Using "filepath(line):" format so entries are clickable in VS
-			if (scanResults.changeLog.Count > 0)
-			{
-				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync("[FileRenamer] === #include reference changes ===");
-				foreach (var (filePath, lineNumber, oldInclude, newInclude) in scanResults.changeLog)
-				{
-					await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync(
-						$"{filePath}({lineNumber}): Changed '{oldInclude}' -> '{newInclude}'");
-				}
-				await GameCodersToolkitPackage.ExtensionOutput.WriteLineAsync($"[FileRenamer] === Total: {scanResults.changeLog.Count} include(s) changed in {updatedFileCount} file(s) ===");
-			}
-
-			if (updatedFileCount > 0)
-			{
-				RenameResults.Add(new CRenameResultViewModel
-				{
-					Description = $"Updated #include references in {updatedFileCount} file(s).",
-					IsSuccess = true
-				});
-			}
-			else
-			{
-				RenameResults.Add(new CRenameResultViewModel
-				{
-					Description = "No #include references found that needed updating.",
-					IsSuccess = true
-				});
-			}
-		}
-
-		private string FindProjectRoot(string startDirectory)
-		{
-			// Strategy: look for CMakeLists.txt going upwards, use the directory of the first one found
-			// Also fall back to looking through the configured CMakeFileEntries
-			CFileTemplateCreatorConfiguration config = GameCodersToolkitPackage.FileTemplateCreatorConfig;
-			if (config?.CreatorConfig?.CMakeFileEntries != null)
-			{
-				// Find the CMakeFileEntry whose file is "closest" parent of our file
-				string bestMatch = null;
-				int bestMatchLength = 0;
-
-				foreach (CMakeFileEntry entry in config.CreatorConfig.CMakeFileEntries)
-				{
-					string cmakeDir = Path.GetDirectoryName(entry.AbsolutePath);
-					if (startDirectory.StartsWith(cmakeDir, StringComparison.OrdinalIgnoreCase) && cmakeDir.Length > bestMatchLength)
-					{
-						bestMatch = cmakeDir;
-						bestMatchLength = cmakeDir.Length;
-					}
-				}
-
-				if (bestMatch != null)
-					return bestMatch;
-			}
-
-			// Walk up looking for CMakeLists.txt
-			string current = startDirectory;
-			while (!string.IsNullOrEmpty(current))
-			{
-				if (File.Exists(Path.Combine(current, "CMakeLists.txt")))
-					return current;
-
-				string parent = Path.GetDirectoryName(current);
-				if (parent == current)
-					break;
-				current = parent;
-			}
-
-			// Fallback to the file's own directory
-			return startDirectory;
-		}
-
 		private async Task RenameFilesOnDiskAsync(Dictionary<string, string> renameMap)
 		{
 			foreach (var pair in renameMap)
@@ -699,7 +287,7 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 						if (p4MoveSucceeded)
 						{
 							// P4 move succeeded - the file has been moved on disk and in Perforce
-							await CloseDocumentIfOpenAsync(oldPath);
+							await FileOperationHelper.CloseDocumentIfOpenAsync(oldPath);
 
 							RenameResults.Add(new CRenameResultViewModel
 							{
@@ -719,7 +307,7 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 
 							if (oldPath.IsFileWritable())
 							{
-								await CloseDocumentIfOpenAsync(oldPath);
+								await FileOperationHelper.CloseDocumentIfOpenAsync(oldPath);
 								File.Move(oldPath, newPath);
 
 								RenameResults.Add(new CRenameResultViewModel
@@ -749,30 +337,6 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 						IsSuccess = false
 					});
 				}
-			}
-		}
-
-		private async Task CloseDocumentIfOpenAsync(string filePath)
-		{
-			try
-			{
-				await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-				var dte = await VS.GetServiceAsync<EnvDTE.DTE, EnvDTE80.DTE2>();
-				if (dte != null)
-				{
-					foreach (EnvDTE.Document doc in dte.Documents)
-					{
-						if (string.Equals(doc.FullName, filePath, StringComparison.OrdinalIgnoreCase))
-						{
-							doc.Close(EnvDTE.vsSaveChanges.vsSaveChangesPrompt);
-							break;
-						}
-					}
-				}
-			}
-			catch
-			{
-				// Best effort - if we can't close it, the rename might still work
 			}
 		}
 
