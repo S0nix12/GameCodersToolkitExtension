@@ -17,6 +17,7 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Converters\BoolToResultColorConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Converters\InverseBooleanConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\Converters\NotNullToBoolConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FileRenamer\ViewModels\CMakeSelectionHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)quickautotest\commands\QuickAutotestCommand.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)QuickAutotest\Commands\QuickAutotestSelectionCommand.cs" />

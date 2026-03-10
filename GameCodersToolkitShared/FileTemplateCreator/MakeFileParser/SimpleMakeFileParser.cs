@@ -194,6 +194,89 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 			}
 		}
 
+		/// <summary>
+		/// Removes the specified file entries from the given group within the given uber file.
+		/// Lines are removed by index (highest first to preserve offsets), then re-parsed.
+		/// </summary>
+		public IMakeFile RemoveFiles(IUberFileNode uberFileNode, IGroupNode groupNode, IEnumerable<IFileNode> fileNodes)
+		{
+			if (uberFileNode is not CSimpleUberFileNode simpleUber || !UberFileEntries.Contains(simpleUber))
+				return this;
+
+			if (groupNode is not SimpleGroupNode simpleGroup || !simpleUber.Groups.Contains(simpleGroup))
+				return this;
+
+			var lineNumbers = fileNodes
+				.OfType<SimpleFileNode>()
+				.Where(f => simpleGroup.Files.Contains(f))
+				.Select(f => f.LineNumber)
+				.OrderByDescending(n => n)
+				.ToList();
+
+			foreach (int lineNum in lineNumbers)
+			{
+				if (lineNum >= 0 && lineNum < Lines.Count)
+				{
+					Lines.RemoveAt(lineNum);
+				}
+			}
+
+			SimpleMakeFileParser parser = new SimpleMakeFileParser();
+			return parser.Parse(FilePath, Lines);
+		}
+
+		/// <summary>
+		/// Removes a group (its header line and all file lines) from the given uber file.
+		/// </summary>
+		public IMakeFile RemoveGroup(IUberFileNode uberFileNode, IGroupNode groupNode)
+		{
+			if (uberFileNode is not CSimpleUberFileNode simpleUber || !UberFileEntries.Contains(simpleUber))
+				return this;
+
+			if (groupNode is not SimpleGroupNode simpleGroup || !simpleUber.Groups.Contains(simpleGroup))
+				return this;
+
+			// The group occupies from its LineNumber (group header) through all its file entries
+			int startLine = simpleGroup.LineNumber;
+			int lineCount = 1 + simpleGroup.Files.Count; // group header + file entries
+
+			if (startLine >= 0 && startLine + lineCount <= Lines.Count)
+			{
+				Lines.RemoveRange(startLine, lineCount);
+			}
+
+			SimpleMakeFileParser parser = new SimpleMakeFileParser();
+			return parser.Parse(FilePath, Lines);
+		}
+
+		/// <summary>
+		/// Removes an entire uber file block (from start line to end line) from the CMake file.
+		/// Also removes any trailing blank line.
+		/// </summary>
+		public IMakeFile RemoveUberFile(IUberFileNode uberFileNode)
+		{
+			if (uberFileNode is not CSimpleUberFileNode simpleUber || !UberFileEntries.Contains(simpleUber))
+				return this;
+
+			int startLine = simpleUber.StartLineNumber;
+			int endLine = simpleUber.EndLineNumber;
+			int lineCount = endLine - startLine + 1;
+
+			if (startLine >= 0 && startLine + lineCount <= Lines.Count)
+			{
+				Lines.RemoveRange(startLine, lineCount);
+
+				// Remove trailing blank line if present
+				if (startLine < Lines.Count && string.IsNullOrWhiteSpace(Lines[startLine]))
+				{
+					Lines.RemoveAt(startLine);
+				}
+			}
+
+			SimpleMakeFileParser parser = new SimpleMakeFileParser();
+			return parser.Parse(FilePath, Lines);
+		}
+
 		public string GetOriginalFilePath()
 		{
 			return FilePath;

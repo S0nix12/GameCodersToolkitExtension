@@ -256,15 +256,20 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 					renameMap[file.FilePath] = newPath;
 				}
 
-				// Step 1: Find and update CMakeLists.txt files
-				ProgressMessage = "Updating CMakeLists.txt files...";
-				await UpdateCMakeFilesAsync(renameMap);
-
-				// Step 2: If user selected a new CMake file + uber + group, add entries there
 				if (CMakeSelection.HasValidSelection)
 				{
+					// When moving to a new CMake location: remove from old first, then add to new
+					ProgressMessage = "Removing files from old CMake location...";
+					await FileOperationHelper.RemoveFilesFromOldCMakeLocationsAsync(renameMap.Keys, RenameResults);
+
 					ProgressMessage = "Adding files to new CMake location...";
 					await CMakeSelection.AddFilesToCMakeLocationAsync(renameMap, RenameResults);
+				}
+				else
+				{
+					// No new CMake location selected: update paths in-place via string replacement
+					ProgressMessage = "Updating CMakeLists.txt files...";
+					await UpdateCMakeFilesAsync(renameMap);
 				}
 
 				// Step 3: Update #include references in the project

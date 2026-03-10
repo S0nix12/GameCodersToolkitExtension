@@ -32,6 +32,9 @@ namespace GameCodersToolkit.FileTemplateCreator.MakeFileParser
 		public abstract Task<IMakeFile> AddUberFileAsync(IUberFileNode prevUberFileNode, string newUberFileName);
 		public abstract Task<IMakeFile> AddGroupAsync(IUberFileNode uberFileNode, IGroupNode prevGroupNode, string newGroupName);
 		public abstract Task<IMakeFile> AddFilesAsync(IUberFileNode uberFileNode, IGroupNode groupNode, IFileNode prevFileNode, IEnumerable<string> newFileNames);
+		public abstract IMakeFile RemoveFiles(IUberFileNode uberFileNode, IGroupNode groupNode, IEnumerable<IFileNode> fileNodes);
+		public abstract IMakeFile RemoveGroup(IUberFileNode uberFileNode, IGroupNode groupNode);
+		public abstract IMakeFile RemoveUberFile(IUberFileNode uberFileNode);
 		public abstract Task SaveAsync();
 
 		public abstract IEnumerable<IUberFileNode> GetUberFiles();

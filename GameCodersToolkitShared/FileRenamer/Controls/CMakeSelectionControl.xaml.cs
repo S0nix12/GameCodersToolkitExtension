@@ -2,6 +2,7 @@ using GameCodersToolkit.FileRenamer.ViewModels;
 using GameCodersToolkit.FileTemplateCreator.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace GameCodersToolkit.FileRenamer.Controls
 {
@@ -14,6 +15,15 @@ namespace GameCodersToolkit.FileRenamer.Controls
 		public CMakeSelectionControl()
 		{
 			InitializeComponent();
+		}
+
+		private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+		{
+			if (sender is ScrollViewer scrollViewer)
+			{
+				scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta);
+				e.Handled = true;
+			}
 		}
 
 		private void MakeFileTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)

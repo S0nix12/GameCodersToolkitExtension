@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using GameCodersToolkit.Configuration;
 using GameCodersToolkit.FileTemplateCreator.MakeFileParser;
 using GameCodersToolkit.FileTemplateCreator.ViewModels;
+using GameCodersToolkit.FileTemplateCreator.Windows;
 using GameCodersToolkit.SourceControl;
 using GameCodersToolkit.Utils;
 using System;
@@ -104,8 +105,22 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 					uberFileVm.Children.Add(groupVm);
 				}
 
+				// Add "Add Group" button at the end of each uber file
+				CMakeFileGroupViewModel lastGroupVm = uberFileVm.Children.OfType<CMakeFileGroupViewModel>().LastOrDefault();
+				CSelectableEntryViewModel addGroupEntry = new CSelectableEntryViewModel();
+				addGroupEntry.Name = "Add Group";
+				addGroupEntry.OnSelect += (vm) => OnAddGroupFromTree(uberFileVm, lastGroupVm);
+				uberFileVm.Children.Add(addGroupEntry);
+
 				MakeFileContent.Add(uberFileVm);
 			}
+
+			// Add "Add Uber File" button at the end of the tree
+			CMakeFileUberFileViewModel lastUberVm = MakeFileContent.OfType<CMakeFileUberFileViewModel>().LastOrDefault();
+			CSelectableEntryViewModel addUberEntry = new CSelectableEntryViewModel();
+			addUberEntry.Name = "Add Uber File";
+			addUberEntry.OnSelect += (vm) => OnAddUberFileFromTree(lastUberVm);
+			MakeFileContent.Add(addUberEntry);
 		}
 
 		/// <summary>
@@ -210,19 +225,133 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 			}
 		}
 
+		/// <summary>
+		/// Creates and inserts a new placeholder uber file VM into the tree.
+		/// Inserts before the "Add Uber File" selectable entry if one exists.
+		/// </summary>
+		private void InsertNewUberFile(string name)
+		{
+			CMakeFileUberFileViewModel newUberVm = new CMakeFileUberFileViewModel();
+			newUberVm.Name = name;
+			newUberVm.DisplayName = name + " (0 Groups) [NEW]";
+			newUberVm.IsNewEntry = true;
+
+			// Add an "Add Group" button inside the new uber file
+			CSelectableEntryViewModel addGroupEntry = new CSelectableEntryViewModel();
+			addGroupEntry.Name = "Add Group";
+			addGroupEntry.OnSelect += (vm) => OnAddGroupFromTree(newUberVm, null);
+			newUberVm.Children.Add(addGroupEntry);
+
+			// Insert before the "Add Uber File" selectable entry at the bottom
+			int insertIndex = MakeFileContent.Count;
+			for (int i = MakeFileContent.Count - 1; i >= 0; i--)
+			{
+				if (MakeFileContent[i] is CSelectableEntryViewModel)
+				{
+					insertIndex = i;
+					break;
+				}
+			}
+
+			MakeFileContent.Insert(insertIndex, newUberVm);
+		}
+
+		/// <summary>
+		/// Creates and inserts a new placeholder group VM into the given uber file.
+		/// Inserts before the "Add Group" selectable entry if one exists.
+		/// </summary>
+		private void InsertNewGroup(CMakeFileUberFileViewModel uberFileVm, string name)
+		{
+			CMakeFileGroupViewModel newGroupVm = new CMakeFileGroupViewModel();
+			newGroupVm.Name = name;
+			newGroupVm.DisplayName = name + " (0 Files) [NEW]";
+			newGroupVm.IsNewEntry = true;
+			newGroupVm.ParentUberFile = uberFileVm;
+
+			// Insert before the "Add Group" selectable entry
+			int insertIndex = uberFileVm.Children.Count;
+			for (int i = uberFileVm.Children.Count - 1; i >= 0; i--)
+			{
+				if (uberFileVm.Children[i] is CSelectableEntryViewModel)
+				{
+					insertIndex = i;
+					break;
+				}
+			}
+
+			uberFileVm.Children.Insert(insertIndex, newGroupVm);
+			uberFileVm.IsExpanded = true;
+
+			// Update the uber file display name to reflect the new child count
+			int groupCount = uberFileVm.Children.OfType<CMakeFileGroupViewModel>().Count();
+			string baseName = uberFileVm.Name;
+			string suffix = uberFileVm.IsNewEntry ? " [NEW]" : "";
+			uberFileVm.DisplayName = $"{baseName} ({groupCount} Groups){suffix}";
+		}
+
+		/// <summary>
+		/// Handler for the in-tree "Add Uber File" button.
+		/// Opens a name dialog and creates a placeholder uber file.
+		/// </summary>
+		private Task OnAddUberFileFromTree(CMakeFileUberFileViewModel previousVm)
+		{
+			if (CurrentMakeFile == null)
+				return Task.CompletedTask;
+
+			Predicate<string> predicate = (result) =>
+			{
+				return result.IsValidFileName()
+					&& !MakeFileContent.OfType<CMakeFileUberFileViewModel>().Any(u => u.Name == result);
+			};
+
+			Action<string> errorAction = (result) =>
+			{
+				System.Windows.MessageBox.Show($"There already is an uber file named {result}!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			};
+
+			if (NameDialogWindow.ShowNameDialog("Enter Uber File name", out string newName, predicate, errorAction, previousVm?.Name))
+			{
+				InsertNewUberFile(newName);
+			}
+
+			return Task.CompletedTask;
+		}
+
+		/// <summary>
+		/// Handler for the in-tree "Add Group" button inside an uber file.
+		/// Opens a name dialog and creates a placeholder group.
+		/// </summary>
+		private Task OnAddGroupFromTree(CMakeFileUberFileViewModel uberFileVm, CMakeFileGroupViewModel previousVm)
+		{
+			if (uberFileVm == null)
+				return Task.CompletedTask;
+
+			Predicate<string> predicate = (result) =>
+			{
+				return result.IsValidFileName()
+					&& !uberFileVm.Children.OfType<CMakeFileGroupViewModel>().Any(g => g.Name == result);
+			};
+
+			Action<string> errorAction = (result) =>
+			{
+				System.Windows.MessageBox.Show($"There already is a group named {result}!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			};
+
+			if (NameDialogWindow.ShowNameDialog("Enter Group name", out string newName, predicate, errorAction, previousVm?.Name))
+			{
+				InsertNewGroup(uberFileVm, newName);
+			}
+
+			return Task.CompletedTask;
+		}
+
 		[RelayCommand]
 		private void AddNewUberFile()
 		{
 			if (CurrentMakeFile == null || string.IsNullOrWhiteSpace(NewUberFileName))
 				return;
 
-			// Create a placeholder uber file VM (not yet persisted to the CMake file)
-			CMakeFileUberFileViewModel newUberVm = new CMakeFileUberFileViewModel();
-			newUberVm.Name = NewUberFileName.Trim();
-			newUberVm.DisplayName = newUberVm.Name + " (0 Groups) [NEW]";
-			newUberVm.IsNewEntry = true;
-
-			MakeFileContent.Add(newUberVm);
+			InsertNewUberFile(NewUberFileName.Trim());
 			NewUberFileName = string.Empty;
 		}
 
@@ -232,22 +361,7 @@ namespace GameCodersToolkit.FileRenamer.ViewModels
 			if (SelectedUberFile == null || string.IsNullOrWhiteSpace(NewGroupName))
 				return;
 
-			// Create a placeholder group VM (not yet persisted to the CMake file)
-			CMakeFileGroupViewModel newGroupVm = new CMakeFileGroupViewModel();
-			newGroupVm.Name = NewGroupName.Trim();
-			newGroupVm.DisplayName = newGroupVm.Name + " (0 Files) [NEW]";
-			newGroupVm.IsNewEntry = true;
-			newGroupVm.ParentUberFile = SelectedUberFile;
-
-			SelectedUberFile.Children.Add(newGroupVm);
-			SelectedUberFile.IsExpanded = true;
-
-			// Update the uber file display name to reflect the new child count
-			int groupCount = SelectedUberFile.Children.OfType<CMakeFileGroupViewModel>().Count();
-			string baseName = SelectedUberFile.Name;
-			string suffix = SelectedUberFile.IsNewEntry ? " [NEW]" : "";
-			SelectedUberFile.DisplayName = $"{baseName} ({groupCount} Groups){suffix}";
-
+			InsertNewGroup(SelectedUberFile, NewGroupName.Trim());
 			NewGroupName = string.Empty;
 		}
 

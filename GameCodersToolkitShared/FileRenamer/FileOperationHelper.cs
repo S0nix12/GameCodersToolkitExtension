@@ -510,6 +510,221 @@ namespace GameCodersToolkit.FileRenamer
 			}
 		}
 
+		/// <summary>
+		/// Scans all configured CMake files for the old file paths (from the move map keys),
+		/// removes matching file entries, and cleans up any groups or uber files that become empty.
+		/// This should be called BEFORE UpdateCMakeFilesAsync (which does path string replacement)
+		/// to ensure a clean removal from the source CMake file when moving to a different CMake location.
+		/// </summary>
+		public static async Task RemoveFilesFromOldCMakeLocationsAsync(
+			IEnumerable<string> oldFilePaths,
+			ObservableCollection<CRenameResultViewModel> results)
+		{
+			CFileTemplateCreatorConfiguration config = GameCodersToolkitPackage.FileTemplateCreatorConfig;
+			if (config?.CreatorConfig?.CMakeFileEntries == null)
+				return;
+
+			IMakeFileParser parser = config.CreateParser();
+			if (parser == null)
+				return;
+
+			// Normalize old file paths for comparison
+			HashSet<string> normalizedOldPaths = new HashSet<string>(
+				oldFilePaths.Select(p => Path.GetFullPath(p).Replace('\\', '/').ToLowerInvariant()));
+
+			foreach (CMakeFileEntry cmakeEntry in config.CreatorConfig.CMakeFileEntries)
+			{
+				string cmakePath = cmakeEntry.AbsolutePath;
+				if (string.IsNullOrEmpty(cmakePath) || !File.Exists(cmakePath))
+					continue;
+
+				IMakeFile makeFile = parser.Parse(cmakePath);
+				if (makeFile == null)
+					continue;
+
+				string cmakeDir = Path.GetDirectoryName(cmakePath);
+				bool madeChanges = false;
+				List<string> removedEntries = new List<string>();
+
+				// Iterate uber files, collecting removal work
+				foreach (IUberFileNode uberFile in makeFile.GetUberFiles().ToList())
+				{
+					foreach (IGroupNode group in uberFile.GetGroups().ToList())
+					{
+						// Find file nodes in this group that match the old paths
+						List<IFileNode> filesToRemove = new List<IFileNode>();
+						foreach (IFileNode fileNode in group.GetFiles())
+						{
+							// The file name in the CMake file is typically a relative path
+							string resolvedPath = Path.GetFullPath(Path.Combine(cmakeDir, fileNode.GetName().Replace('/', '\\')))
+								.Replace('\\', '/').ToLowerInvariant();
+
+							if (normalizedOldPaths.Contains(resolvedPath))
+							{
+								filesToRemove.Add(fileNode);
+							}
+						}
+
+						if (filesToRemove.Count > 0)
+						{
+							// Remove the file entries
+							makeFile = makeFile.RemoveFiles(uberFile, group, filesToRemove);
+							madeChanges = true;
+
+							foreach (var f in filesToRemove)
+							{
+								removedEntries.Add(f.GetName());
+							}
+
+							// Re-find the uber file node after re-parse
+							IUberFileNode updatedUber = makeFile.GetUberFiles()
+								.FirstOrDefault(u => u.GetName() == uberFile.GetName());
+
+							if (updatedUber != null)
+							{
+								// Re-find the group after re-parse
+								IGroupNode updatedGroup = updatedUber.GetGroups()
+									.FirstOrDefault(g => g.GetName() == group.GetName());
+
+								// If group is now empty, remove it
+								if (updatedGroup != null && !updatedGroup.GetFiles().Any())
+								{
+									makeFile = makeFile.RemoveGroup(updatedUber, updatedGroup);
+
+									results.Add(new CRenameResultViewModel
+									{
+										Description = $"Removed empty group '{group.GetName()}' from uber file '{uberFile.GetName()}'",
+										IsSuccess = true
+									});
+								}
+
+								// Re-find the uber file again after potential group removal re-parse
+								updatedUber = makeFile.GetUberFiles()
+									.FirstOrDefault(u => u.GetName() == uberFile.GetName());
+
+								// If uber file is now empty (no groups left), remove it
+								if (updatedUber != null && !updatedUber.GetGroups().Any())
+								{
+									makeFile = makeFile.RemoveUberFile(updatedUber);
+
+									results.Add(new CRenameResultViewModel
+									{
+										Description = $"Removed empty uber file '{uberFile.GetName()}'",
+										IsSuccess = true
+									});
+								}
+							}
+
+							// After removals and re-parses, break out of group loop
+							// and restart the scan for this cmake file since nodes changed
+							break;
+						}
+					}
+
+					// If we made changes, re-scan from scratch for remaining files
+					if (madeChanges)
+						break;
+				}
+
+				// If we broke out early due to changes, rescan for any remaining files
+				if (madeChanges && normalizedOldPaths.Count > removedEntries.Count)
+				{
+					// Do another pass - there might be files in other uber files/groups
+					foreach (IUberFileNode uberFile in makeFile.GetUberFiles().ToList())
+					{
+						foreach (IGroupNode group in uberFile.GetGroups().ToList())
+						{
+							List<IFileNode> filesToRemove = new List<IFileNode>();
+							foreach (IFileNode fileNode in group.GetFiles())
+							{
+								string resolvedPath = Path.GetFullPath(Path.Combine(cmakeDir, fileNode.GetName().Replace('/', '\\')))
+									.Replace('\\', '/').ToLowerInvariant();
+
+								if (normalizedOldPaths.Contains(resolvedPath))
+								{
+									filesToRemove.Add(fileNode);
+								}
+							}
+
+							if (filesToRemove.Count > 0)
+							{
+								makeFile = makeFile.RemoveFiles(uberFile, group, filesToRemove);
+
+								foreach (var f in filesToRemove)
+								{
+									removedEntries.Add(f.GetName());
+								}
+
+								IUberFileNode updatedUber = makeFile.GetUberFiles()
+									.FirstOrDefault(u => u.GetName() == uberFile.GetName());
+
+								if (updatedUber != null)
+								{
+									IGroupNode updatedGroup = updatedUber.GetGroups()
+										.FirstOrDefault(g => g.GetName() == group.GetName());
+
+									if (updatedGroup != null && !updatedGroup.GetFiles().Any())
+									{
+										makeFile = makeFile.RemoveGroup(updatedUber, updatedGroup);
+										results.Add(new CRenameResultViewModel
+										{
+											Description = $"Removed empty group '{group.GetName()}' from uber file '{uberFile.GetName()}'",
+											IsSuccess = true
+										});
+									}
+
+									updatedUber = makeFile.GetUberFiles()
+										.FirstOrDefault(u => u.GetName() == uberFile.GetName());
+
+									if (updatedUber != null && !updatedUber.GetGroups().Any())
+									{
+										makeFile = makeFile.RemoveUberFile(updatedUber);
+										results.Add(new CRenameResultViewModel
+										{
+											Description = $"Removed empty uber file '{uberFile.GetName()}'",
+											IsSuccess = true
+										});
+									}
+								}
+
+								// Break and rescan again since tree structure changed
+								break;
+							}
+						}
+					}
+				}
+
+				if (madeChanges)
+				{
+					await PerforceConnection.TryCheckoutFilesAsync(new string[] { cmakePath });
+
+					if (!cmakePath.IsFileWritable())
+					{
+						cmakePath.MakeFileWritable();
+					}
+
+					if (cmakePath.IsFileWritable())
+					{
+						await makeFile.SaveAsync();
+
+						results.Add(new CRenameResultViewModel
+						{
+							Description = $"Removed {removedEntries.Count} file entry(ies) from {Path.GetFileName(cmakePath)}",
+							IsSuccess = true
+						});
+					}
+					else
+					{
+						results.Add(new CRenameResultViewModel
+						{
+							Description = $"Failed to write to CMake file (not writable): {Path.GetFileName(cmakePath)}",
+							IsSuccess = false
+						});
+					}
+				}
+			}
+		}
+
 		private static async Task CloseDocumentIfOpenAsync(string filePath)
 		{
 			try
