@@ -432,6 +432,13 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 
 		private async Task AddFileToGroupAsync(CMakeFileUberFileViewModel uberFileVm, CMakeFileGroupViewModel groupVm, CMakeFileFileViewModel previousVm)
 		{
+			if (CurrentTemplate == null)
+			{
+				Community.VisualStudio.Toolkit.MessageBox msgBox = new Community.VisualStudio.Toolkit.MessageBox();
+				await msgBox.ShowWarningAsync("Please select a template first.");
+				return;
+			}
+
 			if (uberFileVm != null && groupVm != null)
 			{
 				List<string> newFilePathsAbsolute = new List<string>();
@@ -507,7 +514,6 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 				{
 					string originalMakeFilePath = CurrentMakeFile.GetOriginalFilePath();
 					await PerforceConnection.TryCheckoutFilesAsync(new string[] { originalMakeFilePath });
-					await PerforceConnection.TryAddFilesAsync(newFilePathsAbsolute);
 
 					//Allow fallback in case we do not have a valid P4 connection or the file is locked etc.
 					if (!originalMakeFilePath.IsFileWritable())
@@ -526,7 +532,7 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 								string errorMessage = $"Failed to make file writable: \n\n {originalMakeFilePath}";
 
 								Community.VisualStudio.Toolkit.MessageBox errorMessageBox = new Community.VisualStudio.Toolkit.MessageBox();
-								await messageBox.ShowErrorAsync(message);
+									await errorMessageBox.ShowErrorAsync(errorMessage);
 								return;
 							}
 						}
@@ -550,6 +556,8 @@ namespace GameCodersToolkit.FileTemplateCreator.ViewModels
 					// Add the new files to the make file and save it to disk
 					CurrentMakeFile = await CurrentMakeFile.AddFilesAsync(uberFileVm?.Node, groupVm?.Node, previousVm?.Node, newFilePathsRelative);
 					await CurrentMakeFile.SaveAsync();
+
+					await PerforceConnection.TryAddFilesAsync(newFilePathsAbsolute);
 
 					List<Task> openFileTasks = new List<Task>();
 					foreach (string newFilePath in newFilePathsAbsolute)
